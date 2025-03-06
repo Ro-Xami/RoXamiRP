@@ -6,15 +6,19 @@ using UnityEngine.Rendering;
 public class RoXamiRP : RenderPipeline
 {
     CameraRender cameraRender = new CameraRender();
-    public RoXamiRP()
+
+    bool GPUInstancing, DynamicBatching;
+    public RoXamiRP(bool SRPBatcher , bool GPUInstancing , bool DynamicBatching)
     {
-        GraphicsSettings.useScriptableRenderPipelineBatching = true;
+        this.GPUInstancing = GPUInstancing;
+        this.DynamicBatching = DynamicBatching;
+        GraphicsSettings.useScriptableRenderPipelineBatching = SRPBatcher;
     }
     protected override void Render(ScriptableRenderContext context, Camera[] cameras)
     {
         for (int i = 0; i < cameras.Length; i++)
         {
-            cameraRender.Render(context, cameras[i]);
+            cameraRender.Render(context, cameras[i] , GPUInstancing , DynamicBatching);
         }
     }
 }

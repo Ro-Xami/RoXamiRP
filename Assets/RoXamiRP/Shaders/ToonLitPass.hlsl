@@ -1,11 +1,12 @@
-#ifndef ROXAMIRP_UNLITPASS_INCLUDE
-#define ROXAMIRP_UNLITPASS_INCLUDE
+#ifndef ROXAMIRP_TOONLITPASS_INCLUDE
+#define ROXAMIRP_TOONLITPASS_INCLUDE
+
+#include "../ShaderLibrary/Light.hlsl"
+#include "../ShaderLibrary/ToonLitSurface.hlsl"
+#include "../ShaderLibrary/ToonLighting.hlsl"
 
 #pragma multi_compile_instancing
 #pragma shader_feature_local _ALPHACLIP_ON
-
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
 
 CBUFFER_START(UnityPerMaterial)
 	float4 _BaseColor;
@@ -20,6 +21,9 @@ CBUFFER_END
 
 #define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
 #endif
+
+TEXTURE2D(_BaseMap);
+SAMPLER(sampler_BaseMap);
 
 struct Attributes {
 	float4 positionOS : POSITION;
@@ -37,7 +41,7 @@ struct Varyings {
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
-Varyings UnlitPassVertex(Attributes IN)
+Varyings ToonLitPassVertex(Attributes IN)
 {
 	Varyings OUT = (Varyings)0;
 	UNITY_SETUP_INSTANCE_ID(IN);
@@ -51,7 +55,7 @@ Varyings UnlitPassVertex(Attributes IN)
 	return OUT;
 }
 
-float4 UnlitPassFragment (Varyings IN) : SV_TARGET
+float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 {
 	UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -60,8 +64,8 @@ float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 	#ifdef _ALPHACLIP_ON
 	clip(albedo.a - _cutout);
 	#endif
-
-	return albedo;
+	Light light = GetMainLight();
+	return float4(light.direction , 1);
 }
 
 #endif

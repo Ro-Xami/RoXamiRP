@@ -1,4 +1,4 @@
-Shader "RoXami RP/Unlit"
+Shader "RoXami RP/ToonLit"
 {
 	Properties
 	{
@@ -20,15 +20,16 @@ Shader "RoXami RP/Unlit"
 
 		Pass
 		{
-			Name "Default Unlit"
-			Tags{"LightMode" = "SRPDefaultUnlit"}
+			Name "ToonLit"
+			Tags {"LightMode" = "ToonLit"}
 			ZWrite [_ZWrite]
 			Blend [_SrcBlend] [_DstBlend]
 			HLSLPROGRAM
-			#pragma vertex UnlitPassVertex
-			#pragma fragment UnlitPassFragment
 
-			#include_with_pragmas "UnlitPass.hlsl"
+			#pragma vertex ToonLitPassVertex
+			#pragma fragment ToonLitPassFragment
+
+			#include_with_pragmas "ToonLitPass.hlsl"
 
 			ENDHLSL
 		}

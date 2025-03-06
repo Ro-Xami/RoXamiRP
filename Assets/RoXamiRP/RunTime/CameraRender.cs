@@ -10,6 +10,9 @@ public partial class CameraRender
     CullingResults cullingResults;
 
     static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+    static ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
+
+    Lighting lighting = new Lighting();
 
     CommandBuffer commandBuffer = new CommandBuffer
     {
@@ -17,7 +20,7 @@ public partial class CameraRender
 
     };
 
-    public void Render(ScriptableRenderContext context , Camera camera)
+    public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching)
     {
         this.context = context;
         this.camera = camera;
@@ -31,7 +34,10 @@ public partial class CameraRender
         }
 
         SetUp();
-        DrawGeometry();
+
+        lighting.Setup(context , cullingResults);
+
+        DrawGeometry(GPUInstancing, DynamicBatching);
 
         DrawUnsupportedShaders();
         DrawGizmos();
@@ -54,13 +60,17 @@ public partial class CameraRender
         ExcuteBuffer();        
     }
 
-    void DrawGeometry()
+    void DrawGeometry(bool GPUInstancing, bool DynamicBatching)
     {
         SortingSettings sortingSettings = new SortingSettings(camera)
         {
             criteria = SortingCriteria.CommonOpaque
         };
-        DrawingSettings drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings);
+
+        DrawingSettings drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings)
+        { enableDynamicBatching = DynamicBatching , enableInstancing = GPUInstancing };
+        drawingSettings.SetShaderPassName(1 , toonLitShaderTagId);
+
         FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
         context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
