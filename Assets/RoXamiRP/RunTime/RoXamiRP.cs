@@ -8,17 +8,20 @@ public class RoXamiRP : RenderPipeline
     CameraRender cameraRender = new CameraRender();
 
     bool GPUInstancing, DynamicBatching;
-    public RoXamiRP(bool SRPBatcher , bool GPUInstancing , bool DynamicBatching)
+    ShadowSettings shadowSettings;
+    public RoXamiRP(bool SRPBatcher , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings)
     {
         this.GPUInstancing = GPUInstancing;
         this.DynamicBatching = DynamicBatching;
         GraphicsSettings.useScriptableRenderPipelineBatching = SRPBatcher;
+        GraphicsSettings.lightsUseLinearIntensity = true;
+        this.shadowSettings = shadowSettings;
     }
     protected override void Render(ScriptableRenderContext context, Camera[] cameras)
     {
         for (int i = 0; i < cameras.Length; i++)
         {
-            cameraRender.Render(context, cameras[i] , GPUInstancing , DynamicBatching);
+            cameraRender.Render(context, cameras[i] , GPUInstancing , DynamicBatching , shadowSettings);
         }
     }
 }

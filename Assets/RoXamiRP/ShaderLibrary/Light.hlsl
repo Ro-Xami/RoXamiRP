@@ -1,9 +1,12 @@
 #ifndef ROXAMIRP_LIGHT_INCLUDE
 #define ROXAMIRP_LIGHT_INCLUDE
 
+#define MAX_DIRECTIONAL_LIGHT_COUNT 4
+
 CBUFFER_START(_CustomLight)
-	float3 _DirectionalLightColor;
-	float3 _DirectionalLightDirection;
+	int _DirectionalLightCount;
+	float4 _DirectionalLightColor[MAX_DIRECTIONAL_LIGHT_COUNT];
+	float4 _DirectionalLightDirection[MAX_DIRECTIONAL_LIGHT_COUNT];
 CBUFFER_END
 
 struct Light
@@ -13,11 +16,16 @@ struct Light
 	float shadowAttenuation;
 };
 
-Light GetMainLight()
+int GetDirectionalLightCount()
+{
+    return _DirectionalLightCount;
+}
+
+Light GetMainLight(int index)
 {
 	Light light;
-	light.direction = _DirectionalLightDirection;
-	light.color = _DirectionalLightColor;
+    light.direction = _DirectionalLightDirection[MAX_DIRECTIONAL_LIGHT_COUNT];
+    light.color = _DirectionalLightColor[MAX_DIRECTIONAL_LIGHT_COUNT];
 	light.shadowAttenuation = 1;
 	return light;
 }
