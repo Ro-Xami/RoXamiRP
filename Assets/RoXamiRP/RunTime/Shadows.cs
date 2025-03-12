@@ -14,7 +14,7 @@ public class Shadows
         name = bufferName
     };
 
-    const int maxShadowDirectionalLightCount = 1;
+    const int maxShadowDirectionalLightCount = 2;
     int shadowedDirectionalLightCount;
     struct ShadowedDirectionalLight
     {
@@ -29,7 +29,6 @@ public class Shadows
         this.cullingResults = cullingResults;
         this.context = context;
         this.shadowSettings = shadowSettings;
-        //ExcuteBuffer();
         shadowedDirectionalLightCount = 0;
     }
 
@@ -71,18 +70,41 @@ public class Shadows
         cmd.BeginSample(bufferName);
         ExcuteBuffer();
 
+        int split = shadowedDirectionalLightCount <= 1 ? 1 : 2;
+        int tilingSize = atlasSize / split;
+
         for (int i = 0; i < shadowedDirectionalLightCount; i++)
         {
-            RenderDirectionalShadows(i , atlasSize);
+            RenderDirectionalShadows(i , split , tilingSize);
         }
 
         cmd.EndSample(bufferName);
         ExcuteBuffer();
     }
 
-    void RenderDirectionalShadows(int index , int tilingSize)
+    void RenderDirectionalShadows(int index , int split , int tilingSize)
     {
+        ShadowedDirectionalLight light = shadowedDirectionalLights[index];
+        ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings
+            (cullingResults, light.visibleLightIndex );//, BatchCullingProjectionType.Orthographic
 
+        cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
+            light.visibleLightIndex , 0 , 1 , Vector3.zero , tilingSize , 0f ,
+            out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix , out ShadowSplitData splitData
+            );
+
+        shadowSettings.splitData = splitData;
+
+        SetTilingViewport(index, split, tilingSize);
+        cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+        ExcuteBuffer();
+        context.DrawShadows(ref shadowSettings);
+    }
+
+    void SetTilingViewport(int index , int split , float tilingSize)
+    {
+        Vector2 offset = new Vector2(index % split, index % split);
+        cmd.SetViewport(new Rect(offset.x * tilingSize, offset.y * tilingSize, tilingSize, tilingSize));
     }
 
     void ExcuteBuffer()

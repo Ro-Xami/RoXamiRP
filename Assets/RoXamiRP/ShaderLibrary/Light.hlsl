@@ -24,8 +24,8 @@ int GetDirectionalLightCount()
 Light GetMainLight(int index)
 {
 	Light light;
-    light.direction = _DirectionalLightDirection[MAX_DIRECTIONAL_LIGHT_COUNT];
-    light.color = _DirectionalLightColor[MAX_DIRECTIONAL_LIGHT_COUNT];
+    light.direction = _DirectionalLightDirection[index];
+    light.color = _DirectionalLightColor[index];
 	light.shadowAttenuation = 1;
 	return light;
 }

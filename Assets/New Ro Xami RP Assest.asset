@@ -12,3 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c63cc618ef867a4e87c41a176293b97, type: 3}
   m_Name: New Ro Xami RP Assest
   m_EditorClassIdentifier: 
+  SRPBatcher: 1
+  GPUInstancing: 0
+  DynamicBatching: 0
+  shadowSettings:
+    maxDistance: 15
+    directional:
+      atlasSize: 2048

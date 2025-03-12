@@ -33,5 +33,20 @@ Shader "RoXami RP/ToonLit"
 
 			ENDHLSL
 		}
+
+		Pass
+		{
+			Name "ShadowCaster"
+			Tags {"LightMode" = "ShadowCaster"}
+			ColorMask 0
+			HLSLPROGRAM
+			#pragma target 3.5
+			#pragma vertex ShadowCasterPassVertex
+			#pragma fragment ShadowCasterPassFragment
+
+			#include_with_pragmas "ShadowCasterPass.hlsl"
+
+			ENDHLSL
+		}
 	}
 }
