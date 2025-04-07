@@ -25,7 +25,7 @@ Shader "RoXami RP/ToonLit"
 			ZWrite [_ZWrite]
 			Blend [_SrcBlend] [_DstBlend]
 			HLSLPROGRAM
-
+			#pragma target 3.5
 			#pragma vertex ToonLitPassVertex
 			#pragma fragment ToonLitPassFragment
 

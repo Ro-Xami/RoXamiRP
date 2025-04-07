@@ -17,7 +17,6 @@ public partial class CameraRender
     CommandBuffer commandBuffer = new CommandBuffer
     {
         name = bufferName,
-
     };
 
     public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings)
@@ -33,10 +32,10 @@ public partial class CameraRender
             return;
         }
 
-        commandBuffer.BeginSample(bufferName);
+        commandBuffer.BeginSample(SampleName);
         ExcuteBuffer();
         lighting.Setup(context , cullingResults , shadowSettings);
-        commandBuffer.EndSample(bufferName);
+        commandBuffer.EndSample(SampleName);
 
         SetUp();
 

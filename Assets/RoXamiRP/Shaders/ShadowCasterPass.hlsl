@@ -47,6 +47,14 @@ Varyings ShadowCasterPassVertex(Attributes IN)
     OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
 	OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
 
+	#if UNITY_REVERSED_Z
+		OUT.positionCS.z =
+			min(OUT.positionCS.z, OUT.positionCS.w * UNITY_NEAR_CLIP_VALUE);
+	#else
+		OUT.positionCS.z =
+			max(OUT.positionCS.z, OUT.positionCS.w * UNITY_NEAR_CLIP_VALUE);
+	#endif
+
 	return OUT;
 }
 

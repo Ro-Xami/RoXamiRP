@@ -13,9 +13,16 @@ MonoBehaviour:
   m_Name: New Ro Xami RP Assest
   m_EditorClassIdentifier: 
   SRPBatcher: 1
-  GPUInstancing: 0
-  DynamicBatching: 0
+  GPUInstancing: 1
+  DynamicBatching: 1
   shadowSettings:
-    maxDistance: 15
+    maxDistance: 34
+    distanceFade: 0.114
     directional:
-      atlasSize: 2048
+      atlasSize: 1024
+      filter: 3
+      cascadeCount: 4
+      cascadeRotio1: 0.082
+      cascadeRotio2: 0.33
+      cascadeRotio3: 0.686
+      cascadeFade: 1

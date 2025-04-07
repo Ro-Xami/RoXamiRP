@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,16 +8,18 @@ public class Lighting
     CullingResults cullingResults;
     Shadows shadows = new Shadows();
 
-    const int maxDirectionalLightCount = 2;
+    const int maxDirectionalLightCount = 4;
 
     static int
         dirLightCount = Shader.PropertyToID("_DirectionalLightCount"),
         dirLightColorId = Shader.PropertyToID("_DirectionalLightColor"),
-        dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection");
+        dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection"),
+        dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
 
     static Vector4[]
         dirLightColors = new Vector4[maxDirectionalLightCount],
-        dirLightDirections = new Vector4[maxDirectionalLightCount];
+        dirLightDirections = new Vector4[maxDirectionalLightCount],
+        dirLightShadowDatas = new Vector4[maxDirectionalLightCount];
 
     CommandBuffer buffer = new CommandBuffer
     {
@@ -61,13 +61,15 @@ public class Lighting
         buffer.SetGlobalInt(dirLightCount , currentDirLightCount);
         buffer.SetGlobalVectorArray(dirLightColorId, dirLightColors);
         buffer.SetGlobalVectorArray(dirLightDirectionId, dirLightDirections);
+        buffer.SetGlobalVectorArray(dirLightShadowDataId, dirLightShadowDatas);
+        //Debug.Log(dirLightShadowDatas[0].y);
     }
 
     void SetupDirectionalLight(int index, ref VisibleLight visibleLight)
     {
         dirLightColors[index] = visibleLight.finalColor;
         dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
-        shadows.ReserveDirectionalShadows(visibleLight.light , index);
+        dirLightShadowDatas[index] = shadows.ReserveDirectionalShadows(visibleLight.light , index);
     }
 
     public void CleanUp()
