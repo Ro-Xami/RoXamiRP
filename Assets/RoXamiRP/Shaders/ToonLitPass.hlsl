@@ -69,26 +69,14 @@ float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 	#ifdef _ALPHACLIP_ON
 	clip(albedo.a - _cutout);
 	#endif
-
-	//float shadow = 0;
-	//for (int i = 0; i < 4 ; i++)
-	//{
-	//	Light light = GetMainLight(i , IN.positionWS);
-	//	shadow += 1 - light.shadowAttenuation;
-	//}
- //       shadow = shadow / 4;
-	//	shadow = 1 - shadow;
-
 	
+	Light light = GetMainLight(IN.positionWS , IN.normalWS);
 
-	Light light = GetMainLight(0 , IN.positionWS , IN.normalWS);
+	half lambert = saturate(dot(light.direction , IN.normalWS));
 
-	float4x4 m = _DirectionalShadowMatrices[0];
-	float4 m0 = float4(m[0][0] , m[0][1] ,m[0][2] ,m[0][3]);
-	float4 m1 = float4(m[1][0] , m[1][1] ,m[1][2] ,m[1][3]);
-	float4 m2 = float4(m[2][0] , m[2][1] ,m[2][2] ,m[2][3]);
-	float4 m3 = float4(m[3][0] , m[3][1] ,m[3][2] ,m[3][3]);
-    return light.shadowAttenuation;
+	albedo.rgb *= lambert * light.shadowAttenuation;
+
+    return albedo;
 }
 
 #endif

@@ -34,7 +34,7 @@ public partial class CameraRender
 
         commandBuffer.BeginSample(SampleName);
         ExcuteBuffer();
-        lighting.Setup(context , cullingResults , shadowSettings);
+        lighting.Setup(context , cullingResults , shadowSettings , camera);
         commandBuffer.EndSample(SampleName);
 
         SetUp();

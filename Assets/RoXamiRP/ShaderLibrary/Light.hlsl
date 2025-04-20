@@ -1,14 +1,12 @@
 #ifndef ROXAMIRP_LIGHT_INCLUDE
 #define ROXAMIRP_LIGHT_INCLUDE
 
-#define MAX_DIRECTIONAL_LIGHT_COUNT 4
-
 #include "Shadows.hlsl"
 
 CBUFFER_START(_CustomLight)
 	int _DirectionalLightCount;
-	float4 _DirectionalLightColor[MAX_DIRECTIONAL_LIGHT_COUNT];
-	float4 _DirectionalLightDirection[MAX_DIRECTIONAL_LIGHT_COUNT];
+	float4 _DirectionalLightColor;
+	float4 _DirectionalLightDirection;
 	
 CBUFFER_END
 
@@ -24,16 +22,17 @@ int GetDirectionalLightCount()
     return _DirectionalLightCount;
 }
 
-Light GetMainLight(int index , float3 positionWS , float3 normalWS)
+Light GetMainLight(float3 positionWS , float3 normalWS)
 {
 	Light light;
 	ShadowData shadowData = GetShadowData(positionWS);
-	DirectionalShadowData dirShadowData = GetDirectionalShadowData(index, shadowData);
 
-    light.direction = _DirectionalLightDirection[index].xyz;
-    light.color = _DirectionalLightColor[index].xyz;
-	light.shadowAttenuation = GetDirectionalShadowAttenuation(dirShadowData , shadowData , positionWS , normalWS);
-	//light.attenuation = GetDirectionalShadowAttenuation(dirShadowData, positionWS);
+	DirectionalShadowData dirctionalShadowData = GetDirectionalShadowData(shadowData);
+
+    light.direction = normalize(_DirectionalLightDirection.xyz);
+    light.color = _DirectionalLightColor.xyz;
+	light.shadowAttenuation = GetDirectionalShadowAttenuation(dirctionalShadowData , positionWS);
+	//light.shadowAttenuation = shadowData.cascadeIndex * 0.25;//¼ì²éË÷Òý
 	return light;
 }
 

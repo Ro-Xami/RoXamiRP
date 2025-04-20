@@ -1,75 +1,68 @@
 using Unity.Collections;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 public class Lighting
 {
+    const int lightIndex = 0;
     const string bufferName = "ToonLighting";
     CullingResults cullingResults;
+
     Shadows shadows = new Shadows();
 
-    const int maxDirectionalLightCount = 4;
-
     static int
-        dirLightCount = Shader.PropertyToID("_DirectionalLightCount"),
         dirLightColorId = Shader.PropertyToID("_DirectionalLightColor"),
-        dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection"),
-        dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
+        dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection");
 
-    static Vector4[]
-        dirLightColors = new Vector4[maxDirectionalLightCount],
-        dirLightDirections = new Vector4[maxDirectionalLightCount],
-        dirLightShadowDatas = new Vector4[maxDirectionalLightCount];
+    static Vector4
+        dirLightColor, dirLightDirection;
 
     CommandBuffer buffer = new CommandBuffer
     {
         name = bufferName
     };
 
-    
-
-    public void Setup(ScriptableRenderContext context , CullingResults cullingResults , ShadowSettings shadowSettings)
+    public void Setup(ScriptableRenderContext context , CullingResults cullingResults , ShadowSettings shadowSettings , Camera camera)
     {
         this.cullingResults = cullingResults;
         buffer.BeginSample(bufferName);
+
         shadows.Setup(context, cullingResults, shadowSettings);
-        SetupDirectionalLight();
-        shadows.Render();
+
+        SetupDirectionalLight(camera); 
+
         buffer.EndSample(bufferName);
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
     }
 
-    void SetupDirectionalLight()
+    void SetupDirectionalLight(Camera camera)
     {
         NativeArray<VisibleLight> visibleLights = cullingResults.visibleLights;
 
-        int currentDirLightCount = 0;
-        for (int i = 0; i < visibleLights.Length; i++)
+        //³õÊ¼»¯
+        Light light = null;
+        dirLightColor = Vector4.zero;
+        dirLightDirection = Vector4.zero;
+
+        if (visibleLights != null && visibleLights.Length != 0 && visibleLights[lightIndex].lightType == LightType.Directional)
         {
-            VisibleLight visibleLight = visibleLights[i];
-            if(visibleLight.lightType == LightType.Directional)
-            {
-                SetupDirectionalLight(currentDirLightCount++, ref visibleLight);
-                if (currentDirLightCount >= maxDirectionalLightCount)
-                {
-                    break;
-                }
-            } 
+            VisibleLight visibleLight = visibleLights[lightIndex];
+            light = visibleLight.light;
+
+            dirLightColor = visibleLight.finalColor;
+            dirLightDirection = -visibleLight.localToWorldMatrix.GetColumn(2);
         }
+        buffer.SetGlobalVector(dirLightColorId, dirLightColor);
+        buffer.SetGlobalVector(dirLightDirectionId, dirLightDirection);
 
-        buffer.SetGlobalInt(dirLightCount , currentDirLightCount);
-        buffer.SetGlobalVectorArray(dirLightColorId, dirLightColors);
-        buffer.SetGlobalVectorArray(dirLightDirectionId, dirLightDirections);
-        buffer.SetGlobalVectorArray(dirLightShadowDataId, dirLightShadowDatas);
-        //Debug.Log(dirLightShadowDatas[0].y);
-    }
+#if UNITY_EDITOR
+        if (camera.cameraType == CameraType.Game) { shadows.Render(light); }
+#else
+        shadows.Render(light);
+#endif
 
-    void SetupDirectionalLight(int index, ref VisibleLight visibleLight)
-    {
-        dirLightColors[index] = visibleLight.finalColor;
-        dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
-        dirLightShadowDatas[index] = shadows.ReserveDirectionalShadows(visibleLight.light , index);
     }
 
     public void CleanUp()

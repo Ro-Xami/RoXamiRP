@@ -16,13 +16,13 @@ MonoBehaviour:
   GPUInstancing: 1
   DynamicBatching: 1
   shadowSettings:
-    maxDistance: 34
-    distanceFade: 0.114
+    maxDistance: 31
+    distanceFade: 0.325
     directional:
-      atlasSize: 1024
+      atlasSize: 2048
       filter: 3
       cascadeCount: 4
-      cascadeRotio1: 0.082
-      cascadeRotio2: 0.33
-      cascadeRotio3: 0.686
+      cascadeRotio1: 0.614
+      cascadeRotio2: 0.702
+      cascadeRotio3: 0.803
       cascadeFade: 1

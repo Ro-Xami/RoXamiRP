@@ -3,6 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
 
+//PCF
 #if defined(_DIRECTIONAL_PCF3)
 	#define DIRECTIONAL_FILTER_SAMPLES 4
 	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_3x3
@@ -14,94 +15,21 @@
 	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_7x7
 #endif
 
-#define MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT 4
+//最大级联数
 #define MAX_CASCADE_COUNT 4
 
+//阴影图集
 TEXTURE2D_SHADOW(_DirectionalShadowAtlas);
 #define SHADOW_SAMPLER sampler_linear_clamp_compare
 SAMPLER_CMP(SHADOW_SAMPLER);
 
 CBUFFER_START(_CustomShadows)
+	float4x4 _DirectionalShadowMatrices[MAX_CASCADE_COUNT];
+	float4 _DirectionalLightShadowData;
 	int _CascadeCount;
 	float4 _CascadeCullingSpheres[MAX_CASCADE_COUNT];
-	float4x4 _DirectionalShadowMatrices[MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT * MAX_CASCADE_COUNT];
-	float4 _DirectionalLightShadowData[MAX_DIRECTIONAL_LIGHT_COUNT];
 	float4 _ShadowDistanceFade;
-	float4 _CascadeData[MAX_CASCADE_COUNT];
-	float4 _ShadowAtlasSize;
 CBUFFER_END
-
-struct ShadowData {
-	float strength;
-	int cascadeIndex;
-	float cascadeBlend;
-};
-
-float SampleDirectionalShadowAtlas (float3 positionSTS)
-{
-	return SAMPLE_TEXTURE2D_SHADOW(_DirectionalShadowAtlas, SHADOW_SAMPLER, positionSTS);
-}
-
-float FilterDirectionalShadow (float3 positionSTS) {
-	#if defined(DIRECTIONAL_FILTER_SETUP)
-		float weights[DIRECTIONAL_FILTER_SAMPLES];
-		float2 positions[DIRECTIONAL_FILTER_SAMPLES];
-		float4 size = _ShadowAtlasSize.yyxx;
-		DIRECTIONAL_FILTER_SETUP(size, positionSTS.xy, weights, positions);
-		float shadow = 0;
-		for (int i = 0; i < DIRECTIONAL_FILTER_SAMPLES; i++) {
-			shadow += weights[i] * SampleDirectionalShadowAtlas(
-				float3(positions[i].xy, positionSTS.z)
-			);
-		}
-		return shadow;
-	#else
-		return SampleDirectionalShadowAtlas(positionSTS);
-	#endif
-}
-
-float DistanceSquared(float3 pA, float3 pB) {
-	return dot(pA - pB, pA - pB);
-}
-
-float FadedShadowStrength (float distance, float scale, float fade) {
-	return saturate((1.0 - distance * scale) * fade);
-}
-
-
-ShadowData GetShadowData (float3 positionWS) {
-	ShadowData data;
-
-	int i;
-	for (i = 0; i < _CascadeCount; i++) {
-		float4 sphere = _CascadeCullingSpheres[i];
-		float distanceSqr = DistanceSquared(positionWS, sphere.xyz);
-		if (distanceSqr < sphere.w) {
-			float fade = FadedShadowStrength(
-				distanceSqr, _CascadeData[i].x, _ShadowDistanceFade.z
-			);
-			if (i == _CascadeCount - 1) {
-				data.strength *= fade;
-			}
-			else {
-				data.cascadeBlend = fade;
-			}
-			break;
-		}
-	}
-
-	data.cascadeIndex = i;
-	data.cascadeBlend = 1.0;
-	data.strength = FadedShadowStrength(
-		-TransformWorldToView(positionWS).z, _ShadowDistanceFade.x, _ShadowDistanceFade.y
-	);
-
-	if (i == _CascadeCount) {
-		data.strength = 0.0;
-	}
-
-	return data;
-}
 
 struct DirectionalShadowData
 {
@@ -110,38 +38,70 @@ struct DirectionalShadowData
 	float normalBias;
 };
 
-DirectionalShadowData GetDirectionalShadowData (int lightIndex, ShadowData shadowData)
+struct ShadowData 
+{
+	int cascadeIndex;
+	float cascadeCull;
+
+};
+
+DirectionalShadowData GetDirectionalShadowData(ShadowData shadowData) 
 {
 	DirectionalShadowData data;
-	data.strength = _DirectionalLightShadowData[lightIndex].x * shadowData.strength;
-	data.tileIndex = _DirectionalLightShadowData[lightIndex].y + shadowData.cascadeIndex;
-	data.normalBias = _DirectionalLightShadowData[lightIndex].z;
+	data.strength = _DirectionalLightShadowData.x * shadowData.cascadeCull;
+	data.tileIndex = shadowData.cascadeIndex;
 	return data;
 }
 
-float GetDirectionalShadowAttenuation(DirectionalShadowData data , ShadowData global , float3 positionWS, float3 normalWS)
+//计算平方距离，用于计算是否超过了级联包围球
+float DistanceSquared(float3 pA, float3 pB) 
 {
-	if (data.strength <= 0.0) {
-		return 1.0;
-	}
+	return dot(pA - pB, pA - pB);
+}
 
-	float3 normalBias = normalWS * (data.normalBias * _CascadeData[global.cascadeIndex].y);
-	float3 positionSTS = mul(_DirectionalShadowMatrices[data.tileIndex] , float4(positionWS + normalBias, 1)).xyz;
-	float shadow = FilterDirectionalShadow(positionSTS);
-	if (global.cascadeBlend < 1.0) {
-		normalBias = normalWS *
-			(data.normalBias * _CascadeData[global.cascadeIndex + 1].y);
-		positionSTS = mul(
-			_DirectionalShadowMatrices[data.tileIndex + 1],
-			float4(positionWS + normalBias, 1.0)
-		).xyz;
-		shadow = lerp(
-			FilterDirectionalShadow(positionSTS), shadow, global.cascadeBlend
-		);
+//剔除过渡
+float FadedShadowStrength (float distance, float scale, float fade) {
+	return saturate((1.0 - distance * scale) * fade);
+}
+
+ShadowData GetShadowData (float3 positionWS) 
+{
+	ShadowData data;
+
+	//淡化裁剪
+	float depth = -TransformWorldToView(positionWS).z;
+	data.cascadeCull = FadedShadowStrength(depth, _ShadowDistanceFade.x, _ShadowDistanceFade.y);
+
+	int i;//计算级联包围球的范围
+	for (i = 0; i < _CascadeCount; i++) 
+	{
+		float4 sphere = _CascadeCullingSpheres[i];
+		float distanceSqr = DistanceSquared(positionWS, sphere.xyz);
+		if (distanceSqr < sphere.w) {break;}
 	}
-	return saturate(1 - data.strength + shadow);
-	//return lerp(1.0, shadow, data.strength);
-	//return shadow;
+	if (i == _CascadeCount) {data.cascadeCull = 0.0;}//剔除超过级联包围球的部分
+	data.cascadeIndex = i;
+
+	return data;
+}
+
+//采样阴影图集
+float SampleDirectionalShadowAtlas (float3 positionSTS)
+{
+	return SAMPLE_TEXTURE2D_SHADOW(_DirectionalShadowAtlas, SHADOW_SAMPLER, positionSTS);
+}
+
+//获取阴影
+float GetDirectionalShadowAttenuation (DirectionalShadowData data, float3 positionWS) 
+{
+	if (data.strength != 0)
+	{
+		float3 positionSTS = mul(_DirectionalShadowMatrices[data.tileIndex] , float4(positionWS, 1.0)).xyz;
+		float shadow = SampleDirectionalShadowAtlas(positionSTS);
+
+		return lerp(1.0, shadow, data.strength);
+	}
+	return 1;
 }
 
 #endif
