@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 partial class CameraRender
@@ -63,7 +64,9 @@ partial class CameraRender
 
     partial void PrepareBuffer()
     {
-        commandBuffer.name = SampleName = "RoXami Render: " + camera.name;
+        Profiler.BeginSample("RoXamiRP Editor Only");
+        commandBuffer.name = SampleName = "RoXamiRP: " + camera.name;
+        Profiler.EndSample();
     }
 #else
 	const string SampleName = bufferName;

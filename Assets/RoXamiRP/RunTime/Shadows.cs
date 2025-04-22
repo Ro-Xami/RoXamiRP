@@ -28,17 +28,11 @@ public class Shadows
     static int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
     static int dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
     static int directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices");
-    static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
     static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres");
     static int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
-    static int cascadeDataId = Shader.PropertyToID("_CascadeData");
-    static int shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
 
-    static Vector4 dirLightShadowData;
-
+    static Vector3 dirLightShadowData;
     static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
-    static Vector4[] cascadeData = new Vector4[maxCascades];
-
     static Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
 
     public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
@@ -126,16 +120,14 @@ public class Shadows
             Matrix4x4 matrix = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, atlasOffset, split);
             directionalShadowMatrices[i] = matrix;
 
+            cmd.SetGlobalDepthBias(0f, light.shadowBias);//深度偏移
             ExecuteBuffer();
             context.DrawShadows(ref shadowSettings);
         }
 
-        dirLightShadowData = new Vector4(light.shadowStrength, 0, 0, 0);
-
-        //Debug.Log(directionalShadowMatrices[0]);
+        dirLightShadowData = new Vector3(light.shadowStrength, light.shadowNormalBias, cascadeCount);
         //传入参数
         cmd.SetGlobalVector(dirLightShadowDataId, dirLightShadowData);
-        cmd.SetGlobalInt(cascadeCountId, settings.directional.cascadeCount);
         cmd.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
         cmd.SetGlobalMatrixArray(directionalShadowMatricesID, directionalShadowMatrices);
         cmd.SetGlobalVector(shadowDistanceFadeId,new Vector4(1f / settings.maxDistance, 1f / settings.distanceFade));

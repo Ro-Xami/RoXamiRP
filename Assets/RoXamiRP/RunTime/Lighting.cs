@@ -1,5 +1,4 @@
 using Unity.Collections;
-using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -23,21 +22,21 @@ public class Lighting
         name = bufferName
     };
 
-    public void Setup(ScriptableRenderContext context , CullingResults cullingResults , ShadowSettings shadowSettings , Camera camera)
+    public void Setup(ScriptableRenderContext context , CullingResults cullingResults , ShadowSettings shadowSettings)
     {
         this.cullingResults = cullingResults;
         buffer.BeginSample(bufferName);
 
         shadows.Setup(context, cullingResults, shadowSettings);
 
-        SetupDirectionalLight(camera); 
+        SetupDirectionalLight(); 
 
         buffer.EndSample(bufferName);
         context.ExecuteCommandBuffer(buffer);
         buffer.Clear();
     }
 
-    void SetupDirectionalLight(Camera camera)
+    void SetupDirectionalLight()
     {
         NativeArray<VisibleLight> visibleLights = cullingResults.visibleLights;
 
@@ -57,11 +56,11 @@ public class Lighting
         buffer.SetGlobalVector(dirLightColorId, dirLightColor);
         buffer.SetGlobalVector(dirLightDirectionId, dirLightDirection);
 
-#if UNITY_EDITOR
-        if (camera.cameraType == CameraType.Game) { shadows.Render(light); }
-#else
+//#if UNITY_EDITOR
+//        if (camera.cameraType == CameraType.Game) { shadows.Render(light); }
+//#else
         shadows.Render(light);
-#endif
+//#endif
 
     }
 

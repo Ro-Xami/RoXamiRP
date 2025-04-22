@@ -9,22 +9,22 @@
 #pragma multi_compile _ _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 #pragma shader_feature_local _ALPHACLIP_ON
 
-CBUFFER_START(UnityPerMaterial)
-	float4 _BaseColor;
-	float4 _BaseMap_ST;
-	float _cutout;
-CBUFFER_END
+//CBUFFER_START(UnityPerMaterial)
+//	float4 _BaseColor;
+//	float4 _BaseMap_ST;
+//	float _cutout;
+//CBUFFER_END
 
-#ifdef INSTANCING_ON
-    UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
-        UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
-    UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
+//#ifdef INSTANCING_ON
+//    UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
+//        UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
+//    UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
-#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
-#endif
+//#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
+//#endif
 
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
+//TEXTURE2D(_BaseMap);
+//SAMPLER(sampler_BaseMap);
 
 struct Attributes {
 	float4 positionOS : POSITION;

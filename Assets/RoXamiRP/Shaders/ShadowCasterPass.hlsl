@@ -8,10 +8,11 @@
 #pragma multi_compile_instancing
 #pragma shader_feature_local _ALPHACLIP_ON
 
-CBUFFER_START(UnityPerMaterial)
-	float4 _BaseMap_ST;
-	float _cutout;
-CBUFFER_END
+//UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
+//	UNITY_DEFINE_INSTANCED_PROP(float4, _BaseMap_ST)
+//	UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
+//	UNITY_DEFINE_INSTANCED_PROP(float, _cutout)
+//UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
 //#ifdef INSTANCING_ON
 //    UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
@@ -20,9 +21,6 @@ CBUFFER_END
 
 //#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
 //#endif
-
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
 
 struct Attributes {
 	float4 positionOS : POSITION;

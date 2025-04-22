@@ -26,27 +26,17 @@ public partial class CameraRender
 
         PrepareBuffer();
         PrepareForSceneWindow();
-
-        if (!Cull(shadowSettings.maxDistance))
-        {
-            return;
-        }
+        if (!Cull(shadowSettings.maxDistance)) {return; }
 
         commandBuffer.BeginSample(SampleName);
         ExcuteBuffer();
-        lighting.Setup(context , cullingResults , shadowSettings , camera);
+        lighting.Setup(context , cullingResults , shadowSettings);
         commandBuffer.EndSample(SampleName);
-
         SetUp();
-
         DrawGeometry(GPUInstancing, DynamicBatching);
-
         DrawUnsupportedShaders();
-
         DrawGizmos();
-
         lighting.CleanUp();
-
         Submit();
     }
 

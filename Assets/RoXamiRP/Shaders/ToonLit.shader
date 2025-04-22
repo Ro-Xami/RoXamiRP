@@ -16,6 +16,16 @@ Shader "RoXami RP/ToonLit"
 	{
 		HLSLINCLUDE
 		#include "../ShaderLibrary/Common.hlsl"
+
+		TEXTURE2D(_BaseMap);
+		SAMPLER(sampler_BaseMap);
+
+		CBUFFER_START(UnityPerMaterial)
+			float4 _BaseMap_ST;
+			float4 _BaseColor;
+			float _cutout;
+		CBUFFER_END
+
 		ENDHLSL
 
 		Pass

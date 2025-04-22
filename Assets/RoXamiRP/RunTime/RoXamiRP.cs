@@ -17,11 +17,19 @@ public class RoXamiRP : RenderPipeline
         GraphicsSettings.lightsUseLinearIntensity = true;
         this.shadowSettings = shadowSettings;
     }
-    protected override void Render(ScriptableRenderContext context, Camera[] cameras)
+    protected override void Render(
+        ScriptableRenderContext context, Camera[] cameras
+    )
+    { }
+
+    protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
     {
-        for (int i = 0; i < cameras.Length; i++)
+        for (int i = 0; i < cameras.Count; i++)
         {
-            cameraRender.Render(context, cameras[i] , GPUInstancing , DynamicBatching , shadowSettings);
+            cameraRender.Render(
+                context, cameras[i], DynamicBatching, GPUInstancing,
+                shadowSettings
+            );
         }
     }
 }
