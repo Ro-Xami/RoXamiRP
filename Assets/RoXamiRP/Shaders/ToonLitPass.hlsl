@@ -76,6 +76,7 @@ float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 
 	albedo.rgb *= lambert * light.shadowAttenuation;
 
+	//return half4(IN.normalWS , 1);
     return albedo;
 }
 

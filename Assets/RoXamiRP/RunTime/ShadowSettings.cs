@@ -3,7 +3,7 @@ using UnityEngine;
 [System.Serializable]
 public class ShadowSettings
 {
-    [Min(0.001f)]
+    [Min(1f)]
     public float maxDistance = 500f;
 
     [Range(0.001f, 1f)]
@@ -13,7 +13,6 @@ public class ShadowSettings
     {
         atlasSize = MapSize._2048,
         filter = FilterModeSetting.PCF2x2,
-        cascadeCount = 4,
         cascadeRotio1 = 0.3f,
         cascadeRotio2 = 0.6f,
         cascadeRotio3 = 0.8f,
@@ -31,9 +30,6 @@ public struct Directional
 {
     public MapSize atlasSize;
     public FilterModeSetting filter;
-
-    [Range(0, 4)]
-    public int cascadeCount;
 
     [Range(0f, 1f)]
     public float cascadeRotio1, cascadeRotio2, cascadeRotio3;

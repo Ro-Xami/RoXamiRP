@@ -56,11 +56,7 @@ public class Lighting
         buffer.SetGlobalVector(dirLightColorId, dirLightColor);
         buffer.SetGlobalVector(dirLightDirectionId, dirLightDirection);
 
-//#if UNITY_EDITOR
-//        if (camera.cameraType == CameraType.Game) { shadows.Render(light); }
-//#else
         shadows.Render(light);
-//#endif
 
     }
 

@@ -25,15 +25,18 @@ public class Shadows
         "_DIRECTIONAL_PCF7",
     };
 
-    static int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
-    static int dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
-    static int directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices");
-    static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres");
-    static int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
+    int 
+        directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas"),
+        dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
+        directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices"),
+        cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres"),
+        shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade"),
+        shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
 
-    static Vector3 dirLightShadowData;
-    static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
-    static Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
+    Vector4 dirLightShadowData;
+    Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
+    Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
+    Vector4 shadowDistanceFade;
 
     public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
     {
@@ -77,12 +80,13 @@ public class Shadows
         cmd.BeginSample(bufferName);
         ExecuteBuffer();
 
-        int split = settings.directional.cascadeCount > 1 ? 2 : 1;//根据级联数量设置平铺数量
+        int split = 2;//仅四级级联
         int tileSize = atlasSize / split;//单个级联的大小
 
         RenderDirectionalShadows(split , tileSize , light);
 
         cmd.EndSample(bufferName);
+        ExecuteBuffer();
     }
 
     void RenderDirectionalShadows(int split, int tileSize , Light light) {
@@ -92,7 +96,7 @@ public class Shadows
             cullingResults, lightIndex, BatchCullingProjectionType.Orthographic);
 
         //获取级联设置
-        int cascadeCount = settings.directional.cascadeCount;
+        int cascadeCount = maxCascades;
         Vector3 ratios = settings.directional.CascadeRatios;
 
         //为每个级联渲染图集
@@ -125,12 +129,18 @@ public class Shadows
             context.DrawShadows(ref shadowSettings);
         }
 
-        dirLightShadowData = new Vector3(light.shadowStrength, light.shadowNormalBias, cascadeCount);
         //传入参数
+        int atlasSize = (int)settings.directional.atlasSize;
+        dirLightShadowData = new Vector4(light.shadowStrength, light.shadowNormalBias, cascadeCount , atlasSize);
         cmd.SetGlobalVector(dirLightShadowDataId, dirLightShadowData);
+
         cmd.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
         cmd.SetGlobalMatrixArray(directionalShadowMatricesID, directionalShadowMatrices);
-        cmd.SetGlobalVector(shadowDistanceFadeId,new Vector4(1f / settings.maxDistance, 1f / settings.distanceFade));
+
+        shadowDistanceFade = new Vector4(settings.maxDistance, settings.distanceFade, settings.directional.cascadeFade);
+        cmd.SetGlobalVector(shadowDistanceFadeId, shadowDistanceFade);
+
+        SetKeywords();
     }
 
     Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m, Vector2 offset, int split)
@@ -159,33 +169,24 @@ public class Shadows
         m.m22 = 0.5f * (m.m22);
         m.m23 = 0.5f * (m.m23 + 1);
         return m;
-
-        //if (SystemInfo.usesReversedZBuffer)
-        //{
-        //    m.m20 = -m.m20;
-        //    m.m21 = -m.m21;
-        //    m.m22 = -m.m22;
-        //    m.m23 = -m.m23;
-        //}
-        //float scale = 1f / split;
-        //m.m00 = (0.5f * (m.m00 + m.m30) + offset.x * m.m30) * scale;
-        //m.m01 = (0.5f * (m.m01 + m.m31) + offset.x * m.m31) * scale;
-        //m.m02 = (0.5f * (m.m02 + m.m32) + offset.x * m.m32) * scale;
-        //m.m03 = (0.5f * (m.m03 + m.m33) + offset.x * m.m33) * scale;
-        //m.m10 = (0.5f * (m.m10 + m.m30) + offset.y * m.m30) * scale;
-        //m.m11 = (0.5f * (m.m11 + m.m31) + offset.y * m.m31) * scale;
-        //m.m12 = (0.5f * (m.m12 + m.m32) + offset.y * m.m32) * scale;
-        //m.m13 = (0.5f * (m.m13 + m.m33) + offset.y * m.m33) * scale;
-        //m.m20 = 0.5f * (m.m20 + m.m30);
-        //m.m21 = 0.5f * (m.m21 + m.m31);
-        //m.m22 = 0.5f * (m.m22 + m.m32);
-        //m.m23 = 0.5f * (m.m23 + m.m33);
-        //return m;
     }
 
-    /// <summary>
-    /// 释放Shadow Map
-    /// </summary>
+    void SetKeywords()
+    {
+        int enabledIndex = (int)settings.directional.filter - 1;
+        for (int i = 0; i < directionalFilterKeywords.Length; i++)
+        {
+            if (i == enabledIndex)
+            {
+                cmd.EnableShaderKeyword(directionalFilterKeywords[i]);
+            }
+            else
+            {
+                cmd.DisableShaderKeyword(directionalFilterKeywords[i]);
+            }
+        }
+    }
+
     public void CleanUp()
     {
         cmd.ReleaseTemporaryRT(directionalShadowAtlasID);
@@ -197,23 +198,4 @@ public class Shadows
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
     }
-
-    //调试级联包围球
-#if UNITY_EDITOR
-    public void DrawCascadesGizmos(Camera camera)
-    {
-        if (settings == null || camera == null) return;
-
-        Gizmos.color = Color.yellow;
-        for (int i = 0; i < settings.directional.cascadeCount; i++)
-        {
-            Vector4 sphere = cascadeCullingSpheres[i];
-            Vector3 center = new Vector3(sphere.x, sphere.y, sphere.z);
-            float radius = Mathf.Sqrt(sphere.w);
-
-            // Transform到世界空间（如果你需要）
-            Gizmos.DrawWireSphere(center, radius);
-        }
-    }
-#endif
 }
