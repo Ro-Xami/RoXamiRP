@@ -63,7 +63,7 @@ public partial class CameraRender
         };
 
         DrawingSettings drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings)
-        { enableDynamicBatching = DynamicBatching , enableInstancing = GPUInstancing };
+        { enableDynamicBatching = DynamicBatching , enableInstancing = GPUInstancing , perObjectData = PerObjectData.LightProbe };
         drawingSettings.SetShaderPassName(1 , toonLitShaderTagId);
 
         FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.opaque);

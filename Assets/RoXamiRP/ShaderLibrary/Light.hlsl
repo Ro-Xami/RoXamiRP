@@ -32,6 +32,4 @@ Light GetMainLight(float3 positionWS , float3 normalWS)
 	return light;
 }
 
-
-
 #endif

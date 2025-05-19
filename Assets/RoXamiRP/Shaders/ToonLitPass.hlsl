@@ -1,13 +1,15 @@
 #ifndef ROXAMIRP_TOONLITPASS_INCLUDE
 #define ROXAMIRP_TOONLITPASS_INCLUDE
 
+#pragma multi_compile_instancing
+#pragma multi_compile _ _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
+#pragma shader_feature_local _ALPHACLIP_ON
+
 #include "../ShaderLibrary/Light.hlsl"
 #include "../ShaderLibrary/ToonLitSurface.hlsl"
 #include "../ShaderLibrary/ToonLighting.hlsl"
 
-#pragma multi_compile_instancing
-#pragma multi_compile _ _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
-#pragma shader_feature_local _ALPHACLIP_ON
+
 
 //CBUFFER_START(UnityPerMaterial)
 //	float4 _BaseColor;
@@ -76,7 +78,7 @@ float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 
 	albedo.rgb *= lambert * light.shadowAttenuation;
 
-	//return half4(IN.normalWS , 1);
+	//return half4(SampleLightProbe(IN.normalWS) , 1);
     return albedo;
 }
 
