@@ -10,22 +10,14 @@ Shader "RoXami RP/ToonLit"
 
 		[Toggle] _alphaClip ("Alpha Clip" , float) = 0
 		_cutout ("Cut Out" , Range(0 , 1)) = 0.5
+
+		_TestCube ("TestCube" , Cube) = "white" {}
 	}
 	
 	SubShader
 	{
 		HLSLINCLUDE
-		#include "../ShaderLibrary/Common.hlsl"
-
-		TEXTURE2D(_BaseMap);
-		SAMPLER(sampler_BaseMap);
-
-		CBUFFER_START(UnityPerMaterial)
-			float4 _BaseMap_ST;
-			float4 _BaseColor;
-			float _cutout;
-		CBUFFER_END
-
+		
 		ENDHLSL
 
 		Pass

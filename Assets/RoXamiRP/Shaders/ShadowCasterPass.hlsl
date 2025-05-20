@@ -1,26 +1,19 @@
 #ifndef ROXAMIRP_TOONLITPASS_INCLUDE
 #define ROXAMIRP_TOONLITPASS_INCLUDE
 
-#include "../ShaderLibrary/Light.hlsl"
-#include "../ShaderLibrary/ToonLitSurface.hlsl"
-#include "../ShaderLibrary/ToonLighting.hlsl"
+#include "../ShaderLibrary/Common.hlsl"
 
 #pragma multi_compile_instancing
 #pragma shader_feature_local _ALPHACLIP_ON
 
-//UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
-//	UNITY_DEFINE_INSTANCED_PROP(float4, _BaseMap_ST)
-//	UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
-//	UNITY_DEFINE_INSTANCED_PROP(float, _cutout)
-//UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
+TEXTURE2D(_BaseMap);
+SAMPLER(sampler_BaseMap);
 
-//#ifdef INSTANCING_ON
-//    UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
-//        UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
-//    UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
-
-//#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
-//#endif
+CBUFFER_START(UnityPerMaterial)
+	float4 _BaseMap_ST;
+	float4 _BaseColor;
+	float _cutout;
+CBUFFER_END
 
 struct Attributes {
 	float4 positionOS : POSITION;

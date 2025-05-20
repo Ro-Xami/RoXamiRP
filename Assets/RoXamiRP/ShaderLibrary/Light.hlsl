@@ -3,11 +3,10 @@
 
 #include "Shadows.hlsl"
 
-CBUFFER_START(_RoXamiLight)
+CBUFFER_START(RoXamiLight)
 	int _DirectionalLightCount;
 	float4 _DirectionalLightColor;
-	float4 _DirectionalLightDirection;
-	
+	float4 _DirectionalLightDirection;	
 CBUFFER_END
 
 struct Light
@@ -22,13 +21,29 @@ int GetDirectionalLightCount()
     return _DirectionalLightCount;
 }
 
-Light GetMainLight(float3 positionWS , float3 normalWS)
+Light GetMainLight()
 {
 	Light light;
 
     light.direction = normalize(_DirectionalLightDirection.xyz);
     light.color = _DirectionalLightColor.xyz;
-	light.shadowAttenuation = GetDirectionalShadowAttenuation(positionWS , normalWS);
+
+	light.shadowAttenuation = 1;
+
+	return light;
+}
+
+Light GetMainLight(Input inputData)
+{
+	Light light;
+
+    light.direction = normalize(_DirectionalLightDirection.xyz);
+    light.color = _DirectionalLightColor.xyz;
+
+	light.shadowAttenuation = 
+		GetDirectionalShadowAttenuation(
+		inputData.positionWS , inputData.normalWS);
+
 	return light;
 }
 

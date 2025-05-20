@@ -1,7 +1,7 @@
-#ifndef ROXAMIRP_TOONLITSURFACE_INCLUDE
-#define ROXAMIRP_TOONLITSURFACE_INCLUDE
+#ifndef ROXAMIRP_SURFACE_INCLUDE
+#define ROXAMIRP_SURFACE_INCLUDE
 
-struct ToonLitSurface
+struct Surface
 {
 	float3 albedo;
     float3 normal;

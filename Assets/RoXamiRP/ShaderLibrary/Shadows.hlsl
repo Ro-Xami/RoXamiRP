@@ -1,5 +1,5 @@
-#ifndef CUSTOM_SHADOWS_INCLUDED
-#define CUSTOM_SHADOWS_INCLUDED
+#ifndef ROXAMIRP_SHADOWS_INCLUDED
+#define ROXAMIRP_SHADOWS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
 
@@ -23,7 +23,7 @@ TEXTURE2D_SHADOW(_DirectionalShadowAtlas);
 #define SHADOW_SAMPLER sampler_linear_clamp_compare
 SAMPLER_CMP(SHADOW_SAMPLER);
 
-CBUFFER_START(_RoXamiShadows)
+CBUFFER_START(RoXamiShadows)
 	float4x4 _DirectionalShadowMatrices[MAX_CASCADE_COUNT];
 	float4 _DirectionalLightShadowData;//shadowStrength normaliBias cascadeCount atlasSize
 	float4 _CascadeCullingSpheres[MAX_CASCADE_COUNT];
