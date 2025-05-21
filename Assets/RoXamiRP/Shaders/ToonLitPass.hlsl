@@ -53,7 +53,7 @@ Varyings ToonLitPassVertex(Attributes IN)
 	OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
 	OUT.positionCS = TransformWorldToHClip(OUT.positionWS);
 	OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
-	OUT.viewWS = normalize(_WorldSpaceCameraPos - OUT.positionWS);
+	OUT.viewWS = GetViewDirWS(OUT.positionWS);
 	OUT.color = IN.color * _BaseColor;
 	OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
 

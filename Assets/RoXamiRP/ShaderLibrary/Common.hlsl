@@ -17,4 +17,14 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
 
+float Square(float x) { return x * x;} 
+float2 Square(float2 x) { return x * x;} 
+float3 Square(float3 x) { return x * x;} 
+float4 Square(float4 x) { return x * x;} 
+
+float3 GetViewDirWS(float3 positionWS)
+{
+	return normalize(_WorldSpaceCameraPos - positionWS);
+}
+
 #endif

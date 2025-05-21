@@ -4,8 +4,6 @@ using UnityEngine.Rendering;
 
 public class Shadows
 {
-    const int lightIndex = 0;
-
     const string bufferName = "ToonShadows";
 
     CullingResults cullingResults;
@@ -25,13 +23,13 @@ public class Shadows
         "_DIRECTIONAL_PCF7",
     };
 
-    int 
+    int
         directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas"),
         dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
         directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices"),
         cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres"),
-        shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade"),
-        shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
+        shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
+        //shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
 
     Vector4 dirLightShadowData;
     Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
@@ -45,13 +43,13 @@ public class Shadows
         this.settings = shadowSettings;
     }
 
-    public void Render(Light light)
+    public void Render(Light light, int lightIndex)
     {
         if (light != null 
             && light.shadows != LightShadows.None && light.shadowStrength > 0f &&
             cullingResults.GetShadowCasterBounds(0, out Bounds b))
         {
-            RenderDirectionalShadows(light);
+            RenderDirectionalShadows(light, lightIndex);
         }
         else
         {
@@ -64,7 +62,7 @@ public class Shadows
         }
     }
 
-    void RenderDirectionalShadows(Light light) {
+    void RenderDirectionalShadows(Light light , int lightIndex) {
 
         int atlasSize = (int)settings.directional.atlasSize;
 
@@ -83,13 +81,13 @@ public class Shadows
         int split = 2;//仅四级级联
         int tileSize = atlasSize / split;//单个级联的大小
 
-        RenderDirectionalShadows(split , tileSize , light);
+        RenderDirectionalShadows(split , tileSize , light, lightIndex);
 
         cmd.EndSample(bufferName);
         ExecuteBuffer();
     }
 
-    void RenderDirectionalShadows(int split, int tileSize , Light light) {
+    void RenderDirectionalShadows(int split, int tileSize , Light light , int lightIndex) {
 
         //阴影绘制设置
         ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
