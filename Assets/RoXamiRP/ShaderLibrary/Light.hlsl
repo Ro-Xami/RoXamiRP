@@ -65,7 +65,7 @@ Light GetAdditionalLight(int index , Input inputData)
 	float attenuation = spotAttenuation * rangeAttenuation / distanceSqr;
 
 	light.direction = direction;
-	light.color = _AdditionalLightColor[index];
+	light.color = _AdditionalLightColor[index].rgb;
 	light.shadowAttenuation = attenuation;
 
 	return light;

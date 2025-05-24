@@ -13,9 +13,9 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
 
 	float3 additionalLightColor = float3(0 , 0 , 0);
 	int additionalLightCount = GetAdditionalLightCount();
-	int additionLightIndex = 0;
+	
 	UNITY_LOOP
-	for (additionLightIndex ; additionLightIndex < additionalLightCount ; additionLightIndex++)
+	for (int additionLightIndex = 0 ; additionLightIndex < additionalLightCount ; additionLightIndex++)
 	{
 		Light additionalLight = GetAdditionalLight(additionLightIndex , inputData);
 		float NoL = saturate(dot(additionalLight.direction , inputData.normalWS));
