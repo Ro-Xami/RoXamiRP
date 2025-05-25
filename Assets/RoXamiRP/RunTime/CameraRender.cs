@@ -13,6 +13,9 @@ public partial class CameraRender
     static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
     
     readonly Lighting lighting = new Lighting();
+    
+    static RoXamiPost post = new RoXamiPost();
+    static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
 
     readonly CommandBuffer commandBuffer = new CommandBuffer
     {
@@ -30,7 +33,7 @@ public partial class CameraRender
         public RenderTargetIdentifier depthRT;
     }
 
-    public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings)
+    public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer )
     {
         this.context = context;
         this.camera = camera;
@@ -47,12 +50,16 @@ public partial class CameraRender
         
         commandBuffer.BeginSample(SampleName);
         SetUp();
+        post.Setup(context,camera,renderer);
         ExcuteBuffer();
         
         DrawGeometry(GPUInstancing, DynamicBatching);
         DrawUnsupportedShaders();
+        if (post.IsActive)
+        {
+            post.Render(frameBufferId);
+        }
         DrawGizmos();
-        
         
         CleanUp();
         commandBuffer.EndSample(SampleName);
@@ -63,12 +70,25 @@ public partial class CameraRender
     {
         context.SetupCameraProperties(camera);
         CameraClearFlags flags = camera.clearFlags;
+        
+        if (post.IsActive) 
+        {
+            commandBuffer.GetTemporaryRT(
+                frameBufferId, camera.pixelWidth, camera.pixelHeight,
+                32, FilterMode.Bilinear, RenderTextureFormat.Default
+            );
+            commandBuffer.SetRenderTarget(
+                frameBufferId,
+                RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
+            );
+        }
 
         commandBuffer.ClearRenderTarget(
             flags <= CameraClearFlags.Depth,
             flags <= CameraClearFlags.Color,
             flags == CameraClearFlags.Color ?
-            camera.backgroundColor.linear : Color.clear);
+                camera.backgroundColor.linear : Color.clear
+        );
     }
 
     void DrawGeometry(bool GPUInstancing, bool DynamicBatching)
@@ -114,6 +134,11 @@ public partial class CameraRender
     void CleanUp()
     {
         lighting.CleanUp();
+
+        if (post.IsActive)
+        {
+            commandBuffer.ReleaseTemporaryRT(frameBufferId);
+        }
     }
 
     RenderingData GetRenderingData(float maxShadowDistance)

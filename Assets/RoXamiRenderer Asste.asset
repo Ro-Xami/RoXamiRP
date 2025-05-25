@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b6c9ef11b4f0ff4caee24f274079247, type: 3}
   m_Name: RoXamiRenderer Asste
   m_EditorClassIdentifier: 
+  shader: {fileID: 4800000, guid: 6cefba19da1e456b8c03fafdb5c70c8d, type: 3}

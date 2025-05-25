@@ -30,7 +30,7 @@ public class RoXamiRP : RenderPipeline
         {
             cameraRender.Render(
                 context, cameras[i], DynamicBatching, GPUInstancing,
-                shadowSettings //, renderer
+                shadowSettings , renderer
             );
         }
     }
