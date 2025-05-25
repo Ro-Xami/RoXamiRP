@@ -20,8 +20,8 @@ Shader "RoXami RP/Unlit"
 
 		Pass
 		{
-			Name "Default Unlit"
-			Tags{"LightMode" = "SRPDefaultUnlit"}
+			Name "ToonUnlit"
+			Tags{"LightMode" = "ToonUnlit"}
 			ZWrite [_ZWrite]
 			Blend [_SrcBlend] [_DstBlend]
 			HLSLPROGRAM

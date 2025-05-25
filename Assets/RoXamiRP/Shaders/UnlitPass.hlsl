@@ -4,12 +4,16 @@
 #pragma multi_compile_instancing
 #pragma shader_feature_local _ALPHACLIP_ON
 
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
+TEXTURE2D(_TestMap);
+SAMPLER(sampler_TestMap);
+TEXTURE2D(_TestMap0);
+SAMPLER(sampler_TestMap0);
+TEXTURE2D(_TestMap1);
+SAMPLER(sampler_TestMap1);
 
 CBUFFER_START(UnityPerMaterial)
 	float4 _BaseColor;
-	float4 _BaseMap_ST;
+	float4 _TestMap_ST;
 	float _cutout;
 CBUFFER_END
 
@@ -46,7 +50,7 @@ Varyings UnlitPassVertex(Attributes IN)
 	half3 positionWS = TransformObjectToWorld(IN.positionOS.xyz);
 	OUT.positionCS = TransformWorldToHClip(positionWS);
 	OUT.color = IN.color * _BaseColor;
-	OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
+	OUT.uv = TRANSFORM_TEX(IN.uv , _TestMap);
 
 	return OUT;
 }
@@ -55,7 +59,7 @@ float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 {
 	UNITY_SETUP_INSTANCE_ID(IN);
 
-	half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor * IN.color;
+	half4 albedo = SAMPLE_TEXTURE2D(_TestMap, sampler_TestMap, IN.uv) * _BaseColor * IN.color;
 
 	#ifdef _ALPHACLIP_ON
 	clip(albedo.a - _cutout);

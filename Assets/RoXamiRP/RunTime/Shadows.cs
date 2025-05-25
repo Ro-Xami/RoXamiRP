@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -67,9 +67,9 @@ public class Shadows
         int atlasSize = (int)settings.directional.atlasSize;
 
         cmd.GetTemporaryRT(directionalShadowAtlasID, atlasSize, atlasSize,
-            32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);//尽可能高的深度位数，~，取决于目标平台的贴图格式
+            32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);//???????????位????~????????????????????
 
-        //从GPU渲染纹理而不是从摄像机渲染纹理
+        //??GPU?????????????????????????
         cmd.SetRenderTarget(directionalShadowAtlasID,
             RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
@@ -78,8 +78,8 @@ public class Shadows
         cmd.BeginSample(bufferName);
         ExecuteBuffer();
 
-        int split = 2;//仅四级级联
-        int tileSize = atlasSize / split;//单个级联的大小
+        int split = 2;//?????????
+        int tileSize = atlasSize / split;//???????????小
 
         RenderDirectionalShadows(split , tileSize , light, lightIndex);
 
@@ -89,45 +89,45 @@ public class Shadows
 
     void RenderDirectionalShadows(int split, int tileSize , Light light , int lightIndex) {
 
-        //阴影绘制设置
+        //???????????
         ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
             cullingResults, lightIndex, BatchCullingProjectionType.Orthographic);
 
-        //获取级联设置
+        //???????????
         int cascadeCount = maxCascades;
         Vector3 ratios = settings.directional.CascadeRatios;
 
-        //为每个级联渲染图集
+        //??????????????
         for ( int i = 0; i < cascadeCount; i++ )
         {
-            //输出光源视口矩阵，光源投影矩阵，级联数据
+            //???????????????????????????
             cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
             lightIndex, i, cascadeCount, ratios, tileSize, light.shadowNearPlane,
             out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
 
             shadowSettings.splitData = splitData;
-            //级联包围球
-            Vector4 cullingSphere = splitData.cullingSphere;//xyz包围球中心，w包围球半径
-            cullingSphere.w *= cullingSphere.w;//提前计算包围球的平方距离，减少shader计算
+            //??????围??
+            Vector4 cullingSphere = splitData.cullingSphere;//xyz??围???????w??围???
+            cullingSphere.w *= cullingSphere.w;//????????围??????????????shader????
             cascadeCullingSpheres[i] = cullingSphere;
 
             cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
 
-            //计算图集在每个级联的偏移值
+            //??????????????????????
             Vector2 atlasOffset = new Vector2(i % split, i / split);
-            //设置渲染视口
+            //??????????
             cmd.SetViewport(new Rect(atlasOffset.x * tileSize, atlasOffset.y * tileSize, tileSize, tileSize));
 
-            //矩阵计算
+            //???????
             Matrix4x4 matrix = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, atlasOffset, split);
             directionalShadowMatrices[i] = matrix;
 
-            cmd.SetGlobalDepthBias(0f, light.shadowBias);//深度偏移
+            cmd.SetGlobalDepthBias(0f, light.shadowBias);//??????
             ExecuteBuffer();
             context.DrawShadows(ref shadowSettings);
         }
 
-        //传入参数
+        //???????
         int atlasSize = (int)settings.directional.atlasSize;
         dirLightShadowData = new Vector4(light.shadowStrength, light.shadowNormalBias, cascadeCount , atlasSize);
         cmd.SetGlobalVector(dirLightShadowDataId, dirLightShadowData);
@@ -143,7 +143,7 @@ public class Shadows
 
     Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m, Vector2 offset, int split)
     {
-        //unity在某些平台上使用反向ZBuffer
+        //unity???些??????梅???ZBuffer
         if (SystemInfo.usesReversedZBuffer)
         {
             m.m20 = -m.m20;
@@ -153,15 +153,15 @@ public class Shadows
         }
 
         float scale = 1f / split;
-        //-1~1转化到0~1
+        //-1~1?????0~1
         m.m00 = 0.5f * (m.m00) * scale;
         m.m01 = 0.5f * (m.m01) * scale;
         m.m02 = 0.5f * (m.m02) * scale;
-        m.m03 = (0.5f * (m.m03 + 1) + offset.x) * scale;//计算图集的偏移
+        m.m03 = (0.5f * (m.m03 + 1) + offset.x) * scale;//????????????
         m.m10 = 0.5f * (m.m10) * scale;
         m.m11 = 0.5f * (m.m11) * scale;
         m.m12 = 0.5f * (m.m12) * scale;
-        m.m13 = (0.5f * (m.m13 + 1) + offset.y) *scale;//计算图集的偏移
+        m.m13 = (0.5f * (m.m13 + 1) + offset.y) *scale;//????????????
         m.m20 = 0.5f * (m.m20);
         m.m21 = 0.5f * (m.m21);
         m.m22 = 0.5f * (m.m22);

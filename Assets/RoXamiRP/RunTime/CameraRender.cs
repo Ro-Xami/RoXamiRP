@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 public partial class CameraRender
@@ -7,17 +8,27 @@ public partial class CameraRender
     Camera camera;
     ScriptableRenderContext context;
     const string bufferName = "RoXami Render";
-    CullingResults cullingResults;
 
-    static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
-    static ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
+    static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+    static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
+    
+    readonly Lighting lighting = new Lighting();
 
-    Lighting lighting = new Lighting();
-
-    CommandBuffer commandBuffer = new CommandBuffer
+    readonly CommandBuffer commandBuffer = new CommandBuffer
     {
         name = bufferName,
     };
+
+    public static RenderingData renderingData;
+    
+    public struct RenderingData
+    {
+        public int width;
+        public int height;
+        public CullingResults cullingResults;
+        public RenderTargetIdentifier colorRT;
+        public RenderTargetIdentifier depthRT;
+    }
 
     public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings)
     {
@@ -26,17 +37,25 @@ public partial class CameraRender
 
         PrepareBuffer();
         PrepareForSceneWindow();
-        if (!Cull(shadowSettings.maxDistance)) {return; }
+
+        renderingData = GetRenderingData(shadowSettings.maxDistance);
 
         commandBuffer.BeginSample(SampleName);
         ExcuteBuffer();
-        lighting.Setup(context , cullingResults , shadowSettings);
+        lighting.Setup(context , renderingData.cullingResults , shadowSettings);
         commandBuffer.EndSample(SampleName);
+        
+        commandBuffer.BeginSample(SampleName);
         SetUp();
+        ExcuteBuffer();
+        
         DrawGeometry(GPUInstancing, DynamicBatching);
         DrawUnsupportedShaders();
         DrawGizmos();
-        lighting.CleanUp();
+        
+        
+        CleanUp();
+        commandBuffer.EndSample(SampleName);
         Submit();
     }
 
@@ -50,9 +69,6 @@ public partial class CameraRender
             flags <= CameraClearFlags.Color,
             flags == CameraClearFlags.Color ?
             camera.backgroundColor.linear : Color.clear);
-
-        commandBuffer.BeginSample(SampleName);
-        ExcuteBuffer();        
     }
 
     void DrawGeometry(bool GPUInstancing, bool DynamicBatching)
@@ -71,20 +87,20 @@ public partial class CameraRender
 
         FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
-        context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+        context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+        ExcuteBuffer();
 
         context.DrawSkybox(camera);
-
+        
         sortingSettings.criteria = SortingCriteria.CommonTransparent;
         drawingSettings.sortingSettings = sortingSettings;
         filteringSettings.renderQueueRange = RenderQueueRange.transparent;
-
-        context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+        
+        context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
     }
 
     void Submit()
     {
-        commandBuffer.EndSample(SampleName);
         ExcuteBuffer();
         context.Submit();
     }
@@ -95,14 +111,24 @@ public partial class CameraRender
         commandBuffer.Clear();
     }
 
-    bool Cull(float maxShadowDistance)
+    void CleanUp()
     {
-        if (camera.TryGetCullingParameters(out ScriptableCullingParameters p))
-        {
-            p.shadowDistance = Mathf.Min(maxShadowDistance , camera.farClipPlane);
-            cullingResults = context.Cull(ref p);
-            return true;
-        }
-        return false;
+        lighting.CleanUp();
+    }
+
+    RenderingData GetRenderingData(float maxShadowDistance)
+    {
+        camera.TryGetCullingParameters(out ScriptableCullingParameters p);
+        p.shadowDistance = Mathf.Min(maxShadowDistance , camera.farClipPlane);
+        CullingResults cullingResults = context.Cull(ref p);
+        
+        RenderingData data = new RenderingData();
+        data.width = camera.pixelWidth;
+        data.height = camera.pixelHeight;
+        data.cullingResults = cullingResults;
+        // data.colorRT = camerColorRT;
+        // data.depthRT = cameDepthRT;
+        
+        return data;
     }
 }

@@ -42,7 +42,7 @@ partial class CameraRender
         }
 
         FilteringSettings filteringSettings = FilteringSettings.defaultValue;
-        context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+        context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
     }
 
     partial void DrawGizmos()
