@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,4 +20,14 @@ public class RoXamiRenderer : ScriptableObject
             return material;
         }
     }
+    
+    [Serializable]
+    public class  BloomSettings
+    {
+        public float intensity = 0.1f;
+        public float threshold = 0.95f;
+        public int maxSampleCount = 5;
+    }
+
+    public BloomSettings bloomSettings;
 }

@@ -12,12 +12,12 @@ public partial class CameraRender
     static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
     static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
     
-    readonly Lighting lighting = new Lighting();
+    static readonly Lighting lighting = new Lighting();
     
     static RoXamiPost post = new RoXamiPost();
-    static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+    static readonly int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
 
-    readonly CommandBuffer commandBuffer = new CommandBuffer
+    readonly CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName,
     };
@@ -43,12 +43,12 @@ public partial class CameraRender
 
         renderingData = GetRenderingData(shadowSettings.maxDistance);
 
-        commandBuffer.BeginSample(SampleName);
+        cmd.BeginSample(SampleName);
         ExcuteBuffer();
         lighting.Setup(context , renderingData.cullingResults , shadowSettings);
-        commandBuffer.EndSample(SampleName);
+        cmd.EndSample(SampleName);
         
-        commandBuffer.BeginSample(SampleName);
+        cmd.BeginSample(SampleName);
         SetUp();
         post.Setup(context,camera,renderer);
         ExcuteBuffer();
@@ -62,7 +62,7 @@ public partial class CameraRender
         DrawGizmos();
         
         CleanUp();
-        commandBuffer.EndSample(SampleName);
+        cmd.EndSample(SampleName);
         Submit();
     }
 
@@ -71,19 +71,16 @@ public partial class CameraRender
         context.SetupCameraProperties(camera);
         CameraClearFlags flags = camera.clearFlags;
         
-        if (post.IsActive) 
-        {
-            commandBuffer.GetTemporaryRT(
-                frameBufferId, camera.pixelWidth, camera.pixelHeight,
-                32, FilterMode.Bilinear, RenderTextureFormat.Default
-            );
-            commandBuffer.SetRenderTarget(
-                frameBufferId,
-                RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
-            );
-        }
+        cmd.GetTemporaryRT(
+            frameBufferId, renderingData.width, renderingData.height,
+            32, FilterMode.Bilinear, RenderTextureFormat.Default
+        );
+        cmd.SetRenderTarget(
+            frameBufferId,
+            RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
+        );
 
-        commandBuffer.ClearRenderTarget(
+        cmd.ClearRenderTarget(
             flags <= CameraClearFlags.Depth,
             flags <= CameraClearFlags.Color,
             flags == CameraClearFlags.Color ?
@@ -127,18 +124,15 @@ public partial class CameraRender
 
     void ExcuteBuffer()
     {
-        context.ExecuteCommandBuffer(commandBuffer);
-        commandBuffer.Clear();
+        context.ExecuteCommandBuffer(cmd);
+        cmd.Clear();
     }
 
     void CleanUp()
     {
         lighting.CleanUp();
 
-        if (post.IsActive)
-        {
-            commandBuffer.ReleaseTemporaryRT(frameBufferId);
-        }
+        cmd.ReleaseTemporaryRT(frameBufferId);
     }
 
     RenderingData GetRenderingData(float maxShadowDistance)

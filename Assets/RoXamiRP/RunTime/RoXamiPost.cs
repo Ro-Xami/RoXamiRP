@@ -14,11 +14,18 @@ public class RoXamiPost
     Camera camera;
     RoXamiRenderer renderer;
     
-    int postSourceId = Shader.PropertyToID("_PostSource");
+    static readonly int postSource0Id = Shader.PropertyToID("_PostSource0");
+    static readonly int postSource1Id = Shader.PropertyToID("_PostSource1");
+    static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
 
     enum Pass
     {
-        Copy,
+        copy,
+        filter,
+        blurH,
+        blurV,
+        upSample,
+        combine
     };
 
     public void Setup(
@@ -31,15 +38,82 @@ public class RoXamiPost
 
     public void Render(int sourceID)
     {
-        Draw(sourceID, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+        //Draw(sourceID, BuiltinRenderTextureType.CameraTarget, Pass.copy);
+        
+        cmd.BeginSample("RoXami Bloom");
+        SetupBloom(sourceID);
+        cmd.EndSample("RoXami Bloom");
+        
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
+    }
+
+    void SetupBloom(int sourceID)
+    {
+        RoXamiRenderer.BloomSettings bloom = renderer.bloomSettings;
+
+        int width = CameraRender.renderingData.width;
+        int height = CameraRender.renderingData.height;
+        RenderTextureFormat format = RenderTextureFormat.Default;
+        FilterMode filter = FilterMode.Bilinear;
+        
+        //Filter
+        cmd.GetTemporaryRT(bloomFilterID , width, height,0,filter , format);
+        Draw(sourceID , bloomFilterID, Pass.filter);
+        
+        //DownSample
+        int sampleCount = bloom.maxSampleCount;
+        int[] bloomDownSampleIDs = new int[sampleCount];
+        int[] bloomUpSampleIDs = new int[sampleCount];
+        int fromID = bloomFilterID;
+        for (int i = 0; i < sampleCount; i++)
+        {
+            if (width < 0 || height < 0)
+            {
+                break;
+            }
+            bloomDownSampleIDs[i] = Shader.PropertyToID("_BloomDownSample" + i);
+            bloomUpSampleIDs[i] = Shader.PropertyToID("_BloomUpSample" + i);
+            
+            cmd.GetTemporaryRT(bloomDownSampleIDs[i] , width , height, 0, filter , format);
+            cmd.GetTemporaryRT(bloomUpSampleIDs[i] , width , height, 0, filter , format);
+            
+            Draw(fromID , bloomDownSampleIDs[i] , Pass.blurH);
+            Draw(bloomDownSampleIDs[i] , bloomUpSampleIDs[i] , Pass.blurV);
+
+            fromID = bloomUpSampleIDs[i];
+            width /= 2;
+            height /= 2;
+        }
+        cmd.ReleaseTemporaryRT(bloomFilterID);
+        
+        //UpSample
+        for (int i = sampleCount - 1; i > -2; i--)
+        {
+            if (i > 0)
+            {
+                cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[i - 1]);
+                Draw(bloomUpSampleIDs[i] , bloomUpSampleIDs[i] , Pass.upSample);
+            }
+            
+            if (i == 0)
+            {
+                cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[0]);
+                Draw(sourceID , BuiltinRenderTextureType.CameraTarget, Pass.combine);
+            }
+            
+            if (i < sampleCount - 1)
+            {
+                cmd.ReleaseTemporaryRT(bloomDownSampleIDs[i + 1]);
+                cmd.ReleaseTemporaryRT(bloomUpSampleIDs[i + 1]);
+            }
+        }
     }
     
     void Draw (
         RenderTargetIdentifier from, RenderTargetIdentifier to, Pass pass
     ) {
-        cmd.SetGlobalTexture(postSourceId, from);
+        cmd.SetGlobalTexture(postSource0Id, from);
         cmd.SetRenderTarget(
             to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
         );

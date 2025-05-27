@@ -18,8 +18,7 @@ public class GBuffer
         Shader.PropertyToID("Gbuffer2"),
         Shader.PropertyToID("Gbuffer3"),
     };
-
-    //这样其实是不安全的，如果GbufferIds在GbufferNameIds之前初始化，那么就会有错误了。但是据说C#中是按顺序初始化的
+    
     public static RenderTargetIdentifier[] GbufferIds = new RenderTargetIdentifier[]
     {
         new RenderTargetIdentifier(GbufferNameIds[0]),

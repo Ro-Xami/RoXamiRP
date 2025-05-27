@@ -65,7 +65,7 @@ partial class CameraRender
     partial void PrepareBuffer()
     {
         Profiler.BeginSample("RoXamiRP Editor Only");
-        commandBuffer.name = SampleName = "RoXamiRP: " + camera.name;
+        cmd.name = SampleName = "RoXamiRP: " + camera.name;
         Profiler.EndSample();
     }
 #else
