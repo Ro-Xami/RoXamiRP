@@ -51,6 +51,12 @@ public class RoXamiPost
     void SetupBloom(int sourceID)
     {
         RoXamiRenderer.BloomSettings bloom = renderer.bloomSettings;
+        int sampleCount = bloom.maxSampleCount;
+
+        if (sampleCount <= 0)
+        {
+            return;
+        }
 
         int width = CameraRender.renderingData.width;
         int height = CameraRender.renderingData.height;
@@ -62,14 +68,14 @@ public class RoXamiPost
         Draw(sourceID , bloomFilterID, Pass.filter);
         
         //DownSample
-        int sampleCount = bloom.maxSampleCount;
         int[] bloomDownSampleIDs = new int[sampleCount];
         int[] bloomUpSampleIDs = new int[sampleCount];
         int fromID = bloomFilterID;
         for (int i = 0; i < sampleCount; i++)
         {
-            if (width < 0 || height < 0)
+            if (width <= 0 || height <= 0)
             {
+                sampleCount = i;
                 break;
             }
             bloomDownSampleIDs[i] = Shader.PropertyToID("_BloomDownSample" + i);
@@ -88,25 +94,18 @@ public class RoXamiPost
         cmd.ReleaseTemporaryRT(bloomFilterID);
         
         //UpSample
-        for (int i = sampleCount - 1; i > -2; i--)
+        for (int i = sampleCount - 1; i > 0; i--)
         {
-            if (i > 0)
-            {
-                cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[i - 1]);
-                Draw(bloomUpSampleIDs[i] , bloomUpSampleIDs[i] , Pass.upSample);
-            }
-            
-            if (i == 0)
-            {
-                cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[0]);
-                Draw(sourceID , BuiltinRenderTextureType.CameraTarget, Pass.combine);
-            }
-            
-            if (i < sampleCount - 1)
-            {
-                cmd.ReleaseTemporaryRT(bloomDownSampleIDs[i + 1]);
-                cmd.ReleaseTemporaryRT(bloomUpSampleIDs[i + 1]);
-            }
+            cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[i - 1]);
+            Draw(bloomUpSampleIDs[i] , bloomUpSampleIDs[i - 1] , Pass.upSample);
+        }
+        cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[0]);
+        Draw(sourceID , BuiltinRenderTextureType.CameraTarget , Pass.combine);
+        
+        for (int i = 0; i < sampleCount; i++)
+        {
+            cmd.ReleaseTemporaryRT(bloomDownSampleIDs[i]);
+            cmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
         }
     }
     

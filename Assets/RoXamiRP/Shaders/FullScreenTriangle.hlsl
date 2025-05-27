@@ -121,7 +121,7 @@ float4 BloomCombineFragment(Varyings IN) : SV_TARGET
     float4 s0 = GetSource0(IN.uv);
     float4 s1 = GetSource1(IN.uv);
 
-    return s0 + s1;
+    return s0 + s1 * 3;
 }
 
 #endif
