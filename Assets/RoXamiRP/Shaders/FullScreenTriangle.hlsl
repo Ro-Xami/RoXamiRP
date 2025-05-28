@@ -1,7 +1,8 @@
 ﻿#ifndef ROXAMIRP_FULLSCREENTRIANGLE_INCLUDE
 #define ROXAMIRP_FULLSCREENTRIANGLE_INCLUDE
 
-#include "../ShaderLibrary/UnityInput.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/UnityInput.hlsl"
 
 struct Varyings {
     float4 positionCS : SV_POSITION;
@@ -44,12 +45,11 @@ float4 CopyPassFragment (Varyings IN) : SV_TARGET
     return GetSource0(IN.uv);
 }
 
-float4 _PostFXSource_TexelSize;
+float4 _PostSource0_TexelSize;
 
 float4 GetSourceTexelSize ()
 {
-    return 0.001f;
-    return _PostFXSource_TexelSize;
+    return _PostSource0_TexelSize;
 }
 
 float4 _BloomThreshold;

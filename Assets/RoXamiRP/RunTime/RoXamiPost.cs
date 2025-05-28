@@ -88,6 +88,9 @@ public class RoXamiPost
             Draw(bloomDownSampleIDs[i] , bloomUpSampleIDs[i] , Pass.blurV);
 
             fromID = bloomUpSampleIDs[i];
+            //lower the RT's size to the half size, and set Bilinear filterMode, to ues the unity's mipmap
+            //a single mipmap0 1x1 pixel is the mipmap1 2x2 pixel's average color
+            //example ,when size/2 and blur size is 3x3, same as the blur size is 6x6
             width /= 2;
             height /= 2;
         }
