@@ -9,7 +9,7 @@ public class RoXamiRPAssest : RenderPipelineAsset
     RoXamiRenderer roxamiRenderer;
 
     [SerializeField]
-    bool SRPBatcher = true, GPUInstancing = true, DynamicBatching = false;
+    bool isHDR = true, SRPBatcher = true, GPUInstancing = true, DynamicBatching = false;
 
     [SerializeField]
     ShadowSettings shadowSettings = default;
@@ -17,7 +17,7 @@ public class RoXamiRPAssest : RenderPipelineAsset
     protected override RenderPipeline CreatePipeline()
     {
         return new RoXamiRP(
-            SRPBatcher , GPUInstancing, DynamicBatching, shadowSettings , roxamiRenderer
+            SRPBatcher , GPUInstancing, DynamicBatching, shadowSettings , roxamiRenderer, isHDR
             );
     }
 }

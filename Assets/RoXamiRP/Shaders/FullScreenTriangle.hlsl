@@ -130,6 +130,7 @@ float4 BloomUpSamplePassFragment (Varyings IN) : SV_TARGET
     float4 low = GetSourceBicubic(IN.uv);
     float4 high = GetSource1(IN.uv);
 
+    return  high + low;// * scatter;
     return lerp(high , low , scatter);
 }
 

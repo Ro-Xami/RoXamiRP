@@ -17,6 +17,8 @@ public partial class CameraRender
     static RoXamiPost post = new RoXamiPost();
     static readonly int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
 
+    private bool isHDR;
+
     readonly CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName,
@@ -33,10 +35,11 @@ public partial class CameraRender
         public RenderTargetIdentifier depthRT;
     }
 
-    public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer )
+    public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool isHDR)
     {
         this.context = context;
         this.camera = camera;
+        this.isHDR = isHDR && camera.allowHDR;
 
         PrepareBuffer();
         PrepareForSceneWindow();
@@ -50,7 +53,7 @@ public partial class CameraRender
         
         cmd.BeginSample(SampleName);
         SetUp();
-        post.Setup(context,camera,renderer);
+        post.Setup(context, camera, renderer, isHDR);
         ExcuteBuffer();
         
         DrawGeometry(GPUInstancing, DynamicBatching);
@@ -70,10 +73,11 @@ public partial class CameraRender
     {
         context.SetupCameraProperties(camera);
         CameraClearFlags flags = camera.clearFlags;
-        
+
         cmd.GetTemporaryRT(
             frameBufferId, renderingData.width, renderingData.height,
-            32, FilterMode.Bilinear, RenderTextureFormat.Default
+            32, FilterMode.Bilinear,
+            isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default
         );
         cmd.SetRenderTarget(
             frameBufferId,

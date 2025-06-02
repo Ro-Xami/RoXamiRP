@@ -12,6 +12,7 @@ public class RoXamiPost
     };
     ScriptableRenderContext context;
     Camera camera;
+    bool isHDR;
     RoXamiRenderer renderer;
     
     static readonly int postSource0Id = Shader.PropertyToID("_PostSource0");
@@ -31,11 +32,12 @@ public class RoXamiPost
     };
 
     public void Setup(
-        ScriptableRenderContext context , Camera camera  , RoXamiRenderer renderer)
+        ScriptableRenderContext context , Camera camera  , RoXamiRenderer renderer, bool isHDR)
     {
         this.context = context;
         this.camera = camera;
         this.renderer = camera.cameraType <= CameraType.SceneView ? renderer : null;
+        this.isHDR = isHDR;
     }
 
     public void Render(int sourceID)
@@ -63,7 +65,7 @@ public class RoXamiPost
         //get the rt size and format
         int width = CameraRender.renderingData.width;
         int height = CameraRender.renderingData.height;
-        RenderTextureFormat format = RenderTextureFormat.Default;
+        RenderTextureFormat format = isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
         FilterMode filter = FilterMode.Bilinear;
         
         //Set bloom Shader datas
