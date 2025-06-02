@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b6c9ef11b4f0ff4caee24f274079247, type: 3}
   m_Name: RoXamiRenderer Asste
   m_EditorClassIdentifier: 
-  shader: {fileID: 4800000, guid: 6cefba19da1e456b8c03fafdb5c70c8d, type: 3}
+  postShader: {fileID: 4800000, guid: 6cefba19da1e456b8c03fafdb5c70c8d, type: 3}
+  deferredShader: {fileID: 4800000, guid: 6ff6e2ae66184a2d94dc9c90e9a18896, type: 3}
   bloomSettings:
-    intensity: 3
+    intensity: 1
     clampMax: 100
     threshold: 0.98
     scatter: 0.7

@@ -7,17 +7,32 @@ using UnityEngine;
 public class RoXamiRenderer : ScriptableObject
 {
     [SerializeField]
-    Shader shader = default;
+    Shader postShader = default;
     
     [System.NonSerialized]
-    Material material;
-    public Material Material {
+    Material postMaterial;
+    public Material PostMaterial {
         get {
-            if (material == null && shader != null) {
-                material = new Material(shader);
-                material.hideFlags = HideFlags.HideAndDontSave;
+            if (postMaterial == null && postShader != null) {
+                postMaterial = new Material(postShader);
+                postMaterial.hideFlags = HideFlags.HideAndDontSave;
             }
-            return material;
+            return postMaterial;
+        }
+    }
+    
+    [SerializeField]
+    Shader deferredShader = default;
+    
+    [System.NonSerialized]
+    Material deferredMaterial;
+    public Material DeferredMaterial {
+        get {
+            if (deferredMaterial == null && deferredShader != null) {
+                deferredMaterial = new Material(deferredShader);
+                deferredMaterial.hideFlags = HideFlags.HideAndDontSave;
+            }
+            return deferredMaterial;
         }
     }
     

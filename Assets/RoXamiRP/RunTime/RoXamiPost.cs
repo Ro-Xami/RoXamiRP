@@ -131,7 +131,7 @@ public class RoXamiPost
             to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
         );
         cmd.DrawProcedural(
-            Matrix4x4.identity, renderer.Material, (int)pass,
+            Matrix4x4.identity, renderer.PostMaterial, (int)pass,
             MeshTopology.Triangles, 3
         );
     }

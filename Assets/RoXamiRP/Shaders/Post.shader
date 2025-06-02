@@ -8,7 +8,8 @@
 		
 		HLSLINCLUDE
 		#include "../ShaderLibrary/Common.hlsl"
-		#include_with_pragmas "FullScreenTriangle.hlsl"
+		#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
+		#include_with_pragmas "PostPass.hlsl"
 		ENDHLSL
 
 		Pass

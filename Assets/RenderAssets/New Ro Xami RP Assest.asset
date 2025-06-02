@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: New Ro Xami RP Assest
   m_EditorClassIdentifier: 
   roxamiRenderer: {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920, type: 2}
+  isHDR: 1
   SRPBatcher: 1
   GPUInstancing: 1
   DynamicBatching: 0
   shadowSettings:
     maxDistance: 50
-    distanceFade: 0.054
+    distanceFade: 0.194
     directional:
       atlasSize: 2048
       filter: 3

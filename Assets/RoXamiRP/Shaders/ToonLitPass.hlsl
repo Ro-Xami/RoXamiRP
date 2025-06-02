@@ -11,9 +11,6 @@
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 
-TEXTURECUBE(_TestCube);
-SAMPLER(sampler_TestCube);
-
 CBUFFER_START(UnityPerMaterial)
 	float4 _BaseMap_ST;
 	float4 _BaseColor;

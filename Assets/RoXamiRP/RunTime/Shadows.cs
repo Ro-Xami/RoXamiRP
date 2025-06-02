@@ -17,19 +17,18 @@ public class Shadows
 
     const int maxCascades = 4;
 
-    static string[] directionalFilterKeywords = {
+    static readonly string[] directionalFilterKeywords = {
         "_DIRECTIONAL_PCF3",
         "_DIRECTIONAL_PCF5",
         "_DIRECTIONAL_PCF7",
     };
 
-    int
+    static readonly int
         directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas"),
         dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
         directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices"),
         cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres"),
         shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
-        //shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
 
     Vector4 dirLightShadowData;
     Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
@@ -67,9 +66,8 @@ public class Shadows
         int atlasSize = (int)settings.directional.atlasSize;
 
         cmd.GetTemporaryRT(directionalShadowAtlasID, atlasSize, atlasSize,
-            32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);//???????????λ????~????????????????????
+            32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);//use unity's textureFormat for different API
 
-        //??GPU?????????????????????????
         cmd.SetRenderTarget(directionalShadowAtlasID,
             RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
@@ -78,8 +76,8 @@ public class Shadows
         cmd.BeginSample(bufferName);
         ExecuteBuffer();
 
-        int split = 2;//?????????
-        int tileSize = atlasSize / split;//???????????С
+        int split = 2;//only 4 cascades
+        int tileSize = atlasSize / split;//get 1 cascade texture size
 
         RenderDirectionalShadows(split , tileSize , light, lightIndex);
 
@@ -89,45 +87,42 @@ public class Shadows
 
     void RenderDirectionalShadows(int split, int tileSize , Light light , int lightIndex) {
 
-        //???????????
+        //directional light's camera is orthographic
         ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
             cullingResults, lightIndex, BatchCullingProjectionType.Orthographic);
 
-        //???????????
+        //only 4 cascades, get cascade data
         int cascadeCount = maxCascades;
         Vector3 ratios = settings.directional.CascadeRatios;
 
-        //??????????????
+        //for different cascades datas
         for ( int i = 0; i < cascadeCount; i++ )
         {
-            //???????????????????????????
+            //api for draw shadow, get matrix and split data
             cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
             lightIndex, i, cascadeCount, ratios, tileSize, light.shadowNearPlane,
             out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
 
             shadowSettings.splitData = splitData;
-            //??????Χ??
-            Vector4 cullingSphere = splitData.cullingSphere;//xyz??Χ???????w??Χ???
-            cullingSphere.w *= cullingSphere.w;//????????Χ??????????????shader????
+            Vector4 cullingSphere = splitData.cullingSphere;//sphere's center
+            cullingSphere.w *= cullingSphere.w;//power of 2 culling sphere's radios
             cascadeCullingSpheres[i] = cullingSphere;
 
             cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
 
-            //??????????????????????
-            Vector2 atlasOffset = new Vector2(i % split, i / split);
-            //??????????
+            //current cascade's offest on the shadowMap
+            Vector2 atlasOffset = new Vector2(i % split, (float)i / split);
             cmd.SetViewport(new Rect(atlasOffset.x * tileSize, atlasOffset.y * tileSize, tileSize, tileSize));
 
-            //???????
             Matrix4x4 matrix = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, atlasOffset, split);
             directionalShadowMatrices[i] = matrix;
 
-            cmd.SetGlobalDepthBias(0f, light.shadowBias);//??????
+            cmd.SetGlobalDepthBias(0f, light.shadowBias);
             ExecuteBuffer();
             context.DrawShadows(ref shadowSettings);
         }
 
-        //???????
+        //set shader data
         int atlasSize = (int)settings.directional.atlasSize;
         dirLightShadowData = new Vector4(light.shadowStrength, light.shadowNormalBias, cascadeCount , atlasSize);
         cmd.SetGlobalVector(dirLightShadowDataId, dirLightShadowData);
@@ -143,7 +138,6 @@ public class Shadows
 
     Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m, Vector2 offset, int split)
     {
-        //unity???Щ??????÷???ZBuffer
         if (SystemInfo.usesReversedZBuffer)
         {
             m.m20 = -m.m20;
@@ -153,15 +147,15 @@ public class Shadows
         }
 
         float scale = 1f / split;
-        //-1~1?????0~1
+        //-1~1 to 0~1
         m.m00 = 0.5f * (m.m00) * scale;
         m.m01 = 0.5f * (m.m01) * scale;
         m.m02 = 0.5f * (m.m02) * scale;
-        m.m03 = (0.5f * (m.m03 + 1) + offset.x) * scale;//????????????
+        m.m03 = (0.5f * (m.m03 + 1) + offset.x) * scale;//cascade's shadow map offest
         m.m10 = 0.5f * (m.m10) * scale;
         m.m11 = 0.5f * (m.m11) * scale;
         m.m12 = 0.5f * (m.m12) * scale;
-        m.m13 = (0.5f * (m.m13 + 1) + offset.y) *scale;//????????????
+        m.m13 = (0.5f * (m.m13 + 1) + offset.y) *scale;//cascade's shadow map offest
         m.m20 = 0.5f * (m.m20);
         m.m21 = 0.5f * (m.m21);
         m.m22 = 0.5f * (m.m22);
