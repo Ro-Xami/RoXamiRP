@@ -1,5 +1,5 @@
-#define ROXAMIRP_FULLSCREEN_TRIANGLE_INCLUDE
-#ifndef  ROXAMIRP_FULLSCREEN_TRIANGLE_EXCLUDE
+#ifndef ROXAMIRP_FULLSCREEN_TRIANGLE_INCLUDE
+#define ROXAMIRP_FULLSCREEN_TRIANGLE_EXCLUDE
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/UnityInput.hlsl"
