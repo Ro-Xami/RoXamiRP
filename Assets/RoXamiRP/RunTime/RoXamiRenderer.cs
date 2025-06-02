@@ -24,9 +24,11 @@ public class RoXamiRenderer : ScriptableObject
     [Serializable]
     public class  BloomSettings
     {
-        public float intensity = 0.1f;
-        public float threshold = 0.95f;
-        public int maxSampleCount = 5;
+        [Min(0f)]public float intensity = 1f;
+        [Min(0f)]public float clampMax = 5f;
+        [Range(0f , 1f)]public float threshold = 0.9f;
+        [Range(0f , 1f)]public float scatter = 0.7f;
+        [Range(0f , 10f)]public int maxSampleCount = 5;
     }
 
     public BloomSettings bloomSettings;

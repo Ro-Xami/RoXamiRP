@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: RoXamiRenderer Asste
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: 6cefba19da1e456b8c03fafdb5c70c8d, type: 3}
+  bloomSettings:
+    intensity: 6.87
+    clampMax: 5
+    threshold: 0.9
+    scatter: 0.7
+    maxSampleCount: 6

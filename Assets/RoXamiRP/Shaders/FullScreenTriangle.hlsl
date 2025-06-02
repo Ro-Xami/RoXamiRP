@@ -3,6 +3,7 @@
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/UnityInput.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 
 struct Varyings {
     float4 positionCS : SV_POSITION;
@@ -29,10 +30,23 @@ Varyings FullScreenTriangle (uint vertexID : SV_VertexID) {
 TEXTURE2D(_PostSource0);
 TEXTURE2D(_PostSource1);
 SAMPLER(sampler_linear_clamp);
+float4 _PostSource0_TexelSize;
+
+float4 GetSourceTexelSize()
+{
+    return _PostSource0_TexelSize;
+}
 
 float4 GetSource0(float2 screenUV)
 {
     return SAMPLE_TEXTURE2D_LOD(_PostSource0, sampler_linear_clamp, screenUV, 0);
+}
+
+float4 GetSourceBicubic (float2 screenUV) {
+    return SampleTexture2DBicubic(
+        TEXTURE2D_ARGS(_PostSource0, sampler_linear_clamp), screenUV,
+        GetSourceTexelSize().zwxy, 1.0, 0.0
+    );
 }
 
 float4 GetSource1(float2 screenUV)
@@ -45,26 +59,31 @@ float4 CopyPassFragment (Varyings IN) : SV_TARGET
     return GetSource0(IN.uv);
 }
 
-float4 _PostSource0_TexelSize;
-
-float4 GetSourceTexelSize ()
-{
-    return _PostSource0_TexelSize;
-}
-
-float4 _BloomThreshold;
+//================================================Bloom====================================================
+float4 _bloomParam;
+#define threshold _bloomParam.x
+#define thresholdKnee _bloomParam.y
+#define clampMax _bloomParam.z
+#define scatter _bloomParam.w
+float _bloomIntensity;
 
 float3 ApplyBloomThreshold (float3 color)
 {
-    float brightness = Max3(color.r, color.g, color.b);
-    float soft = brightness + _BloomThreshold.y;
-    soft = clamp(soft, 0.0, _BloomThreshold.z);
-    soft = soft * soft * _BloomThreshold.w;
-    float contribution = max(soft, brightness - _BloomThreshold.x);
-    contribution /= max(brightness, 0.00001);
+    // User controlled clamp to limit crazy high broken spec
+    color = min(clampMax, color);
 
-    return color * 2;
-    return color * contribution;
+    // Thresholding,soft the threshold
+    half brightness = Max3(color.r, color.g, color.b);
+    half softness = clamp(brightness - threshold + thresholdKnee, 0.0, 2.0 * thresholdKnee);
+    softness = (softness * softness) / (4.0 * thresholdKnee + 1e-4);
+    half multiplier = max(brightness - threshold, softness) / max(brightness, 1e-4);
+    color *= multiplier;
+
+    // Clamp colors to positive once in prefilter. Encode can have a sqrt, and sqrt(-x) == NaN. Up/Downsample passes would then spread the NaN.
+    color = max(color, 0);
+
+    return color;
+    //return EncodeHDR(color);
 }
 
 float4 BloomPrefilterPassFragment (Varyings IN) : SV_TARGET
@@ -86,7 +105,6 @@ float4 BloomHorizontalPassFragment (Varyings IN) : SV_TARGET
         float offset = offsets[i] * 2.0 * GetSourceTexelSize().x;
         color += GetSource0(IN.uv + float2(offset, 0.0)).rgb * weights[i];
     }
-    //return GetSource0(IN.uv) + float4(0.15,0,0,1);
     return float4(color, 1.0);
 }
 
@@ -104,16 +122,15 @@ float4 BloomVerticalPassFragment (Varyings IN) : SV_TARGET
         float offset = offsets[i] * GetSourceTexelSize().y;
         color += GetSource0(IN.uv + float2(0.0, offset)).rgb * weights[i];
     }
-    //return GetSource0(IN.uv) + float4(0,0.15,0,1);
     return float4(color, 1.0);
 }
 
 float4 BloomUpSamplePassFragment (Varyings IN) : SV_TARGET
 {
-    float4 s0 = GetSource0(IN.uv);
-    float4 s1 = GetSource1(IN.uv);
+    float4 low = GetSourceBicubic(IN.uv);
+    float4 high = GetSource1(IN.uv);
 
-    return (s0 + s1) * 0.5;
+    return lerp(high , low , scatter);
 }
 
 float4 BloomCombineFragment(Varyings IN) : SV_TARGET
@@ -121,7 +138,8 @@ float4 BloomCombineFragment(Varyings IN) : SV_TARGET
     float4 s0 = GetSource0(IN.uv);
     float4 s1 = GetSource1(IN.uv);
 
-    return s0 + s1 * 3;
+    //return s1 * _bloomIntensity;
+    return s0 + s1 * _bloomIntensity;
 }
 
 #endif

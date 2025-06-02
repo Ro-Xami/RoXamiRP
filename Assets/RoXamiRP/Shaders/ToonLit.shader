@@ -4,6 +4,10 @@ Shader "RoXami RP/ToonLit"
 	{
 		_BaseColor ("Base Color" , color) = (1,1,1,1)
 		_BaseMap ("Base Map" , 2D) = "white" {}
+		_roughness ("Roughness" , Range(0 , 1)) = 0.5
+		_metallic ("Metallic" , Range(0 , 1)) = 0
+		_ao ("AO" , Range(0 , 1)) = 1
+		[HDR]_emissive ("Emissive" , Color) = (0,0,0,0)
 		[Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src Blend", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 0
 		[Enum(Off, 0, On, 1)] _ZWrite ("Z Write", Float) = 1

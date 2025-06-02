@@ -17,6 +17,8 @@ public class RoXamiPost
     static readonly int postSource0Id = Shader.PropertyToID("_PostSource0");
     static readonly int postSource1Id = Shader.PropertyToID("_PostSource1");
     static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
+    static readonly int bloomParam = Shader.PropertyToID("_bloomParam");
+    static readonly int bloomIntenstiy = Shader.PropertyToID("_bloomIntensity");
 
     enum Pass
     {
@@ -58,10 +60,17 @@ public class RoXamiPost
             return;
         }
 
+        //get the rt size and format
         int width = CameraRender.renderingData.width;
         int height = CameraRender.renderingData.height;
         RenderTextureFormat format = RenderTextureFormat.Default;
         FilterMode filter = FilterMode.Bilinear;
+        
+        //Set bloom Shader datas
+        float threshold = Mathf.GammaToLinearSpace(bloom.threshold);
+        float thresholdKnee = threshold * 0.5f; // Hardcoded soft knee
+        cmd.SetGlobalVector(bloomParam , new Vector4(threshold , thresholdKnee, bloom.clampMax , bloom.scatter));
+        cmd.SetGlobalFloat(bloomIntenstiy , bloom.intensity);
         
         //Filter
         cmd.GetTemporaryRT(bloomFilterID , width, height,0,filter , format);
@@ -95,7 +104,7 @@ public class RoXamiPost
             height /= 2;
         }
         cmd.ReleaseTemporaryRT(bloomFilterID);
-        
+
         //UpSample
         for (int i = sampleCount - 1; i > 0; i--)
         {

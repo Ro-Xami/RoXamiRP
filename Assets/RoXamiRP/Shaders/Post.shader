@@ -8,7 +8,7 @@
 		
 		HLSLINCLUDE
 		#include "../ShaderLibrary/Common.hlsl"
-		#include "FullScreenTriangle.hlsl"
+		#include_with_pragmas "FullScreenTriangle.hlsl"
 		ENDHLSL
 
 		Pass

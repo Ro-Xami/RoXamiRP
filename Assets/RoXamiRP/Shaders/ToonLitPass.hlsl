@@ -18,6 +18,10 @@ CBUFFER_START(UnityPerMaterial)
 	float4 _BaseMap_ST;
 	float4 _BaseColor;
 	float _cutout;
+	float _roughness;
+	float _metallic;
+	float _ao;
+	float3 _emissive;
 CBUFFER_END
 
 struct Attributes {
@@ -78,6 +82,11 @@ Surface GetSurfaceData(Varyings IN)
 	float4 base = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * IN.color;
 	OUT.albedo = base.rgb;
 	OUT.normal = IN.normalWS;
+	OUT.roughness = _roughness;
+	OUT.metallic = _metallic;
+	OUT.emissive = _emissive;
+	OUT.ao = _ao;
+	OUT.alpha = base.a;
 
 	return OUT;
 }
@@ -86,9 +95,9 @@ float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 {
 	UNITY_SETUP_INSTANCE_ID(IN);
 
-	//#ifdef _ALPHACLIP_ON
-	//clip(albedo.a - _cutout);
-	//#endif
+	#ifdef _ALPHACLIP_ON
+	clip(albedo.a - _cutout);
+	#endif
 
 	Input inputData = GetInputData(IN);
 	Surface surfaceData = GetSurfaceData(IN);

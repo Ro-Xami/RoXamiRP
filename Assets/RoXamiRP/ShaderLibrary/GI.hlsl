@@ -51,9 +51,10 @@ float3 SampleEnvironment (float3 normalWS , float3 viewWS , float roughness) {
 GI GetGI(Input inputData , Surface surfaceData)
 {
 	GI OUT = (GI)0;
+	float mip = PerceptualRoughnessToMipmapLevel(surfaceData.roughness);
 	float3 reflectionDir = reflect(-inputData.viewWS , inputData.normalWS);
 	OUT.diffuse = SampleLightProbe(inputData.normalWS);
-	OUT.specular = SampleEnvironment(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
+	OUT.specular = SampleEnvironment(inputData.normalWS , inputData.viewWS , mip);
 
 	return OUT;
 }

@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Material 1
+  m_Name: Material 2
   m_Shader: {fileID: 4800000, guid: cf25610f8f1bf53419adecb6b58647a5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 0eaf7b1151a938b4bb2d6386c162befb, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -40,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TestCube:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8900000, guid: ce65848e2f9bfd84eb080edd953b51fb, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -49,13 +49,14 @@ Material:
     - _SrcBlend: 1
     - _ZWrite: 1
     - _alphaClip: 0
-    - _ao: 0.298
+    - _ao: 1
     - _cutout: 0.5
-    - _metallic: 0.396
+    - _metallic: 0.114
     - _normalStrength: 1
-    - _roughness: 0.587
+    - _roughness: 0.5
     m_Colors:
-    - _BaseColor: {r: 0, g: 0.65999997, b: 0.73, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.24586153, g: 0.8018868, b: 0.5341925, a: 1}
+    - _Color: {r: 1, g: 0, b: 0, a: 1}
     - _emissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _emissive: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

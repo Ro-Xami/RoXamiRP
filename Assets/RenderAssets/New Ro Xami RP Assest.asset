@@ -15,14 +15,14 @@ MonoBehaviour:
   roxamiRenderer: {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920, type: 2}
   SRPBatcher: 1
   GPUInstancing: 1
-  DynamicBatching: 1
+  DynamicBatching: 0
   shadowSettings:
     maxDistance: 50
-    distanceFade: 0.001
+    distanceFade: 0.054
     directional:
-      atlasSize: 512
+      atlasSize: 2048
       filter: 3
-      cascadeRotio1: 0.246
-      cascadeRotio2: 0.456
-      cascadeRotio3: 0.794
-      cascadeFade: 0.001
+      cascadeRotio1: 0.135
+      cascadeRotio2: 0.49
+      cascadeRotio3: 0.837
+      cascadeFade: 1
