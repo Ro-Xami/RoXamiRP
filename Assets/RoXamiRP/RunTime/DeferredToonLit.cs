@@ -19,16 +19,22 @@ public class DeferredToonLit
     public void Render(ScriptableRenderContext context, RoXamiRenderer renderer)
     {
         cmd.BeginSample(bufferName);
-        cmd.DrawProcedural(
-            Matrix4x4.identity, renderer.DeferredMaterial, 0,
-            MeshTopology.Triangles, 3
-        );
-        cmd.SetRenderTarget(
-            BuiltinRenderTextureType.CameraTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
-        );
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
+        
+        cmd.Blit(BuiltinRenderTextureType.CameraTarget,BuiltinRenderTextureType.CameraTarget, renderer.DeferredMaterial);
+        
+        context.Submit();
         cmd.EndSample(bufferName);
+        
+        //?
+        // cmd.DrawProcedural(
+        //     Matrix4x4.identity, renderer.DeferredMaterial, 0,
+        //     MeshTopology.Triangles, 3
+        // );
+        // cmd.SetRenderTarget(
+        //     BuiltinRenderTextureType.CameraTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
+        // );
     }
 
     public void CleanUp()

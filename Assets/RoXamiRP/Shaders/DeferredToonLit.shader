@@ -17,14 +17,14 @@ Shader "RoXami RP/DeferredToonLit"
 //			Tags {"LightMode" = "ToonLit"}
 			HLSLPROGRAM
 			#pragma target 3.5
-			#pragma vertex FullScreenTriangle
+			#pragma vertex ToonLitPassVertex
 			#pragma fragment ToonLitPassFragment
 
 			#pragma multi_compile _instancing
 			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 			#pragma shader_feature_local _ALPHACLIP_ON
 
-			#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
+			//#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
 			#include "../ShaderLibrary/Common.hlsl"
 			#include "../ShaderLibrary/ToonLighting.hlsl"
 
@@ -41,6 +41,46 @@ Shader "RoXami RP/DeferredToonLit"
 
 			CBUFFER_END
 
+			struct Attributes {
+	float4 positionOS : POSITION;
+	float3 normalOS : NORMAL;
+	float4 tangentOS : TANGENT;
+	float2 uv : TEXCOORD0;
+	float4 color : COLOR;
+
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+ 
+struct Varyings {
+	float4 positionCS : SV_POSITION;
+	float2 uv : TEXCOORD0;
+	float3 positionWS : TEXCOORD1;
+	float3 normalWS : TEXCOORD2;
+	float3 tangentWS : TEXCOORD3;
+	float3 bitangentWS : TEXCOORD4;
+	float3 viewWS : TEXCOORD5;
+	float2 screenSpaceUV : TEXCOORD6;
+	float4 color : COLOR;
+
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
+Varyings ToonLitPassVertex(Attributes IN)
+{
+	Varyings OUT = (Varyings)0;
+	UNITY_SETUP_INSTANCE_ID(IN);
+	UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
+
+	OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
+	OUT.positionCS = TransformWorldToHClip(OUT.positionWS);
+	OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
+	OUT.viewWS = GetViewDirWS(OUT.positionWS);
+	OUT.color = IN.color;
+	OUT.uv = IN.uv;
+
+	return OUT;
+}
+
 			Input GetInputData(Varyings IN)
 			{
 				Input OUT = (Input)0;
@@ -56,17 +96,17 @@ Shader "RoXami RP/DeferredToonLit"
 			Surface GetSurfaceData(Varyings IN)
 			{
 				Surface OUT = (Surface)0;
-				float3 base = SAMPLE_TEXTURE2D(Gbuffer0, sampler_Gbuffer0, IN.uv);
-				float3 nomral = SAMPLE_TEXTURE2D(Gbuffer1, sampler_Gbuffer1, IN.uv);
-				float3 MRA = SAMPLE_TEXTURE2D(Gbuffer2, sampler_Gbuffer2, IN.uv);
-				float3 emission = SAMPLE_TEXTURE2D(Gbuffer3, sampler_Gbuffer3, IN.uv);
+				float4 base = SAMPLE_TEXTURE2D(Gbuffer0, sampler_Gbuffer0, IN.uv);
+				float4 nomral = SAMPLE_TEXTURE2D(Gbuffer1, sampler_Gbuffer1, IN.uv);
+				float4 MRA = SAMPLE_TEXTURE2D(Gbuffer2, sampler_Gbuffer2, IN.uv);
+				float4 emission = SAMPLE_TEXTURE2D(Gbuffer3, sampler_Gbuffer3, IN.uv);
 				OUT.albedo = base.rgb;
-				OUT.normal = nomral;
+				OUT.normal = nomral.xyz;
 				OUT.roughness = MRA.g;
 				OUT.metallic = MRA.r;
 				OUT.ao = MRA.b;
-				OUT.emissive = emission;
-				OUT.alpha = 1;
+				OUT.emissive = emission.rgb;
+				OUT.alpha = base.a;
 
 				return OUT;
 			}
@@ -84,7 +124,7 @@ Shader "RoXami RP/DeferredToonLit"
 
 				float4 color = CalculateToonLighting(inputData , surfaceData);
 
-			    return float4(surfaceData.normal , 1);
+			    return float4(surfaceData.normal , surfaceData.alpha);
 			}
 
 			ENDHLSL

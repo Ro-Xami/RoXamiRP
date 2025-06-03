@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 public class Shadows
 {
-    const string bufferName = "ToonShadows";
+    const string bufferName = "RoXami Shadows";
 
     CullingResults cullingResults;
     ScriptableRenderContext context;

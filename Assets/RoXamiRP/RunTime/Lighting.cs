@@ -8,7 +8,7 @@ public class Lighting
     //const int maxDirectionalLightCount = 1;
     const int maxAdditionalLightCount = 64;
 
-    const string bufferName = "ToonLighting";
+    const string bufferName = "RoXami Lighting";
     CullingResults cullingResults;
 
     Shadows shadows = new Shadows();

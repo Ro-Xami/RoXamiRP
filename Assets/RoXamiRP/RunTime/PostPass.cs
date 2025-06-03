@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class RoXamiPost
+public class PostPass
 {
     public bool IsActive => renderer != null;
     
-    const string bufferName = "RoXamiPost";
+    const string bufferName = "RoXami Post";
     CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName,
