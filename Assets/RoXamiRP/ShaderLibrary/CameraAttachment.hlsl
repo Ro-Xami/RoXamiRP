@@ -2,12 +2,12 @@
 #define ROXAMIRP_CAMERAATTCHMENT_INCLUDE
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 
-TEXTURE2D(_CameraDepthTexture);
-SAMPLER(sampler_CameraDepthTexture);
+TEXTURE2D(_CameraOpaqueDepthTexture);
+SAMPLER(sampler_CameraOpaqueDepthTexture);
 
-float SampleCameraDepth(float2 uv)
+float SampleCameraOpaqueDepth(float2 uv)
 {
-    return SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
+    return SAMPLE_TEXTURE2D(_CameraOpaqueDepthTexture, sampler_CameraOpaqueDepthTexture, uv).r;
 }
 
 TEXTURE2D(_CameraOpaqueColorTexture);

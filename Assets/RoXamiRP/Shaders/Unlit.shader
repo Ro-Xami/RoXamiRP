@@ -79,6 +79,9 @@ Shader "RoXami RP/Unlit"
 				return OUT;
 			}
 
+			TEXTURE2D(_WorldSpacePositionTexture);
+			SAMPLER(sampler_WorldSpacePositionTexture);
+
 			float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
@@ -89,10 +92,13 @@ Shader "RoXami RP/Unlit"
 				clip(albedo.a - _cutout);
 				#endif
 
-				float depth = SampleCameraDepth(IN.uv);
+				float depth = SampleCameraOpaqueDepth(IN.uv);
 				float3 color = SampleCameraOpaqueColor(IN.uv);
 
-				return float4(color,1);
+				float3 position = SAMPLE_TEXTURE2D(_WorldSpacePositionTexture, sampler_WorldSpacePositionTexture, IN.uv);
+				position *= float3(1,0,0);
+				
+				return float4(position,1);
 				return float4(depth.xxx, 1);
 				return albedo;
 			}
