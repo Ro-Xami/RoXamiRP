@@ -19,7 +19,7 @@ public class PostPass
     static readonly int postSource1Id = Shader.PropertyToID("_PostSource1");
     static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
     static readonly int bloomParam = Shader.PropertyToID("_bloomParam");
-    static readonly int bloomIntenstiy = Shader.PropertyToID("_bloomIntensity");
+    static readonly int bloomIntensity = Shader.PropertyToID("_bloomIntensity");
 
     enum Pass
     {
@@ -40,12 +40,10 @@ public class PostPass
         this.isHDR = isHDR;
     }
 
-    public void Render(int sourceID)
+    public void Render()
     {
-        //Draw(sourceID, BuiltinRenderTextureType.CameraTarget, Pass.copy);
-        
         cmd.BeginSample("RoXami Bloom");
-        SetupBloom(sourceID);
+        SetupBloom(CameraRender.renderingData.cameraColorBufferId);
         cmd.EndSample("RoXami Bloom");
         
         context.ExecuteCommandBuffer(cmd);
@@ -72,7 +70,7 @@ public class PostPass
         float threshold = Mathf.GammaToLinearSpace(bloom.threshold);
         float thresholdKnee = threshold * 0.5f; // Hardcoded soft knee
         cmd.SetGlobalVector(bloomParam , new Vector4(threshold , thresholdKnee, bloom.clampMax , bloom.scatter));
-        cmd.SetGlobalFloat(bloomIntenstiy , bloom.intensity);
+        cmd.SetGlobalFloat(bloomIntensity , bloom.intensity);
         
         //Filter
         cmd.GetTemporaryRT(bloomFilterID , width, height,0,filter , format);

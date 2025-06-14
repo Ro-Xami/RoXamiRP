@@ -11,12 +11,13 @@ public partial class CameraRender
     public static RenderingData renderingData;
     
     static readonly Lighting lighting = new Lighting();
-    
-    static readonly GBufferPass gBufferPass = new GBufferPass();
-    static readonly DeferredToonLit deferredToonLit = new DeferredToonLit();
     static readonly ForwardPass forwardPass = new ForwardPass();
     static readonly PostPass postPass = new PostPass();
-    static readonly int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+    
+    static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
+    static readonly int cameraColorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
+    
+    //static readonly int matrixInvVP_ID = Shader.PropertyToID("_MatrixInvVP");
 
     readonly CommandBuffer cmd = new CommandBuffer
     {
@@ -35,9 +36,8 @@ public partial class CameraRender
         public bool isGPUInstancing;
         public bool isDynamicBatching;
         public bool isHDR;
-        public int frameBufferId;
-        // public RenderTargetIdentifier colorRT;
-        // public RenderTargetIdentifier depthRT;
+        public int cameraDepthBufferId;
+        public int cameraColorBufferId;
     }
 
     public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool HDR)
@@ -57,15 +57,13 @@ public partial class CameraRender
         lighting.Setup(context , renderingData.cullingResults , shadowSettings);
         
         context.SetupCameraProperties(camera);
-        //gBufferPass.SetUp();
-        //deferredToonLit.Render(context , renderer);
         forwardPass.Render();
 
         postPass.Setup(context, camera, renderer, isHDR);
         DrawUnsupportedShaders();
         if (postPass.IsActive)
         {
-            postPass.Render(renderingData.frameBufferId);
+            postPass.Render();
         }
         DrawGizmos();
         CleanUp();
@@ -84,7 +82,6 @@ public partial class CameraRender
     void CleanUp()
     {
         lighting.CleanUp();
-        //gBufferPass.CleanUp();
         forwardPass.CleanUp();
     }
 
@@ -105,9 +102,8 @@ public partial class CameraRender
         data.isHDR = isHDR;
         data.shadowSettings = shadowSettings;
         data.renderer = renderer;
-        data.frameBufferId = frameBufferId;
-        // data.colorRT = camerColorRT;
-        // data.depthRT = cameDepthRT;
+        data.cameraColorBufferId = cameraColorAttachmentId;
+        data.cameraDepthBufferId = cameraDepthAttachmentId;
         
         return data;
     }
