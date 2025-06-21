@@ -98,7 +98,7 @@ Shader "RoXami RP/Unlit"
 				float3 position = SAMPLE_TEXTURE2D(_WorldSpacePositionTexture, sampler_WorldSpacePositionTexture, IN.uv);
 				position *= float3(1,0,0);
 				
-				return float4(position,1);
+				return float4(position.xyz,1);
 				return float4(depth.xxx, 1);
 				return albedo;
 			}

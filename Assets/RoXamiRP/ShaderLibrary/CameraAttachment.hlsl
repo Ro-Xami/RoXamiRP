@@ -15,7 +15,7 @@ SAMPLER(sampler_CameraOpaqueColorTexture);
 
 float3 SampleCameraOpaqueColor(float2 uv)
 {
-    return SAMPLE_TEXTURE2D(_CameraOpaqueColorTexture, sampler_CameraOpaqueColorTexture, uv);
+    return SAMPLE_TEXTURE2D(_CameraOpaqueColorTexture, sampler_CameraOpaqueColorTexture, uv).rgb;
 }
 
 //=====================Function=======================

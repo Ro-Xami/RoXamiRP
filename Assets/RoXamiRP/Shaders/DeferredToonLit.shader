@@ -1,4 +1,4 @@
-Shader "RoXami RP/DeferredToonLit"
+Shader "RoXami RP/Hide/DeferredToonLit"
 {
 	Properties
 	{
@@ -25,8 +25,8 @@ Shader "RoXami RP/DeferredToonLit"
 			#pragma shader_feature_local _ALPHACLIP_ON
 
 			//#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
-			#include "../ShaderLibrary/Common.hlsl"
-			#include "../ShaderLibrary/ToonLighting.hlsl"
+			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+			#include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
 
 			TEXTURE2D(Gbuffer0);
 			SAMPLER(sampler_Gbuffer0);

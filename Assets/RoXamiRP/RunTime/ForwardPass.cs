@@ -16,18 +16,14 @@ public class ForwardPass
     {
         name = transparentBufferName
     };
-    
-    static readonly string textureBufferName = "RoXami Reconstruct PositionWS";
-    private static readonly CommandBuffer textureCmd = new CommandBuffer()
-    {
-        name = textureBufferName
-    };
-    
+
     static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("ToonUnlit");
     static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
     
     static readonly int cameraOpaqueDepthTextureID = Shader.PropertyToID("_CameraOpaqueDepthTexture");
     static readonly int cameraOpaqueColorTextureID = Shader.PropertyToID("_CameraOpaqueColorTexture");
+    
+    
     static readonly int worldSpacePositionTextureID = Shader.PropertyToID("_WorldSpacePositionTexture");
     
     public void Render()
@@ -42,15 +38,6 @@ public class ForwardPass
         
         opaqueCmd.EndSample(opaqueBufferName);
         ExecuteBuffer(opaqueCmd);
-        
-        //Texture=========================================================================
-        textureCmd.BeginSample(textureBufferName);
-        ExecuteBuffer(textureCmd);
-        
-        CalculatePositionWS();
-        
-        textureCmd.EndSample(textureBufferName);
-        ExecuteBuffer(textureCmd);
         
         //Transparent=======================================================================
         transparentCmd.BeginSample(transparentBufferName);
@@ -74,6 +61,17 @@ public class ForwardPass
             CameraRender.renderingData.cameraDepthBufferId, 
             CameraRender.renderingData.width, CameraRender.renderingData.height,
             32, FilterMode.Point, RenderTextureFormat.Depth);
+
+        opaqueCmd.GetTemporaryRT(
+            cameraOpaqueDepthTextureID, 
+            CameraRender.renderingData.width, CameraRender.renderingData.height,
+            32, FilterMode.Point, RenderTextureFormat.Depth);
+
+        opaqueCmd.GetTemporaryRT(
+            cameraOpaqueColorTextureID,
+            CameraRender.renderingData.width, CameraRender.renderingData.height,
+            0, FilterMode.Bilinear,
+            CameraRender.renderingData.isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default);
         
         opaqueCmd.SetRenderTarget(
             CameraRender.renderingData.cameraColorBufferId,
@@ -112,27 +110,13 @@ public class ForwardPass
         CameraRender.renderingData.context.DrawSkybox(CameraRender.renderingData.camera);
         
         CopyOpaqueDepthColor();
+        //CalculatePositionWS();
 
         CameraRender.renderingData.context.Submit();
     }
 
     void CopyOpaqueDepthColor()
     {
-        opaqueCmd.GetTemporaryRT(
-            cameraOpaqueDepthTextureID, 
-            CameraRender.renderingData.width, CameraRender.renderingData.height,
-            32, FilterMode.Point, RenderTextureFormat.Depth);
-
-        opaqueCmd.GetTemporaryRT(
-            cameraOpaqueColorTextureID,
-            CameraRender.renderingData.width, CameraRender.renderingData.height,
-            0, FilterMode.Bilinear,
-            CameraRender.renderingData.isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default);
-
-        opaqueCmd.GetTemporaryRT(worldSpacePositionTextureID,
-            CameraRender.renderingData.width, CameraRender.renderingData.height,
-            0, FilterMode.Bilinear, RenderTextureFormat.Default);
-        
         opaqueCmd.CopyTexture(CameraRender.renderingData.cameraDepthBufferId, cameraOpaqueDepthTextureID);
         opaqueCmd.CopyTexture(CameraRender.renderingData.cameraColorBufferId, cameraOpaqueColorTextureID);
     }
@@ -156,11 +140,21 @@ public class ForwardPass
 
     void CalculatePositionWS()
     {
-        textureCmd.GetTemporaryRT(worldSpacePositionTextureID,
+        opaqueCmd.GetTemporaryRT(
+            worldSpacePositionTextureID,
             CameraRender.renderingData.width, CameraRender.renderingData.height,
-            0, FilterMode.Bilinear, RenderTextureFormat.Default);
+            0, FilterMode.Bilinear, RenderTextureFormat.Default,RenderTextureReadWrite.Linear,
+            1,true);
+        
+        ComputeShader cs = CameraRender.renderingData.renderer.depthToPositionWSCompute;
+        int kernel = cs.FindKernel("CSMain");
 
-        textureCmd.Blit(cameraOpaqueDepthTextureID, worldSpacePositionTextureID);
+        opaqueCmd.SetComputeTextureParam(cs, kernel,"Result",worldSpacePositionTextureID);
+        
+        int threadGroupX = Mathf.CeilToInt(CameraRender.renderingData.width / 8.0f);
+        int threadGroupY = Mathf.CeilToInt(CameraRender.renderingData.height / 8.0f);
+        opaqueCmd.DispatchCompute(cs, kernel, threadGroupX, threadGroupY, 1);
+        
     }
 
     private void ExecuteBuffer(CommandBuffer cmd)
@@ -171,9 +165,9 @@ public class ForwardPass
 
     public void CleanUp()
     {
-        textureCmd.ReleaseTemporaryRT(cameraOpaqueDepthTextureID);
-        textureCmd.ReleaseTemporaryRT(cameraOpaqueColorTextureID);
-        textureCmd.ReleaseTemporaryRT(worldSpacePositionTextureID);
+        opaqueCmd.ReleaseTemporaryRT(cameraOpaqueDepthTextureID);
+        opaqueCmd.ReleaseTemporaryRT(cameraOpaqueColorTextureID);
+        opaqueCmd.ReleaseTemporaryRT(worldSpacePositionTextureID);
         opaqueCmd.ReleaseTemporaryRT(CameraRender.renderingData.cameraColorBufferId);
         opaqueCmd.ReleaseTemporaryRT(CameraRender.renderingData.cameraDepthBufferId);
     }

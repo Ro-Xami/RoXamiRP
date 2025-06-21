@@ -16,8 +16,7 @@ public partial class CameraRender
     
     static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
     static readonly int cameraColorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
-    
-    //static readonly int matrixInvVP_ID = Shader.PropertyToID("_MatrixInvVP");
+    static readonly int matrixInvVP_ID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
 
     readonly CommandBuffer cmd = new CommandBuffer
     {
@@ -48,6 +47,7 @@ public partial class CameraRender
 
         PrepareBuffer();
         PrepareForSceneWindow();
+        SetCommonData();
 
         renderingData = GetRenderingData(shadowSettings.maxDistance , GPUInstancing , DynamicBatching , shadowSettings , renderer , isHDR);
 
@@ -106,5 +106,10 @@ public partial class CameraRender
         data.cameraDepthBufferId = cameraDepthAttachmentId;
         
         return data;
+    }
+
+    void SetCommonData()
+    {
+        cmd.SetGlobalMatrix(matrixInvVP_ID, (camera.projectionMatrix * camera.worldToCameraMatrix).inverse);
     }
 }

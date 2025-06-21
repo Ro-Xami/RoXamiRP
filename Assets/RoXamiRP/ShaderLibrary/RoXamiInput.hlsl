@@ -1,0 +1,6 @@
+#ifndef ROXAMIRP_ROXAMIRPINPUT_INCLUDE
+#define ROXAMIRP_ROXAMIRPINPUT_INCLUDE
+
+float4x4 _RoXamiRP_MatrixInvVP;
+
+#endif

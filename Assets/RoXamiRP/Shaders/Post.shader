@@ -1,4 +1,4 @@
-﻿Shader "Hidden/RoXamiRP/Post"
+﻿Shader "RoXami RP/Hide/Post"
 {
 	SubShader
 	{

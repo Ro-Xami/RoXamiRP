@@ -22,7 +22,7 @@ public class DeferredToonLit
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
         
-        cmd.Blit(BuiltinRenderTextureType.CameraTarget,BuiltinRenderTextureType.CameraTarget, renderer.DeferredMaterial);
+        cmd.Blit(BuiltinRenderTextureType.CameraTarget,BuiltinRenderTextureType.CameraTarget, renderer.deferredMaterial);
         
         context.Submit();
         cmd.EndSample(bufferName);

@@ -6,35 +6,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RoXamiRenderer Asste", menuName ="RoXamiRP/RoXamiRenderer Asste")]
 public class RoXamiRenderer : ScriptableObject
 {
-    [SerializeField]
-    Shader postShader = default;
-    
-    [System.NonSerialized]
-    Material postMaterial;
-    public Material PostMaterial {
-        get {
-            if (postMaterial == null && postShader != null) {
-                postMaterial = new Material(postShader);
-                postMaterial.hideFlags = HideFlags.HideAndDontSave;
-            }
-            return postMaterial;
-        }
-    }
-    
-    [SerializeField]
-    Shader deferredShader = default;
-    
-    [System.NonSerialized]
-    Material deferredMaterial;
-    public Material DeferredMaterial {
-        get {
-            if (deferredMaterial == null && deferredShader != null) {
-                deferredMaterial = new Material(deferredShader);
-                deferredMaterial.hideFlags = HideFlags.HideAndDontSave;
-            }
-            return deferredMaterial;
-        }
-    }
+    public Material depthToPositionWS;
+    public Material postMaterial;
+    public Material deferredMaterial;
+    public ComputeShader depthToPositionWSCompute;
     
     [Serializable]
     public class  BloomSettings

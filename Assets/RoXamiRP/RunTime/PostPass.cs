@@ -129,7 +129,7 @@ public class PostPass
             to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
         );
         cmd.DrawProcedural(
-            Matrix4x4.identity, renderer.PostMaterial, (int)pass,
+            Matrix4x4.identity, renderer.postMaterial, (int)pass,
             MeshTopology.Triangles, 3
         );
     }
