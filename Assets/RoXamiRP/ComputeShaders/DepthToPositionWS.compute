@@ -1,0 +1,27 @@
+#pragma kernel DepthToPositionWS
+
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+
+RWTexture2D<float4> _Result;
+
+float4 _TextureSize;
+
+[numthreads(8,8,1)]
+void DepthToPositionWS (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_TextureSize.x || id.y >= (uint)_TextureSize.y)
+    {
+        return;
+    }
+    
+    float2 screenSpaceUV = id.xy * _TextureSize.zw;
+
+    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 0).r;
+    depth = GetReverseDepth(depth);
+
+    float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
+    
+    _Result[id.xy] = float4(positionWS, 1.0);
+}
+

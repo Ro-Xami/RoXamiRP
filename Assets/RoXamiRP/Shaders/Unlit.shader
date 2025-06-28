@@ -61,6 +61,7 @@ Shader "RoXami RP/Unlit"
 				float4 positionCS : SV_POSITION;
 				float2 uv : TEXCOORD0;
 				float4 color : COLOR;
+				float4 srcPos : TEXCOORD1;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -75,12 +76,10 @@ Shader "RoXami RP/Unlit"
 				OUT.positionCS = TransformWorldToHClip(positionWS);
 				OUT.color = IN.color * _BaseColor;
 				OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
+				OUT.srcPos = ComputeScreenPos(OUT.positionCS);
 
 				return OUT;
 			}
-
-			TEXTURE2D(_WorldSpacePositionTexture);
-			SAMPLER(sampler_WorldSpacePositionTexture);
 
 			float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 			{
@@ -92,14 +91,12 @@ Shader "RoXami RP/Unlit"
 				clip(albedo.a - _cutout);
 				#endif
 
-				float depth = SampleCameraOpaqueDepth(IN.uv);
-				float3 color = SampleCameraOpaqueColor(IN.uv);
-
-				float3 position = SAMPLE_TEXTURE2D(_WorldSpacePositionTexture, sampler_WorldSpacePositionTexture, IN.uv);
-				position *= float3(1,0,0);
+				float2 screenSpaceUV = IN.srcPos.xy / IN.srcPos.w;
+				float depth = SampleCameraDepth(screenSpaceUV);
+				float3 color = SampleCameraColor(screenSpaceUV);
+				float3 position = SampleWorldSpacePosition(screenSpaceUV);
 				
 				return float4(position.xyz,1);
-				return float4(depth.xxx, 1);
 				return albedo;
 			}
 

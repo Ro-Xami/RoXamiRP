@@ -1,7 +1,7 @@
 #ifndef ROXAMIRP_LIGHT_INCLUDE
 #define ROXAMIRP_LIGHT_INCLUDE
 
-#include "Shadows.hlsl"
+//#include "Shadows.hlsl"
 
 #define _MaxAdditionalLightCount 64
 
@@ -41,9 +41,9 @@ Light GetMainLight(Input inputData)
     light.direction = normalize(_DirectionalLightDirection.xyz);
     light.color = _DirectionalLightColor.xyz;
 
-	light.shadowAttenuation = 
-		GetDirectionalShadowAttenuation(
-		inputData.positionWS , inputData.normalWS);
+	light.shadowAttenuation = 1;
+		// GetDirectionalShadowAttenuation(
+		// inputData.positionWS , inputData.normalWS);
 
 	return light;
 }

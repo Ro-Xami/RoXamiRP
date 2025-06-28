@@ -2,21 +2,27 @@
 #define ROXAMIRP_CAMERAATTCHMENT_INCLUDE
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 
-TEXTURE2D(_CameraOpaqueDepthTexture);
-SAMPLER(sampler_CameraOpaqueDepthTexture);
-
-float SampleCameraOpaqueDepth(float2 uv)
+TEXTURE2D(_CameraDepthTexture);
+SAMPLER(sampler_CameraDepthTexture);
+float SampleCameraDepth(float2 uv)
 {
-    return SAMPLE_TEXTURE2D(_CameraOpaqueDepthTexture, sampler_CameraOpaqueDepthTexture, uv).r;
+    return SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
 }
 
-TEXTURE2D(_CameraOpaqueColorTexture);
-SAMPLER(sampler_CameraOpaqueColorTexture);
-
-float3 SampleCameraOpaqueColor(float2 uv)
+TEXTURE2D(_CameraColorTexture);
+SAMPLER(sampler_CameraColorTexture);
+float3 SampleCameraColor(float2 uv)
 {
-    return SAMPLE_TEXTURE2D(_CameraOpaqueColorTexture, sampler_CameraOpaqueColorTexture, uv).rgb;
+    return SAMPLE_TEXTURE2D(_CameraColorTexture, sampler_CameraColorTexture, uv).rgb;
 }
+
+TEXTURE2D(_WorldSpacePositionTexture);
+SAMPLER(sampler_WorldSpacePositionTexture);
+float3 SampleWorldSpacePosition(float2 uv)
+{
+    return SAMPLE_TEXTURE2D(_WorldSpacePositionTexture, sampler_WorldSpacePositionTexture, uv).rgb;
+}
+
 
 //=====================Function=======================
 
@@ -31,16 +37,16 @@ float GetReverseDepth(float depth)
     return reverseZ;
 }
 
-// float3 CalculateDepthToPositionWS(float reverseZ, float2 screenUV)
-// {
-//     float4 positionCS = float4(screenUV * 2.0 - 1.0, reverseZ, 1.0);
-//
-//     #if UNITY_UV_STARTS_AT_TOP
-//     positionCS.y = -positionCS.y;
-//     #endif
-//     
-//     float4 positionWS = mul(UNITY_MATRIX_I_VP, positionCS);
-//     return positionWS.xyz / positionWS.w;
-// }
+float3 CalculateDepthToPositionWS(float reverseZ, float2 screenUV)
+{
+    float4 ndc = float4(screenUV * 2.0 - 1.0, reverseZ, 1.0);
+
+    // #if UNITY_UV_STARTS_AT_TOP
+    // positionCS.y = -positionCS.y;
+    // #endif
+    
+    float4 positionWS = mul(MATRIX_I_VP, ndc);
+    return positionWS.xyz / positionWS.w;
+}
 
 #endif

@@ -3,7 +3,7 @@
 #include "Surface.hlsl"
 #include "Input.hlsl"
 #include "Light.hlsl"
-#include "Shadows.hlsl"
+//#include "Shadows.hlsl"
 #include "GI.hlsl"
 
 #define linear_F0 0.04

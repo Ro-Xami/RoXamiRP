@@ -110,6 +110,13 @@ public partial class CameraRender
 
     void SetCommonData()
     {
-        cmd.SetGlobalMatrix(matrixInvVP_ID, (camera.projectionMatrix * camera.worldToCameraMatrix).inverse);
+        Matrix4x4 viewMatrix = camera.worldToCameraMatrix;
+        Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(camera.projectionMatrix, false);
+
+        Matrix4x4 vpMatrix = projMatrix * viewMatrix;
+        Matrix4x4 invVP = vpMatrix.inverse;
+
+        cmd.SetGlobalMatrix(matrixInvVP_ID, invVP);
+
     }
 }
