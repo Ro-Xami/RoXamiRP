@@ -10,6 +10,8 @@ public class PostPass
     {
         name = bufferName,
     };
+
+    private RenderingData renderingData;
     ScriptableRenderContext context;
     Camera camera;
     bool isHDR;
@@ -31,19 +33,19 @@ public class PostPass
         combine
     };
 
-    public void Setup(
-        ScriptableRenderContext context , Camera camera  , RoXamiRenderer renderer, bool isHDR)
+    public void Setup(RenderingData renderData )
     {
-        this.context = context;
-        this.camera = camera;
-        this.renderer = camera.cameraType <= CameraType.SceneView ? renderer : null;
-        this.isHDR = isHDR;
+        this.renderingData = renderData;
+        this.context = renderingData.context;
+        this.camera = renderingData.camera;
+        this.renderer = camera.cameraType <= CameraType.SceneView ? renderingData.renderer : null;
+        this.isHDR = renderingData.isHDR;
     }
 
     public void Render()
     {
         cmd.BeginSample("RoXami Bloom");
-        SetupBloom(CameraRender.renderingData.cameraColorBufferId);
+        SetupBloom(renderingData.cameraColorAttachmentId);
         cmd.EndSample("RoXami Bloom");
         
         context.ExecuteCommandBuffer(cmd);
@@ -61,8 +63,8 @@ public class PostPass
         }
 
         //get the rt size and format
-        int width = CameraRender.renderingData.width;
-        int height = CameraRender.renderingData.height;
+        int width = renderingData.width;
+        int height = renderingData.height;
         RenderTextureFormat format = isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
         FilterMode filter = FilterMode.Bilinear;
         

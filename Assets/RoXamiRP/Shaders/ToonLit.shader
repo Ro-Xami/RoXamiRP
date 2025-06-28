@@ -35,7 +35,76 @@ Shader "RoXami RP/ToonLit"
 			#pragma vertex ToonLitPassVertex
 			#pragma fragment ToonLitPassFragment
 
-			#include_with_pragmas "ToonLitPass.hlsl"
+			#include_with_pragmas "Assets/RoXamiRP/Shaders/ToonLitPass.hlsl"
+
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Name "ToonGBuffer"
+			Tags{"LightMode" = "ToonGBuffer"}
+			
+			Stencil
+			{
+				Ref 0
+				Pass Replace
+			}
+			
+			HLSLPROGRAM
+			#pragma vertex ToonGBufferPassVertex
+			#pragma fragment ToonGBufferPassFragment
+
+			#pragma multi_compile_instancing
+			#pragma shader_feature_local _ALPHACLIP_ON
+			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+
+			struct Attributes {
+				float4 positionOS : POSITION;
+				float2 uv : TEXCOORD0;
+				float3 normalOS : NORMAL;
+				float3 tangentOS : TANGENT;
+				float4 color : COLOR;
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+			 
+			struct Varyings {
+				float4 positionCS : SV_POSITION;
+				float2 uv : TEXCOORD0;
+				float3 normalWS : TEXCOORD1;
+				float3 tangentWS : TEXCOORD2;
+				float4 bitangentWS : TEXCOORD3;
+				float4 color : COLOR;
+
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			Varyings ToonGBufferPassVertex(Attributes IN)
+			{
+				Varyings OUT = (Varyings)0;
+				UNITY_SETUP_INSTANCE_ID(IN);
+				UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
+
+				OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
+				OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
+
+				return OUT;
+			}
+
+			void ToonGBufferPassFragment (Varyings IN,
+				out float4 GT0 : SV_Target0,
+                out float4 GT1 : SV_Target1,
+                out float4 GT2 : SV_Target2,
+                out float4 GT3 : SV_Target3)
+			{
+				UNITY_SETUP_INSTANCE_ID(IN);
+
+				GT0 = 0;
+				GT1 = 0;
+				GT2 = 0;
+				GT3 = 0;
+			}
 
 			ENDHLSL
 		}
@@ -50,7 +119,7 @@ Shader "RoXami RP/ToonLit"
 			#pragma vertex ShadowCasterPassVertex
 			#pragma fragment ShadowCasterPassFragment
 
-			#include_with_pragmas "ShadowCasterPass.hlsl"
+			#include_with_pragmas "Assets/RoXamiRP/Shaders/ShadowCasterPass.hlsl"
 
 			ENDHLSL
 		}

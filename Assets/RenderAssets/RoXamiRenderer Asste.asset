@@ -18,7 +18,7 @@ MonoBehaviour:
   depthToPositionWSCompute: {fileID: 7200000, guid: c21f7dc728a464a4c9900870491fe95e,
     type: 3}
   bloomSettings:
-    intensity: 0
+    intensity: 1
     clampMax: 100
     threshold: 0.98
     scatter: 0.7

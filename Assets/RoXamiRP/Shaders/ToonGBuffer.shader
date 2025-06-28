@@ -23,7 +23,28 @@ Shader "RoXami RP/ToonGBuffer"
 	SubShader
 	{
 		HLSLINCLUDE
-			#include "../ShaderLibrary/Common.hlsl"
+			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+		
+		ENDHLSL
+
+		Pass
+		{
+			Name "ToonGBuffer"
+			Tags{"LightMode" = "ToonGBuffer"}
+			
+			Stencil
+			{
+				Ref 100
+				Pass Replace
+			}
+			
+			HLSLPROGRAM
+			#pragma vertex ToonGBufferPassVertex
+			#pragma fragment ToonGBufferPassFragment
+
+			#pragma multi_compile_instancing
+			#pragma shader_feature_local _ALPHACLIP_ON
+
 			TEXTURE2D(_BaseMap);
 			SAMPLER(sampler_BaseMap);
 			TEXTURE2D(_MRAMap);
@@ -51,19 +72,6 @@ Shader "RoXami RP/ToonGBuffer"
 
 			#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
 			#endif
-		
-		ENDHLSL
-
-		Pass
-		{
-			Name "ToonGBuffer"
-			Tags{"LightMode" = "ToonGBuffer"}
-			HLSLPROGRAM
-			#pragma vertex ToonGBufferPassVertex
-			#pragma fragment ToonGBufferPassFragment
-
-			#pragma multi_compile_instancing
-			#pragma shader_feature_local _ALPHACLIP_ON
 
 			struct Attributes {
 				float4 positionOS : POSITION;
@@ -134,62 +142,19 @@ Shader "RoXami RP/ToonGBuffer"
 			ENDHLSL
 		}
 
-//		Pass
-//		{
-//			Name "DepthOnly"
-//			Tags{"LightMode" = "DepthOnly"}
-//			HLSLPROGRAM
-//			#pragma vertex DepthOnlyPassVertex
-//			#pragma fragment DepthOnlyPassFragment
-//
-//			#pragma multi_compile_instancing
-//			#pragma shader_feature_local _ALPHACLIP_ON
-//
-//			struct Attributes {
-//				float4 positionOS : POSITION;
-//				float2 uv : TEXCOORD0;
-//				float4 color : COLOR;
-//				UNITY_VERTEX_INPUT_INSTANCE_ID
-//			};
-//			 
-//			struct Varyings {
-//				float4 positionCS : SV_POSITION;
-//				#ifdef _ALPHACLIP_ON
-//				float2 uv : TEXCOORD0;
-//				float4 color : COLOR;
-//				#endif
-//				UNITY_VERTEX_INPUT_INSTANCE_ID
-//			};
-//
-//			Varyings DepthOnlyPassVertex(Attributes IN)
-//			{
-//				Varyings OUT = (Varyings)0;
-//				UNITY_SETUP_INSTANCE_ID(IN);
-//				UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
-//
-//				OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
-//
-//				#ifdef _ALPHACLIP_ON
-//				OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
-//				OUT.color = IN.color * _BaseColor;
-//				#endif
-//
-//				return OUT;
-//			}
-//
-//			float4 DepthOnlyPassFragment (Varyings IN) : SV_Target
-//			{
-//				UNITY_SETUP_INSTANCE_ID(IN);
-//
-//				#ifdef _ALPHACLIP_ON
-//				float alpha = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv).a * IN.color.a;
-//				clip(alpha - _cutout);
-//				#endif
-//
-//				return  0;
-//			}
-//
-//			ENDHLSL
-//		}
+		Pass
+		{
+			Name "ShadowCaster"
+			Tags {"LightMode" = "ShadowCaster"}
+			ColorMask 0
+			HLSLPROGRAM
+			#pragma target 3.5
+			#pragma vertex ShadowCasterPassVertex
+			#pragma fragment ShadowCasterPassFragment
+
+			#include_with_pragmas "Assets/RoXamiRP/Shaders/ShadowCasterPass.hlsl"
+
+			ENDHLSL
+		}
 	}
 }

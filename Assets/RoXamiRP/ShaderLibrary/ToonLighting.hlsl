@@ -141,11 +141,12 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
     float4 finalColor = float4(0, 0, 0, 0);
     finalColor.rgb =
         DirectionalLight(HoL, NoL, NoV, NoH, albedo, roughness, metallic, F0 , lightColor, inputData.viewWS) +
-        InDirectionalLight(NoV, normalDir, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi) +
+        InDirectionalLight(NoV, inputData.normalWS, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi) +
         emission +
         additionalLightColor * albedo;
     finalColor.a = surfaceData.alpha;
-    
+
+    //return float4(NoL.xxx, 1);
     return finalColor;
 }
 

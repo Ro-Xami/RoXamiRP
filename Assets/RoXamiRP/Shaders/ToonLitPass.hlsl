@@ -5,8 +5,8 @@
 #pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 #pragma shader_feature_local _ALPHACLIP_ON
 
-#include "../ShaderLibrary/Common.hlsl"
-#include "../ShaderLibrary/ToonLighting.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);

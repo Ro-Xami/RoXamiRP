@@ -5,15 +5,16 @@ using UnityEngine.Rendering;
 
 public class Lighting
 {
-    //const int maxDirectionalLightCount = 1;
+    const int maxDirectionalLightCount = 1;
     const int maxAdditionalLightCount = 64;
 
     const string bufferName = "RoXami Lighting";
     CullingResults cullingResults;
+    ScriptableRenderContext context;
 
-    Shadows shadows = new Shadows();
+    static readonly Shadows shadows = new Shadows();
 
-    static int
+    static readonly int
         dirLightColorId = Shader.PropertyToID("_DirectionalLightColor"),
         dirLightDirectionId = Shader.PropertyToID("_DirectionalLightDirection"),
         addLightCountID = Shader.PropertyToID("_AdditionalLightCount"),
@@ -36,12 +37,14 @@ public class Lighting
         name = bufferName
     };
 
-    public void Setup(ScriptableRenderContext context , CullingResults cullingResults , ShadowSettings shadowSettings)
+    public void Setup(RenderingData renderingData)
     {
-        this.cullingResults = cullingResults;
+        cullingResults = renderingData.cullingResults;
+        context = renderingData.context;
+        
         buffer.BeginSample(bufferName);
 
-        shadows.Setup(context, cullingResults, shadowSettings);
+        shadows.Setup(context, cullingResults, renderingData.shadowSettings);
 
         SetupDirectionalLight(); 
 
@@ -53,7 +56,9 @@ public class Lighting
     void SetupDirectionalLight()
     {
         int addLightCount = 0;
-
+        int dirLightCount = 0;
+        int dirLightIndex = 0;
+        
         Light dirLight = null;
         dirLightColor = Vector4.zero;
         dirLightDirection = Vector4.zero;
@@ -69,7 +74,12 @@ public class Lighting
             switch (visibleLight.lightType)
             {
                 case LightType.Directional:
-                    SetUpDirectionalLightAndShadow(dirLight, visibleLight, i);
+                    if (dirLightCount < maxDirectionalLightCount)
+                    {
+                        SetUpDirectionalLightAndShadow(visibleLight);
+                        dirLight = visibleLight.light;
+                        dirLightCount++;
+                    }
                     break;
 
                 case LightType.Point:
@@ -90,6 +100,10 @@ public class Lighting
             }
         }
 
+        shadows.Render(dirLight, dirLightIndex);
+        buffer.SetGlobalVector(dirLightColorId, dirLightColor);
+        buffer.SetGlobalVector(dirLightDirectionId, dirLightDirection);
+        
         buffer.SetGlobalInt(addLightCountID, addLightCount);
         buffer.SetGlobalVectorArray(addLightColorID, addLightColor);
         buffer.SetGlobalVectorArray(addLightPositionID, addLightPosition);
@@ -97,16 +111,10 @@ public class Lighting
         buffer.SetGlobalVectorArray(addLightDirectionID, addLightDirection);
     }
 
-    void SetUpDirectionalLightAndShadow(Light dirLight, VisibleLight visibleLight , int lightIndex)
+    void SetUpDirectionalLightAndShadow(VisibleLight visibleLight)
     {
         dirLightColor = visibleLight.finalColor;
         dirLightDirection = -visibleLight.localToWorldMatrix.GetColumn(2);
-
-        buffer.SetGlobalVector(dirLightColorId, dirLightColor);
-        buffer.SetGlobalVector(dirLightDirectionId, dirLightDirection);
-
-        dirLight = visibleLight.light;
-        shadows.Render(dirLight , lightIndex);
     }
 
     void SetupPointLight(int lightIndex , ref VisibleLight visibleLight)

@@ -8,14 +8,18 @@ public partial class CameraRender
     Camera camera;
     ScriptableRenderContext context;
     const string bufferName = "RoXami Render";
-    public static RenderingData renderingData;
+    private static RenderingData renderingData = new RenderingData();
     
     static readonly Lighting lighting = new Lighting();
+    static readonly GBufferPass gBufferPass = new GBufferPass();
+    static readonly DeferredPass deferredPass = new DeferredPass();
     static readonly ForwardPass forwardPass = new ForwardPass();
     static readonly PostPass postPass = new PostPass();
     
     static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
     static readonly int cameraColorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
+    static readonly int cameraDepthCopyTextureID = Shader.PropertyToID("_CameraDepthTexture");
+    static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_CameraColorTexture");
     static readonly int matrixInvVP_ID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
 
     readonly CommandBuffer cmd = new CommandBuffer
@@ -23,43 +27,33 @@ public partial class CameraRender
         name = bufferName,
     };
 
-    public struct RenderingData
+    public void Render(
+        ScriptableRenderContext scriptableRenderContext , Camera cameraIndex , 
+        bool GPUInstancing , bool DynamicBatching , 
+        ShadowSettings shadowSettings , RoXamiRenderer renderer, bool HDR)
     {
-        public int width;
-        public int height;
-        public Camera camera;
-        public ScriptableRenderContext context;
-        public CullingResults cullingResults;
-        public RoXamiRenderer renderer;
-        public ShadowSettings shadowSettings;
-        public bool isGPUInstancing;
-        public bool isDynamicBatching;
-        public bool isHDR;
-        public int cameraDepthBufferId;
-        public int cameraColorBufferId;
-    }
-
-    public void Render(ScriptableRenderContext context , Camera camera , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool HDR)
-    {
-        this.context = context;
-        this.camera = camera;
+        context = scriptableRenderContext;
+        camera = cameraIndex;
         bool isHDR = HDR && camera.allowHDR;
 
         PrepareBuffer();
         PrepareForSceneWindow();
         SetCommonData();
-
-        renderingData = GetRenderingData(shadowSettings.maxDistance , GPUInstancing , DynamicBatching , shadowSettings , renderer , isHDR);
-
-        cmd.BeginSample(SampleName);
-        ExcuteBuffer();
+        SetUpRenderingData(GPUInstancing , DynamicBatching , shadowSettings , renderer , isHDR);
+        SetUpCameraColorDepthRT();
         
-        lighting.Setup(context , renderingData.cullingResults , shadowSettings);
+        cmd.BeginSample(SampleName);
+        ExecuteBuffer();
+        
+        lighting.Setup(renderingData);
         
         context.SetupCameraProperties(camera);
-        forwardPass.Render();
+        
+        gBufferPass.SetUp(renderingData);
+        deferredPass.SetUp(renderingData);
+        forwardPass.SetUp(renderingData);
 
-        postPass.Setup(context, camera, renderer, isHDR);
+        postPass.Setup(renderingData);
         DrawUnsupportedShaders();
         if (postPass.IsActive)
         {
@@ -69,11 +63,41 @@ public partial class CameraRender
         CleanUp();
         
         cmd.EndSample(SampleName);
-        ExcuteBuffer();
+        ExecuteBuffer();
         context.Submit();
     }
 
-    void ExcuteBuffer()
+    private void SetUpCameraColorDepthRT()
+    {
+        RenderTextureDescriptor cameraColorDescriptor = 
+            new RenderTextureDescriptor(renderingData.width, renderingData.height);
+        cameraColorDescriptor.depthBufferBits = 0;
+        cameraColorDescriptor.colorFormat =
+            renderingData.isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
+        FilterMode cameraColorFilterMode = FilterMode.Bilinear;
+
+        RenderTextureDescriptor cameraDepthDescriptor =
+            new RenderTextureDescriptor(renderingData.width, renderingData.height);
+        cameraDepthDescriptor.depthBufferBits = 32;
+        cameraDepthDescriptor.colorFormat = RenderTextureFormat.Depth;
+        FilterMode cameraDepthFilterMode = FilterMode.Point;
+        
+        renderingData.cameraColorAttachmentId = cameraColorAttachmentId;
+        renderingData.cameraDepthAttachmentId = cameraDepthAttachmentId;
+        renderingData.cameraColorCopyTextureID = cameraColorCopyTextureID;
+        renderingData.cameraDepthCopyTextureID = cameraDepthCopyTextureID;
+        renderingData.cameraColorDescriptor =  cameraColorDescriptor;
+        renderingData.cameraDepthDescriptor = cameraDepthDescriptor;
+        renderingData.cameraColorFilterMode =  cameraColorFilterMode;
+        renderingData.cameraDepthFilterMode =  cameraDepthFilterMode;
+        
+        cmd.GetTemporaryRT(renderingData.cameraColorAttachmentId, cameraColorDescriptor, cameraColorFilterMode);
+        cmd.GetTemporaryRT(renderingData.cameraDepthAttachmentId, cameraDepthDescriptor, cameraDepthFilterMode);
+        cmd.GetTemporaryRT(renderingData.cameraColorCopyTextureID, cameraColorDescriptor, cameraColorFilterMode);
+        cmd.GetTemporaryRT(renderingData.cameraDepthCopyTextureID, cameraDepthDescriptor, cameraDepthFilterMode);
+    }
+
+    void ExecuteBuffer()
     {
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
@@ -81,31 +105,32 @@ public partial class CameraRender
 
     void CleanUp()
     {
+        cmd.ReleaseTemporaryRT(renderingData.cameraColorAttachmentId);
+        cmd.ReleaseTemporaryRT(renderingData.cameraDepthAttachmentId);
+        cmd.ReleaseTemporaryRT(renderingData.cameraColorCopyTextureID);
+        cmd.ReleaseTemporaryRT(renderingData.cameraDepthCopyTextureID);
         lighting.CleanUp();
+        gBufferPass.CleanUp();
+        deferredPass.CleanUp();
         forwardPass.CleanUp();
     }
 
-    RenderingData GetRenderingData(float maxShadowDistance, bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool isHDR)
+    void SetUpRenderingData(bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool isHDR)
     {
         camera.TryGetCullingParameters(out ScriptableCullingParameters p);
-        p.shadowDistance = Mathf.Min(maxShadowDistance , camera.farClipPlane);
+        p.shadowDistance = Mathf.Min(shadowSettings.maxDistance , camera.farClipPlane);
         CullingResults cullingResults = context.Cull(ref p);
-        
-        RenderingData data = new RenderingData();
-        data.camera = camera;
-        data.context = context;
-        data.cullingResults = cullingResults;
-        data.width = camera.pixelWidth;
-        data.height = camera.pixelHeight;
-        data.isGPUInstancing = GPUInstancing;
-        data.isDynamicBatching = DynamicBatching;
-        data.isHDR = isHDR;
-        data.shadowSettings = shadowSettings;
-        data.renderer = renderer;
-        data.cameraColorBufferId = cameraColorAttachmentId;
-        data.cameraDepthBufferId = cameraDepthAttachmentId;
-        
-        return data;
+
+        renderingData.camera = camera;
+        renderingData.context = context;
+        renderingData.cullingResults = cullingResults;
+        renderingData.width = camera.pixelWidth;
+        renderingData.height = camera.pixelHeight;
+        renderingData.isGPUInstancing = GPUInstancing;
+        renderingData.isDynamicBatching = DynamicBatching;
+        renderingData.isHDR = isHDR;
+        renderingData.shadowSettings = shadowSettings;
+        renderingData.renderer = renderer;
     }
 
     void SetCommonData()

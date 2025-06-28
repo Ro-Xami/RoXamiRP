@@ -95,6 +95,7 @@ Shader "RoXami RP/Unlit"
 				float depth = SampleCameraDepth(screenSpaceUV);
 				float3 color = SampleCameraColor(screenSpaceUV);
 				float3 position = SampleWorldSpacePosition(screenSpaceUV);
+				position = CalculateDepthToPositionWS(depth, screenSpaceUV);
 				
 				return float4(position.xyz,1);
 				return albedo;

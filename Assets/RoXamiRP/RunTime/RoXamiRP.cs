@@ -5,11 +5,13 @@ using UnityEngine.Rendering;
 
 public class RoXamiRP : RenderPipeline
 {
-    CameraRender cameraRender = new CameraRender();
+    readonly CameraRender cameraRender = new CameraRender();
 
-    RoXamiRenderer renderer = default;
-    bool GPUInstancing, DynamicBatching , isHDR;
-    ShadowSettings shadowSettings;
+    readonly RoXamiRenderer renderer = default;
+    readonly bool GPUInstancing;
+    readonly bool DynamicBatching;
+    readonly bool isHDR;
+    readonly ShadowSettings shadowSettings;
     public RoXamiRP(bool SRPBatcher , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool isHDR)
     {
         this.GPUInstancing = GPUInstancing;
@@ -27,10 +29,10 @@ public class RoXamiRP : RenderPipeline
 
     protected override void Render(ScriptableRenderContext context, List<Camera> cameras)
     {
-        for (int i = 0; i < cameras.Count; i++)
+        foreach (var camera in cameras)
         {
             cameraRender.Render(
-                context, cameras[i], DynamicBatching, GPUInstancing,
+                context, camera, DynamicBatching, GPUInstancing,
                 shadowSettings , renderer, isHDR
             );
         }

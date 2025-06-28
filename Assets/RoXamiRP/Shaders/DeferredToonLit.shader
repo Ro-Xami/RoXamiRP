@@ -7,87 +7,50 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 	
 	SubShader
 	{
-		HLSLINCLUDE
+		Cull Off
+		ZWrite Off
+		ZTest Always
 		
+		HLSLINCLUDE
+			#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
+			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+			#include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
+			#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
 		ENDHLSL
 
 		Pass
 		{
-//			Name "Deff"
-//			Tags {"LightMode" = "ToonLit"}
+			Name "DeferredTooLit"
+			Tags {"LightMode" = "DeferredToonLit"}
+			
+			Stencil
+			{
+				Ref 100
+				Comp Equal
+			}
+			
 			HLSLPROGRAM
 			#pragma target 3.5
-			#pragma vertex ToonLitPassVertex
-			#pragma fragment ToonLitPassFragment
-
-			#pragma multi_compile _instancing
+			#pragma vertex FullScreenTriangle
+			#pragma fragment DeferredToonLitPassFragment
 			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
-			#pragma shader_feature_local _ALPHACLIP_ON
 
-			//#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
-			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
-
-			TEXTURE2D(Gbuffer0);
-			SAMPLER(sampler_Gbuffer0);
-			TEXTURE2D(Gbuffer1);
-			SAMPLER(sampler_Gbuffer1);
-			TEXTURE2D(Gbuffer2);
-			SAMPLER(sampler_Gbuffer2);
-			TEXTURE2D(Gbuffer3);
-			SAMPLER(sampler_Gbuffer3);
-
-			CBUFFER_START(UnityPerMaterial)
-
-			CBUFFER_END
-
-			struct Attributes {
-	float4 positionOS : POSITION;
-	float3 normalOS : NORMAL;
-	float4 tangentOS : TANGENT;
-	float2 uv : TEXCOORD0;
-	float4 color : COLOR;
-
-	UNITY_VERTEX_INPUT_INSTANCE_ID
-};
- 
-struct Varyings {
-	float4 positionCS : SV_POSITION;
-	float2 uv : TEXCOORD0;
-	float3 positionWS : TEXCOORD1;
-	float3 normalWS : TEXCOORD2;
-	float3 tangentWS : TEXCOORD3;
-	float3 bitangentWS : TEXCOORD4;
-	float3 viewWS : TEXCOORD5;
-	float2 screenSpaceUV : TEXCOORD6;
-	float4 color : COLOR;
-
-	UNITY_VERTEX_INPUT_INSTANCE_ID
-};
-
-Varyings ToonLitPassVertex(Attributes IN)
-{
-	Varyings OUT = (Varyings)0;
-	UNITY_SETUP_INSTANCE_ID(IN);
-	UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
-
-	OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
-	OUT.positionCS = TransformWorldToHClip(OUT.positionWS);
-	OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
-	OUT.viewWS = GetViewDirWS(OUT.positionWS);
-	OUT.color = IN.color;
-	OUT.uv = IN.uv;
-
-	return OUT;
-}
-
+			TEXTURE2D(_GBuffer0);
+			SAMPLER(sampler_GBuffer0);
+			TEXTURE2D(_GBuffer1);
+			SAMPLER(sampler_GBuffer1);
+			TEXTURE2D(_GBuffer2);
+			SAMPLER(sampler_GBuffer2);
+			TEXTURE2D(_GBuffer3);
+			SAMPLER(sampler_GBuffer3);
+			
+			
 			Input GetInputData(Varyings IN)
 			{
 				Input OUT = (Input)0;
-				OUT.positionWS = 0;
-			    OUT.positionCS = IN.positionCS;
-			    OUT.normalWS = 0;
-			    OUT.viewWS = 0;
+				OUT.positionWS = SampleWorldSpacePosition(IN.uv);
+			    OUT.normalWS = SAMPLE_TEXTURE2D(_GBuffer1, sampler_GBuffer1, IN.uv);
+			    OUT.viewWS = GetViewDirWS(OUT.positionWS);
 			    OUT.screenSpaceUV = 0;
 
 				return OUT;
@@ -96,10 +59,10 @@ Varyings ToonLitPassVertex(Attributes IN)
 			Surface GetSurfaceData(Varyings IN)
 			{
 				Surface OUT = (Surface)0;
-				float4 base = SAMPLE_TEXTURE2D(Gbuffer0, sampler_Gbuffer0, IN.uv);
-				float4 nomral = SAMPLE_TEXTURE2D(Gbuffer1, sampler_Gbuffer1, IN.uv);
-				float4 MRA = SAMPLE_TEXTURE2D(Gbuffer2, sampler_Gbuffer2, IN.uv);
-				float4 emission = SAMPLE_TEXTURE2D(Gbuffer3, sampler_Gbuffer3, IN.uv);
+				float4 base = SAMPLE_TEXTURE2D(_GBuffer0, sampler_GBuffer0, IN.uv);
+				float4 nomral = SAMPLE_TEXTURE2D(_GBuffer1, sampler_GBuffer1, IN.uv);
+				float4 MRA = SAMPLE_TEXTURE2D(_GBuffer2, sampler_GBuffer2, IN.uv);
+				float4 emission = SAMPLE_TEXTURE2D(_GBuffer3, sampler_GBuffer3, IN.uv);
 				OUT.albedo = base.rgb;
 				OUT.normal = nomral.xyz;
 				OUT.roughness = MRA.g;
@@ -111,7 +74,7 @@ Varyings ToonLitPassVertex(Attributes IN)
 				return OUT;
 			}
 
-			float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
+			float4 DeferredToonLitPassFragment (Varyings IN) : SV_TARGET
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -124,7 +87,7 @@ Varyings ToonLitPassVertex(Attributes IN)
 
 				float4 color = CalculateToonLighting(inputData , surfaceData);
 
-			    return float4(surfaceData.normal , surfaceData.alpha);
+			    return float4(color.rgb, 1);
 			}
 
 			ENDHLSL
