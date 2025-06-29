@@ -49,9 +49,9 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 			{
 				Input OUT = (Input)0;
 				OUT.positionWS = SampleWorldSpacePosition(IN.uv);
-			    OUT.normalWS = SAMPLE_TEXTURE2D(_GBuffer1, sampler_GBuffer1, IN.uv);
+			    OUT.normalWS = SAMPLE_TEXTURE2D(_GBuffer1, sampler_GBuffer1, IN.uv).xyz;
 			    OUT.viewWS = GetViewDirWS(OUT.positionWS);
-			    OUT.screenSpaceUV = 0;
+			    OUT.screenSpaceUV = IN.uv;
 
 				return OUT;
 			}

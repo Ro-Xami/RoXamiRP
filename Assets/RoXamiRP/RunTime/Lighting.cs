@@ -37,16 +37,18 @@ public class Lighting
         name = bufferName
     };
 
-    public void Setup(RenderingData renderingData)
+    public void Setup(ref RenderingData renderingData)
     {
         cullingResults = renderingData.cullingResults;
         context = renderingData.context;
         
         buffer.BeginSample(bufferName);
 
-        shadows.Setup(context, cullingResults, renderingData.shadowSettings);
+        shadows.Setup(renderingData);
 
-        SetupDirectionalLight(); 
+        SetupDirectionalLight();
+        
+        shadows.GetScreenSpaceShadowsData(out renderingData.screenSpaceShadowsData);
 
         buffer.EndSample(bufferName);
         context.ExecuteCommandBuffer(buffer);

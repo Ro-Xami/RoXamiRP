@@ -53,7 +53,7 @@ Material:
     - _cutout: 0.5
     - _metallic: 0.114
     - _normalStrength: 1
-    - _roughness: 0.5
+    - _roughness: 0.307
     m_Colors:
     - _BaseColor: {r: 0.24586153, g: 0.8018868, b: 0.5341925, a: 1}
     - _Color: {r: 1, g: 0, b: 0, a: 1}

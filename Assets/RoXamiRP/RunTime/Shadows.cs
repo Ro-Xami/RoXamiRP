@@ -10,36 +10,26 @@ public class Shadows
     ScriptableRenderContext context;
     ShadowSettings settings;
 
-    CommandBuffer cmd = new CommandBuffer
+    private static readonly CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName
     };
 
-    const int maxCascades = 4;
-
-    static readonly string[] directionalFilterKeywords = {
-        "_DIRECTIONAL_PCF3",
-        "_DIRECTIONAL_PCF5",
-        "_DIRECTIONAL_PCF7",
-    };
-
-    static readonly int
-        directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas"),
-        dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
-        directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices"),
-        cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres"),
-        shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
-
-    Vector4 dirLightShadowData;
-    Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
-    Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
+    private const int maxCascades = 4;
+    
+    private static readonly int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
+    Vector4 directionalLightShadowData;
+    private readonly Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
+    private readonly Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
     Vector4 shadowDistanceFade;
+    
+    private static ScreenSpaceShadowsData screenSpaceShadowsData = new ScreenSpaceShadowsData();
 
-    public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
+    public void Setup(RenderingData renderingData)
     {
-        this.cullingResults = cullingResults;
-        this.context = context;
-        this.settings = shadowSettings;
+        this.cullingResults = renderingData.cullingResults;
+        this.context = renderingData.context;
+        this.settings = renderingData.shadowSettings;
     }
 
     public void Render(Light light, int lightIndex)
@@ -52,13 +42,18 @@ public class Shadows
         }
         else
         {
-            cmd.SetGlobalVector(dirLightShadowDataId, Vector4.zero);
+            directionalLightShadowData = Vector4.zero;
 
             cmd.GetTemporaryRT(
                 directionalShadowAtlasID, 1, 1,
                 32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap
             );
         }
+    }
+
+    public void GetScreenSpaceShadowsData(out ScreenSpaceShadowsData ssShadowsData)
+    {
+        ssShadowsData = screenSpaceShadowsData;
     }
 
     void RenderDirectionalShadows(Light light , int lightIndex) {
@@ -89,7 +84,7 @@ public class Shadows
 
         //directional light's camera is orthographic
         ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
-            cullingResults, lightIndex);//, BatchCullingProjectionType.Orthographic);
+            cullingResults, lightIndex, BatchCullingProjectionType.Orthographic);
 
         //only 4 cascades, get cascade data
         int cascadeCount = maxCascades;
@@ -124,16 +119,14 @@ public class Shadows
 
         //set shader data
         int atlasSize = (int)settings.directional.atlasSize;
-        dirLightShadowData = new Vector4(light.shadowStrength, light.shadowNormalBias, cascadeCount , atlasSize);
-        cmd.SetGlobalVector(dirLightShadowDataId, dirLightShadowData);
-
-        cmd.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
-        cmd.SetGlobalMatrixArray(directionalShadowMatricesID, directionalShadowMatrices);
-
+        directionalLightShadowData = new Vector4(light.shadowStrength, light.shadowNormalBias, cascadeCount , atlasSize);
         shadowDistanceFade = new Vector4(settings.maxDistance, settings.distanceFade, settings.directional.cascadeFade);
-        cmd.SetGlobalVector(shadowDistanceFadeId, shadowDistanceFade);
-
-        SetKeywords();
+        
+        screenSpaceShadowsData.directionalShadowAtlasID = directionalShadowAtlasID;
+        screenSpaceShadowsData.directionalLightShadowData = directionalLightShadowData;
+        screenSpaceShadowsData.cascadeCullingSpheres = cascadeCullingSpheres;
+        screenSpaceShadowsData.directionalShadowMatrices = directionalShadowMatrices;
+        screenSpaceShadowsData.shadowDistanceFade = shadowDistanceFade;
     }
 
     Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m, Vector2 offset, int split)
@@ -161,22 +154,6 @@ public class Shadows
         m.m22 = 0.5f * (m.m22);
         m.m23 = 0.5f * (m.m23 + 1);
         return m;
-    }
-
-    void SetKeywords()
-    {
-        int enabledIndex = (int)settings.directional.filter - 1;
-        for (int i = 0; i < directionalFilterKeywords.Length; i++)
-        {
-            if (i == enabledIndex)
-            {
-                cmd.EnableShaderKeyword(directionalFilterKeywords[i]);
-            }
-            else
-            {
-                cmd.DisableShaderKeyword(directionalFilterKeywords[i]);
-            }
-        }
     }
 
     public void CleanUp()

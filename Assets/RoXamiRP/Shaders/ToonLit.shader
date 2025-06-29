@@ -101,7 +101,7 @@ Shader "RoXami RP/ToonLit"
 				UNITY_SETUP_INSTANCE_ID(IN);
 
 				GT0 = 0;
-				GT1 = 0;
+				GT1 = float4(IN.normalWS, 1);
 				GT2 = 0;
 				GT3 = 0;
 			}

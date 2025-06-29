@@ -21,4 +21,14 @@ public struct RenderingData
     public int cameraColorAttachmentId;
     public int cameraDepthCopyTextureID;
     public int cameraColorCopyTextureID;
+    public ScreenSpaceShadowsData screenSpaceShadowsData;
+}
+
+public struct ScreenSpaceShadowsData
+{
+    public int directionalShadowAtlasID;
+    public Vector4 directionalLightShadowData;
+    public Vector4[] cascadeCullingSpheres;
+    public Matrix4x4[] directionalShadowMatrices;
+    public Vector4 shadowDistanceFade;
 }

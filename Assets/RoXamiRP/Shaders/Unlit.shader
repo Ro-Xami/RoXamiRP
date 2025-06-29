@@ -81,6 +81,14 @@ Shader "RoXami RP/Unlit"
 				return OUT;
 			}
 
+			TEXTURE2D(_ScreenSpaceShadowsTexture);
+SAMPLER(sampler_ScreenSpaceShadowsTexture);
+
+float SampleScreenSpaceShadows(float2 screenSpaceUV)
+{
+	return SAMPLE_TEXTURE2D(_ScreenSpaceShadowsTexture, sampler_ScreenSpaceShadowsTexture, screenSpaceUV).r;
+}
+
 			float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
@@ -95,8 +103,10 @@ Shader "RoXami RP/Unlit"
 				float depth = SampleCameraDepth(screenSpaceUV);
 				float3 color = SampleCameraColor(screenSpaceUV);
 				float3 position = SampleWorldSpacePosition(screenSpaceUV);
-				position = CalculateDepthToPositionWS(depth, screenSpaceUV);
+				//position = CalculateDepthToPositionWS(depth, screenSpaceUV);
+				float shadow = SampleScreenSpaceShadows(screenSpaceUV);
 				
+				return float4(shadow.xxx, 1);
 				return float4(position.xyz,1);
 				return albedo;
 			}

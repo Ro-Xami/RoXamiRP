@@ -12,6 +12,8 @@ public partial class CameraRender
     
     static readonly Lighting lighting = new Lighting();
     static readonly GBufferPass gBufferPass = new GBufferPass();
+    static readonly DepthToPositionWSPass depthToPositionWSPass = new DepthToPositionWSPass();
+    static readonly ScreenSpaceShadowsPass screenSpaceShadowsPass = new ScreenSpaceShadowsPass();
     static readonly DeferredPass deferredPass = new DeferredPass();
     static readonly ForwardPass forwardPass = new ForwardPass();
     static readonly PostPass postPass = new PostPass();
@@ -45,11 +47,13 @@ public partial class CameraRender
         cmd.BeginSample(SampleName);
         ExecuteBuffer();
         
-        lighting.Setup(renderingData);
+        lighting.Setup(ref renderingData);
         
         context.SetupCameraProperties(camera);
         
         gBufferPass.SetUp(renderingData);
+        depthToPositionWSPass.SetUp(renderingData);
+        screenSpaceShadowsPass.SetUp(renderingData);
         deferredPass.SetUp(renderingData);
         forwardPass.SetUp(renderingData);
 
@@ -111,6 +115,8 @@ public partial class CameraRender
         cmd.ReleaseTemporaryRT(renderingData.cameraDepthCopyTextureID);
         lighting.CleanUp();
         gBufferPass.CleanUp();
+        depthToPositionWSPass.CleanUp();
+        screenSpaceShadowsPass.CleanUp();
         deferredPass.CleanUp();
         forwardPass.CleanUp();
     }

@@ -41,10 +41,11 @@ float3 CalculateDepthToPositionWS(float reverseZ, float2 screenUV)
 {
     float4 ndc = float4(screenUV * 2.0 - 1.0, reverseZ, 1.0);
 
-    // #if UNITY_UV_STARTS_AT_TOP
-    //ndc.y = -ndc.y;
-    // #endif
-    
+    if (!_ProjectionParams.x)
+    {
+        ndc.y = -ndc.y;
+    }
+
     float4 positionWS = mul(MATRIX_I_VP, ndc);
     return positionWS.xyz / positionWS.w;
 }

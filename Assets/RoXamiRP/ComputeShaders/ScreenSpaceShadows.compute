@@ -1,0 +1,26 @@
+#pragma kernel ScreenSpaceShadows
+
+RWTexture2D<float4> _ScreenSpaceShadowsTexture;
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Shadows.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+
+TEXTURE2D(_GBuffer1);
+SAMPLER(sampler_GBuffer1);
+float4 _TextureSize;
+
+[numthreads(8,8,1)]
+void ScreenSpaceShadows (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_TextureSize.x || id.y >= (uint)_TextureSize.y)
+    {
+        return;
+    }
+    float2 screenSpaceUV = id.xy * _TextureSize.zw;
+
+    float3 normalWS = _GBuffer1.SampleLevel(sampler_GBuffer1, screenSpaceUV, 0).xyz;
+    float3 positionWS = _WorldSpacePositionTexture.SampleLevel(sampler_WorldSpacePositionTexture, screenSpaceUV, 1).xyz;
+    float shadow = GetDirectionalShadowAttenuation (positionWS , normalWS);
+    
+    _ScreenSpaceShadowsTexture[id.xy] = float4(shadow.xxx, 1);
+}

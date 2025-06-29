@@ -39,7 +39,7 @@ struct Varyings {
 	float3 tangentWS : TEXCOORD3;
 	float3 bitangentWS : TEXCOORD4;
 	float3 viewWS : TEXCOORD5;
-	float2 screenSpaceUV : TEXCOORD6;
+	float4 srcPos : TEXCOORD6;
 	float4 color : COLOR;
 
 	UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -57,6 +57,7 @@ Varyings ToonLitPassVertex(Attributes IN)
 	OUT.viewWS = GetViewDirWS(OUT.positionWS);
 	OUT.color = IN.color * _BaseColor;
 	OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
+	OUT.srcPos = ComputeScreenPos(OUT.positionCS);
 
 	return OUT;
 }
@@ -68,7 +69,7 @@ Input GetInputData(Varyings IN)
     OUT.positionCS = IN.positionCS;
     OUT.normalWS = IN.normalWS;
     OUT.viewWS = IN.viewWS;
-    OUT.screenSpaceUV = IN.screenSpaceUV;
+    OUT.screenSpaceUV = IN.srcPos.xy / IN.srcPos.w;
 
 	return OUT;
 }

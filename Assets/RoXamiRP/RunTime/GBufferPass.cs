@@ -28,9 +28,6 @@ public class GBufferPass
         new RenderTargetIdentifier(gBufferNameIDs[2]),
         new RenderTargetIdentifier(gBufferNameIDs[3]),
     };
-    
-    static readonly DepthToPositionWS depthToPositionWS = new DepthToPositionWS();
-    
     RenderingData renderingData;
     
      public void SetUp(RenderingData renderData)
@@ -47,7 +44,6 @@ public class GBufferPass
         renderingData.context.Submit();
         
         CopyCameraDepth();
-        depthToPositionWS.CalculatePositionWS(cmd, renderData);
         
         cmd.EndSample(bufferName);
         ExecuteBuffer();
@@ -111,7 +107,5 @@ public class GBufferPass
         {
             cmd.ReleaseTemporaryRT(gBufferID);
         }
-        
-        depthToPositionWS.CleanUp(cmd);
     }
 }

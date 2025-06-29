@@ -19,6 +19,7 @@
 
 #include "Assets/RoXamiRP/ShaderLibrary/RoXamiInput.hlsl"
 #define MATRIX_I_VP _RoXamiRP_MatrixInvVP
+//#define ROXAMIRP_UV_STARTS_AT_TOP _ProjectionParams.x
 
 float Square(float x) { return x * x;} 
 float2 Square(float2 x) { return x * x;} 

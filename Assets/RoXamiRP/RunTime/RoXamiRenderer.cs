@@ -6,10 +6,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RoXamiRenderer Asste", menuName ="RoXamiRP/RoXamiRenderer Asste")]
 public class RoXamiRenderer : ScriptableObject
 {
-    public Material depthToPositionWS;
+    public Material depthToPositionWSMaterial;
     public Material postMaterial;
     public Material deferredMaterial;
     public ComputeShader depthToPositionWSCompute;
+    public ComputeShader screenSpaceShadowsCompute;
     
     [Serializable]
     public class  BloomSettings
