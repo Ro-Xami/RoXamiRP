@@ -116,7 +116,6 @@ public partial class CameraRender
         lighting.CleanUp();
         gBufferPass.CleanUp();
         depthToPositionWSPass.CleanUp();
-        screenSpaceShadowsPass.CleanUp();
         deferredPass.CleanUp();
         forwardPass.CleanUp();
     }

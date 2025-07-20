@@ -20,8 +20,10 @@ MonoBehaviour:
     type: 3}
   screenSpaceShadowsCompute: {fileID: 7200000, guid: a8c4476fc8586e3479414139329386ec,
     type: 3}
+  screenSpacePlanarReflectionCompute: {fileID: 7200000, guid: fa87b42df27c87e449eecff4a8ed8fa0,
+    type: 3}
   bloomSettings:
-    intensity: 1
+    intensity: 0
     clampMax: 100
     threshold: 0.98
     scatter: 0.7

@@ -82,12 +82,18 @@ Shader "RoXami RP/Unlit"
 			}
 
 			TEXTURE2D(_ScreenSpaceShadowsTexture);
-SAMPLER(sampler_ScreenSpaceShadowsTexture);
+			SAMPLER(sampler_ScreenSpaceShadowsTexture);
+			float SampleScreenSpaceShadows(float2 screenSpaceUV)
+			{
+				return SAMPLE_TEXTURE2D(_ScreenSpaceShadowsTexture, sampler_ScreenSpaceShadowsTexture, screenSpaceUV).r;
+			}
 
-float SampleScreenSpaceShadows(float2 screenSpaceUV)
-{
-	return SAMPLE_TEXTURE2D(_ScreenSpaceShadowsTexture, sampler_ScreenSpaceShadowsTexture, screenSpaceUV).r;
-}
+			TEXTURE2D(_SSPRTexture);
+			SAMPLER(sampler_SSPRTexture);
+			float4 SampleSSPRTexture(float2 screenSpaceUV)
+			{
+				return SAMPLE_TEXTURE2D(_SSPRTexture, sampler_SSPRTexture, screenSpaceUV);
+			}
 
 			float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 			{
@@ -105,7 +111,10 @@ float SampleScreenSpaceShadows(float2 screenSpaceUV)
 				float3 position = SampleWorldSpacePosition(screenSpaceUV);
 				//position = CalculateDepthToPositionWS(depth, screenSpaceUV);
 				float shadow = SampleScreenSpaceShadows(screenSpaceUV);
-				
+				float4 lastColor = SampleSSPRTexture(screenSpaceUV);
+				lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
+
+				return float4(lastColor.rgb, 1);
 				return float4(shadow.xxx, 1);
 				return float4(position.xyz,1);
 				return albedo;

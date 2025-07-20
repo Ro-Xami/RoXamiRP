@@ -4,9 +4,16 @@
 
 TEXTURE2D(_CameraDepthTexture);
 SAMPLER(sampler_CameraDepthTexture);
+float4 _CameraDepthTexture_TexelSize;
+
 float SampleCameraDepth(float2 uv)
 {
     return SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
+}
+
+float4 GetCameraDepthTexelSize()
+{
+    return _CameraDepthTexture_TexelSize;
 }
 
 TEXTURE2D(_CameraColorTexture);
@@ -22,8 +29,6 @@ float3 SampleWorldSpacePosition(float2 uv)
 {
     return SAMPLE_TEXTURE2D(_WorldSpacePositionTexture, sampler_WorldSpacePositionTexture, uv).rgb;
 }
-
-
 //=====================Function=======================
 
 float GetReverseDepth(float depth)

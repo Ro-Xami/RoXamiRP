@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "RoXamiRenderer Asste", menuName ="RoXamiRP/RoXamiRenderer Asste")]
+[CreateAssetMenu(fileName = "RoXamiRenderer Asset", menuName ="RoXamiRP/RoXamiRenderer Asset")]
 public class RoXamiRenderer : ScriptableObject
 {
     public Material depthToPositionWSMaterial;
@@ -11,6 +11,7 @@ public class RoXamiRenderer : ScriptableObject
     public Material deferredMaterial;
     public ComputeShader depthToPositionWSCompute;
     public ComputeShader screenSpaceShadowsCompute;
+    public ComputeShader screenSpacePlanarReflectionCompute;
     
     [Serializable]
     public class  BloomSettings

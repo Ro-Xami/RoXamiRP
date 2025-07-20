@@ -22,6 +22,8 @@ public class ForwardPass
 
     private RenderingData renderingData;
     
+    static readonly ScreenSpacePlanarReflectionPass ssprPass = new ScreenSpacePlanarReflectionPass();
+    
     public void SetUp(RenderingData renderData)
     {
         renderingData = renderData;
@@ -35,6 +37,8 @@ public class ForwardPass
         
         opaqueCmd.EndSample(opaqueBufferName);
         ExecuteBuffer(opaqueCmd);
+        
+        ssprPass.SetUp(renderingData);
         
         //Transparent=======================================================================
         SetRenderTarget(transparentCmd);
@@ -77,14 +81,15 @@ public class ForwardPass
 
         renderingData.context.DrawSkybox(renderingData.camera);
 
-        CopyCameraColor();
+        CopyCameraColor(opaqueCmd);
 
         renderingData.context.Submit();
     }
 
-    void CopyCameraColor()
+    void CopyCameraColor(CommandBuffer cmd)
     {
-        opaqueCmd.CopyTexture(renderingData.cameraColorAttachmentId, renderingData.cameraColorCopyTextureID);
+        cmd.CopyTexture(renderingData.cameraColorAttachmentId, renderingData.cameraColorCopyTextureID);
+        cmd.CopyTexture(renderingData.cameraDepthAttachmentId, renderingData.cameraDepthCopyTextureID);
     }
 
     void DrawTransparent(SortingSettings sortingSettings, DrawingSettings drawingSettings, FilteringSettings filteringSettings)
@@ -95,6 +100,8 @@ public class ForwardPass
         
         renderingData.context.DrawRenderers(
             renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+        
+        CopyCameraColor(transparentCmd);
         
         renderingData.context.Submit();
     }
@@ -107,6 +114,6 @@ public class ForwardPass
 
     public void CleanUp()
     {
-
+        ssprPass.CleanUp();
     }
 }

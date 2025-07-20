@@ -1,0 +1,95 @@
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+#pragma kernel SSPRCompute
+//#pragma kernel SSPRHole
+
+RWTexture2D<float4> _SSPRTexture;
+RWTexture2D<float> _SSPRHeightBuffer;
+
+float _height;
+float4 _texelSize;
+
+[numthreads(8,8,1)]
+void SSPRCompute(uint3 id : SV_DispatchThreadID)
+{
+    _SSPRTexture[id.xy] = float4(0, 0, 0, 0);
+    _SSPRHeightBuffer[id.xy] = FLT_MAX;
+    
+    if (id.x > (uint)_texelSize.x || id.y > (uint)_texelSize.y)
+    {
+        return;
+    }
+    float2 screenSpaceUV = float2(id.xy) * _texelSize.zw;
+
+    float depth = _CameraDepthTexture.
+        SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 1).r;
+
+    //withoutSkybox
+    #if defined(UNITY_REVERSED_Z)
+        if (depth <= FLT_MIN)
+        {
+            return;
+        }
+    #else
+        depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
+        if (depth >= 1)
+        {
+            return;
+        }
+    #endif
+    
+    float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
+    if (positionWS.y < _height)
+    {
+        return;
+    }
+
+    float3 prWS = positionWS;
+    prWS.y = _height * 2 - prWS.y;
+    
+    float4 prHClip = TransformWorldToHClip(prWS.xyz);
+    float4 prSrcPos = ComputeScreenPos(prHClip);
+    float2 prUV = prSrcPos.xy / prSrcPos.w;
+
+    if (any(prUV) < 0 || any(prUV) > 1){return; }
+    prUV *= _texelSize.xy;
+
+    float getBuffer = _SSPRHeightBuffer[prUV];
+    if (positionWS.y > getBuffer)
+    {
+        return;
+    }
+    _SSPRHeightBuffer[prUV] = positionWS.y;
+
+    float3 color = _CameraColorTexture.
+        SampleLevel(sampler_CameraColorTexture, screenSpaceUV, 1).rgb;
+
+    float fade = 1 - distance(0.5, screenSpaceUV) * 2;
+    
+    _SSPRTexture[prUV] = float4(color, fade);
+}
+
+// [numthreads(8,8,1)]
+// void SSPRHole(uint3 id : SV_DispatchThreadID)
+// {
+//     const float pixelCount = 2;
+//
+//     uint2 uv = id.xy * pixelCount;
+//
+//     if (uv.x > (uint)_texelSize.y || uv.y > (uint)_texelSize.y) {return; }
+//
+//     float4 pixelColors[ pixelCount * pixelCount];
+//     float4 sampleColor = 0;
+//
+//     for (int i = 0 ; i < pixelCount * pixelCount ; i++)
+//     {
+//         pixelColors[i] = _SSPRTexture[uv + float2(i % pixelCount , i / pixelCount)];
+//         sampleColor = pixelColors[i].a > sampleColor.a ? pixelColors[i] : sampleColor;
+//     }
+//
+//     for (int j = 0 ; j < pixelCount * pixelCount ; j++)
+//     {
+//         _SSPRTexture[uv + float2(j % pixelCount , j / pixelCount)] = 
+//         pixelColors[j].a > 0 ? pixelColors[j] : sampleColor;
+//     }
+// }
