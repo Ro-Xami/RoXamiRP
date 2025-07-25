@@ -3,8 +3,12 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-public class ForwardPass
+public class ForwardPass : RoXamiRenderPass
 {
+    public ForwardPass(RenderPassEvent evt)
+    {
+        renderPassEvent = evt;
+    }
     static readonly string opaqueBufferName = "RoXami Forward Opaque";
     static readonly CommandBuffer opaqueCmd = new CommandBuffer()
     {
@@ -17,69 +21,71 @@ public class ForwardPass
         name = transparentBufferName
     };
 
-    static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("ToonUnlit");
-    static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
-
     private RenderingData renderingData;
     
     static readonly ScreenSpacePlanarReflectionPass ssprPass = new ScreenSpacePlanarReflectionPass();
-    
-    public void SetUp(RenderingData renderData)
+
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
     {
         renderingData = renderData;
         
         //Opaque==========================================================================
         SetRenderTarget(opaqueCmd);
         opaqueCmd.BeginSample(opaqueBufferName);
-        ExecuteBuffer(opaqueCmd);
+        ExecuteCommandBuffer(context, opaqueCmd);
         
         DrawOpaqueSkybox(out SortingSettings sortingSettings, out DrawingSettings drawingSettings, out FilteringSettings filteringSettings);
         
         opaqueCmd.EndSample(opaqueBufferName);
-        ExecuteBuffer(opaqueCmd);
+        ExecuteCommandBuffer(context, opaqueCmd);
         
         ssprPass.SetUp(renderingData);
         
         //Transparent=======================================================================
         SetRenderTarget(transparentCmd);
         transparentCmd.BeginSample(transparentBufferName);
-        ExecuteBuffer(transparentCmd);
+        ExecuteCommandBuffer(context, transparentCmd);
         
         DrawTransparent(sortingSettings, drawingSettings, filteringSettings);
 
         transparentCmd.EndSample(transparentBufferName);
-        ExecuteBuffer(transparentCmd);
+        ExecuteCommandBuffer(context, transparentCmd);
+    }
+    
+    public override void CleanUp()
+    {
+        ssprPass.CleanUp();
     }
 
     private void SetRenderTarget(CommandBuffer cmd)
     {
         cmd.SetRenderTarget(
-            renderingData.cameraColorAttachmentId,
+            ShaderDataID.cameraColorAttachmentId,
             RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-            renderingData.cameraDepthAttachmentId,
+            ShaderDataID.cameraDepthAttachmentId,
             RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
     }
 
     void DrawOpaqueSkybox(out SortingSettings sortingSettings, out DrawingSettings drawingSettings, out FilteringSettings filteringSettings)
     {
-        sortingSettings = new SortingSettings(renderingData.camera)
+        sortingSettings = new SortingSettings(renderingData.cameraData.camera)
         {
             criteria = SortingCriteria.CommonOpaque
         };
 
-        drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings) { 
+        drawingSettings = new DrawingSettings(ShaderDataID.unlitShaderTagId, sortingSettings) { 
             enableDynamicBatching = renderingData.isDynamicBatching , 
             enableInstancing = renderingData.isGPUInstancing , 
             perObjectData = 
                 PerObjectData.ReflectionProbes |
                 PerObjectData.LightProbe};
-        drawingSettings.SetShaderPassName(1 , toonLitShaderTagId);
+        drawingSettings.SetShaderPassName(1 , ShaderDataID.toonLitShaderTagId);
 
         filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
         renderingData.context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
 
-        renderingData.context.DrawSkybox(renderingData.camera);
+        renderingData.context.DrawSkybox(renderingData.cameraData.camera);
 
         CopyCameraColor(opaqueCmd);
 
@@ -88,8 +94,8 @@ public class ForwardPass
 
     void CopyCameraColor(CommandBuffer cmd)
     {
-        cmd.CopyTexture(renderingData.cameraColorAttachmentId, renderingData.cameraColorCopyTextureID);
-        cmd.CopyTexture(renderingData.cameraDepthAttachmentId, renderingData.cameraDepthCopyTextureID);
+        cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
+        cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
     }
 
     void DrawTransparent(SortingSettings sortingSettings, DrawingSettings drawingSettings, FilteringSettings filteringSettings)
@@ -104,16 +110,5 @@ public class ForwardPass
         CopyCameraColor(transparentCmd);
         
         renderingData.context.Submit();
-    }
-
-    private void ExecuteBuffer(CommandBuffer cmd)
-    {
-        renderingData.context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
-    }
-
-    public void CleanUp()
-    {
-        ssprPass.CleanUp();
     }
 }

@@ -3,25 +3,25 @@ using UnityEngine;
 using UnityEngine.Rendering;
 public struct RenderingData
 {
-    public int width;
-    public int height;
-    public Camera camera;
-    public ScriptableRenderContext context;
-    public CullingResults cullingResults;
-    public RoXamiRenderer renderer;
-    public ShadowSettings shadowSettings;
     public bool isGPUInstancing;
     public bool isDynamicBatching;
-    public bool isHDR;
+    public CullingResults cullingResults;
+    public CameraData cameraData;
+    public ScriptableRenderContext context;
+    public RoXamiRendererAsset RendererAsset;
+    public ShadowSettings shadowSettings;
+    public ScreenSpaceShadowsData screenSpaceShadowsData;
+}
+
+public struct CameraData
+{
+    public Camera camera;
+    public int width;
+    public int height;
     public RenderTextureDescriptor cameraColorDescriptor;
     public RenderTextureDescriptor cameraDepthDescriptor;
     public FilterMode cameraColorFilterMode;
     public FilterMode cameraDepthFilterMode;
-    public int cameraDepthAttachmentId;
-    public int cameraColorAttachmentId;
-    public int cameraDepthCopyTextureID;
-    public int cameraColorCopyTextureID;
-    public ScreenSpaceShadowsData screenSpaceShadowsData;
 }
 
 public struct ScreenSpaceShadowsData
@@ -31,4 +31,15 @@ public struct ScreenSpaceShadowsData
     public Vector4[] cascadeCullingSpheres;
     public Matrix4x4[] directionalShadowMatrices;
     public Vector4 shadowDistanceFade;
+}
+
+public static class ShaderDataID
+{
+    public static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("ToonUnlit");
+    public static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
+    
+    public static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
+    public static readonly int cameraColorAttachmentId= Shader.PropertyToID("_CameraColorAttachment");
+    public static readonly int cameraDepthCopyTextureID= Shader.PropertyToID("_CameraDepthTexture");
+    public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
 }

@@ -2,9 +2,15 @@ using System;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
+using RoXamiRenderPipeline;
 
-public class Lighting
+public class LightingPass : RoXamiRenderPass
 {
+    public LightingPass(RenderPassEvent evt)
+    {
+        renderPassEvent = evt;
+    }
+    
     const int maxDirectionalLightCount = 1;
     const int maxAdditionalLightCount = 64;
 
@@ -32,17 +38,22 @@ public class Lighting
         addLightDirection = new Vector4[maxAdditionalLightCount],
         addLightAngles = new Vector4[maxAdditionalLightCount];
 
-    CommandBuffer buffer = new CommandBuffer
+    readonly CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName
     };
 
-    public void Setup(ref RenderingData renderingData)
+    public override void SetUp(ref RenderingData renderingData)
+    {
+        base.SetUp(ref renderingData);
+    }
+
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         cullingResults = renderingData.cullingResults;
         context = renderingData.context;
         
-        buffer.BeginSample(bufferName);
+        cmd.BeginSample(bufferName);
 
         shadows.Setup(renderingData);
 
@@ -50,9 +61,13 @@ public class Lighting
         
         shadows.GetScreenSpaceShadowsData(out renderingData.screenSpaceShadowsData);
 
-        buffer.EndSample(bufferName);
-        context.ExecuteCommandBuffer(buffer);
-        buffer.Clear();
+        cmd.EndSample(bufferName);
+        ExecuteCommandBuffer(context, cmd);
+    }
+
+    public override void CleanUp()
+    {
+        shadows.CleanUp();
     }
 
     void SetupDirectionalLight()
@@ -103,14 +118,14 @@ public class Lighting
         }
 
         shadows.Render(dirLight, dirLightIndex);
-        buffer.SetGlobalVector(dirLightColorId, dirLightColor);
-        buffer.SetGlobalVector(dirLightDirectionId, dirLightDirection);
+        cmd.SetGlobalVector(dirLightColorId, dirLightColor);
+        cmd.SetGlobalVector(dirLightDirectionId, dirLightDirection);
         
-        buffer.SetGlobalInt(addLightCountID, addLightCount);
-        buffer.SetGlobalVectorArray(addLightColorID, addLightColor);
-        buffer.SetGlobalVectorArray(addLightPositionID, addLightPosition);
-        buffer.SetGlobalVectorArray(addLightAnglesID, addLightAngles);
-        buffer.SetGlobalVectorArray(addLightDirectionID, addLightDirection);
+        cmd.SetGlobalInt(addLightCountID, addLightCount);
+        cmd.SetGlobalVectorArray(addLightColorID, addLightColor);
+        cmd.SetGlobalVectorArray(addLightPositionID, addLightPosition);
+        cmd.SetGlobalVectorArray(addLightAnglesID, addLightAngles);
+        cmd.SetGlobalVectorArray(addLightDirectionID, addLightDirection);
     }
 
     void SetUpDirectionalLightAndShadow(VisibleLight visibleLight)
@@ -150,10 +165,5 @@ public class Lighting
         Vector4 position = visibleLight.localToWorldMatrix.GetColumn(3);
         position.w = 1f / Mathf.Max(0.0001f, visibleLight.range * visibleLight.range);
         return position;
-    }
-
-    public void CleanUp()
-    {
-        shadows.CleanUp();
     }
 }

@@ -7,19 +7,19 @@ public class RoXamiRP : RenderPipeline
 {
     readonly CameraRender cameraRender = new CameraRender();
 
-    readonly RoXamiRenderer renderer = default;
+    readonly RoXamiRendererAsset _rendererAsset = default;
     readonly bool GPUInstancing;
     readonly bool DynamicBatching;
     readonly bool isHDR;
     readonly ShadowSettings shadowSettings;
-    public RoXamiRP(bool SRPBatcher , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRenderer renderer, bool isHDR)
+    public RoXamiRP(bool SRPBatcher , bool GPUInstancing , bool DynamicBatching , ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset, bool isHDR)
     {
         this.GPUInstancing = GPUInstancing;
         this.DynamicBatching = DynamicBatching;
         GraphicsSettings.useScriptableRenderPipelineBatching = SRPBatcher;
         GraphicsSettings.lightsUseLinearIntensity = true;
         this.shadowSettings = shadowSettings;
-        this.renderer = renderer;
+        this._rendererAsset = rendererAsset;
         this.isHDR = isHDR;
     }
     protected override void Render(
@@ -32,8 +32,8 @@ public class RoXamiRP : RenderPipeline
         foreach (var camera in cameras)
         {
             cameraRender.Render(
-                context, camera, DynamicBatching, GPUInstancing,
-                shadowSettings , renderer, isHDR
+                context, camera, GPUInstancing, DynamicBatching,
+                shadowSettings , _rendererAsset, isHDR
             );
         }
     }

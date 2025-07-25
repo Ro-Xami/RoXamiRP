@@ -1,8 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 
-public class ScreenSpaceShadowsPass
+public class ScreenSpaceShadowsPass : RoXamiRenderPass
 {
+    public ScreenSpaceShadowsPass(RenderPassEvent evt)
+    {
+        renderPassEvent = evt;
+    }
     const string bufferName = "RoXami ScreenSpaceShadows";
     private static readonly CommandBuffer cmd = new CommandBuffer()
     {
@@ -27,11 +31,11 @@ public class ScreenSpaceShadowsPass
     private const string kernelName = "ScreenSpaceShadows";
     RenderingData renderingData;
 
-    public void SetUp(RenderingData renderData)
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
     {
         renderingData = renderData;
-        int width = renderingData.width;
-        int height = renderingData.height;
+        int width = renderingData.cameraData.width;
+        int height = renderingData.cameraData.height;
 
         cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
             width, height, 0, FilterMode.Point, RenderTextureFormat.R16,
@@ -39,17 +43,22 @@ public class ScreenSpaceShadowsPass
         cmd.SetRenderTarget(screenSpaceShadowsTextureID, 
             RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
         cmd.BeginSample(bufferName);
-        ExecuteBuffer();
+        ExecuteCommandBuffer(context, cmd);
         
         ComputeScreenSpaceShadows(width, height, renderingData.screenSpaceShadowsData);
 
         cmd.EndSample(bufferName);
-        ExecuteBuffer();
+        ExecuteCommandBuffer(context, cmd);
+    }
+    
+    public override void CleanUp()
+    {
+        cmd.ReleaseTemporaryRT(screenSpaceShadowsTextureID);
     }
 
     private void ComputeScreenSpaceShadows(int width, int height, ScreenSpaceShadowsData screenSpaceShadowsData)
     {
-        ComputeShader cs = renderingData.renderer.screenSpaceShadowsCompute;
+        ComputeShader cs = renderingData.RendererAsset.screenSpaceShadowsCompute;
         int kernel = cs.FindKernel(kernelName);
 
         cmd.SetComputeVectorParam(cs,
@@ -87,15 +96,4 @@ public class ScreenSpaceShadowsPass
     //         }
     //     }
     // }
-
-    public void CleanUp()
-    {
-        cmd.ReleaseTemporaryRT(screenSpaceShadowsTextureID);
-    }
-
-    void ExecuteBuffer()
-    {
-        renderingData.context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
-    }
 }

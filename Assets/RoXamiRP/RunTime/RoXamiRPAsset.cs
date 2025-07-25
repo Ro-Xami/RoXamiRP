@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "RoXamiRPAsset", menuName = "RoXamiRP/RoXamiRP Asset")]
-public class RoXamiRPAssest : RenderPipelineAsset
+public class RoXamiRPAsset : RenderPipelineAsset
 {
-    [SerializeField]
-    RoXamiRenderer roxamiRenderer;
+    [FormerlySerializedAs("roxamiRenderer")] [SerializeField]
+    RoXamiRendererAsset roxamiRendererAsset;
 
     [SerializeField]
     bool isHDR = true, SRPBatcher = true, GPUInstancing = true, DynamicBatching = false;
@@ -17,7 +18,7 @@ public class RoXamiRPAssest : RenderPipelineAsset
     protected override RenderPipeline CreatePipeline()
     {
         return new RoXamiRP(
-            SRPBatcher , GPUInstancing, DynamicBatching, shadowSettings , roxamiRenderer, isHDR
+            SRPBatcher , GPUInstancing, DynamicBatching, shadowSettings , roxamiRendererAsset, isHDR
             );
     }
 }

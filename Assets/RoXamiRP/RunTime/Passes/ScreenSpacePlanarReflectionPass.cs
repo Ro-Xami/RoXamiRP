@@ -27,12 +27,12 @@ public class ScreenSpacePlanarReflectionPass
 
         CleanUp();
         
-        var ssprDescriptor = renderingData.cameraColorDescriptor;
+        var ssprDescriptor = renderData.cameraData.cameraColorDescriptor;
         ssprDescriptor.enableRandomWrite = true;
         cmd.GetTemporaryRT(ssprTextureID, 
-            ssprDescriptor, renderingData.cameraColorFilterMode);
+            ssprDescriptor, renderingData.cameraData.cameraColorFilterMode);
         cmd.GetTemporaryRT(heightBufferID, 
-            ssprDescriptor, renderingData.cameraColorFilterMode);
+            ssprDescriptor, renderingData.cameraData.cameraColorFilterMode);
 
         cmd.SetRenderTarget(ssprTextureID, 
             RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
@@ -45,20 +45,20 @@ public class ScreenSpacePlanarReflectionPass
     
     void SSPRCompute()
     {
-        compute = renderingData.renderer.screenSpacePlanarReflectionCompute;
+        compute = renderingData.RendererAsset.screenSpacePlanarReflectionCompute;
         int ssprKernel = compute.FindKernel(ssprKernelName);
         //int holeKernel = compute.FindKernel(holeKernelName);
         
-        int width = renderingData.width;
-        int height = renderingData.height;
+        int width = renderingData.cameraData.width;
+        int height = renderingData.cameraData.height;
         
         cmd.SetComputeFloatParam(compute, heightID, 0);
         cmd.SetComputeVectorParam(compute, texelSizeID, 
             new Vector4(width, height, 1 / (float)width, 1 / (float)height));
         cmd.SetComputeTextureParam(compute, ssprKernel, 
-            renderingData.cameraDepthCopyTextureID, renderingData.cameraDepthCopyTextureID);
+            ShaderDataID.cameraDepthCopyTextureID, ShaderDataID.cameraDepthCopyTextureID);
         cmd.SetComputeTextureParam(compute, ssprKernel, 
-            renderingData.cameraColorCopyTextureID, renderingData.cameraColorCopyTextureID);
+            ShaderDataID.cameraColorCopyTextureID, ShaderDataID.cameraColorCopyTextureID);
         cmd.SetComputeTextureParam(compute, ssprKernel, 
             heightBufferID, heightBufferID);
         cmd.SetComputeTextureParam(compute, ssprKernel, 

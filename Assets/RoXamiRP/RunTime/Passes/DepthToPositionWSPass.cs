@@ -15,8 +15,8 @@ public class DepthToPositionWSPass
     public void SetUp(RenderingData renderData)
     {
         renderingData = renderData;
-        int width = renderingData.width;
-        int height = renderingData.height;
+        int width = renderingData.cameraData.width;
+        int height = renderingData.cameraData.height;
         
         cmd.GetTemporaryRT(worldSpacePositionTextureID, width, height, 
             0, FilterMode.Point, RenderTextureFormat.ARGBFloat);
@@ -26,7 +26,7 @@ public class DepthToPositionWSPass
         ExecuteBuffer();
 
         cmd.DrawProcedural(
-            Matrix4x4.identity, renderData.renderer.depthToPositionWSMaterial,
+            Matrix4x4.identity, renderData.RendererAsset.depthToPositionWSMaterial,
             0, MeshTopology.Triangles, 3);
         
         cmd.EndSample(bufferName);

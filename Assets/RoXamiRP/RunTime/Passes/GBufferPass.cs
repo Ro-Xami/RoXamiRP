@@ -2,8 +2,12 @@
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
-public class GBufferPass
+public class GBufferPass : RoXamiRenderPass
 {
+    public GBufferPass(RenderPassEvent evt)
+    {
+        renderPassEvent = evt;
+    }
     const string bufferName = "RoXami GBuffer";
 
     private readonly CommandBuffer cmd = new CommandBuffer()
@@ -29,15 +33,20 @@ public class GBufferPass
         new RenderTargetIdentifier(gBufferNameIDs[3]),
     };
     RenderingData renderingData;
-    
-     public void SetUp(RenderingData renderData)
+
+    public override void SetUp(ref RenderingData renderingData)
+    {
+        base.SetUp(ref renderingData);
+    }
+
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
     {
         renderingData = renderData;
         GetGBufferRT();
 
         ClearCmdRenderTarget();
         cmd.BeginSample(bufferName);
-        ExecuteBuffer();
+        ExecuteCommandBuffer(context, cmd);
         
         SetDrawingSettings(out var drawingSettings, out var filteringSettings);
         renderingData.context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
@@ -46,41 +55,49 @@ public class GBufferPass
         CopyCameraDepth();
         
         cmd.EndSample(bufferName);
-        ExecuteBuffer();
+        ExecuteCommandBuffer(context, cmd);
+    }
+    
+    public override void CleanUp()
+    {
+        foreach (var gBufferID in gBufferNameIDs)
+        {
+            cmd.ReleaseTemporaryRT(gBufferID);
+        }
     }
 
     private void CopyCameraDepth()
     {
-        cmd.CopyTexture(renderingData.cameraDepthAttachmentId, renderingData.cameraDepthCopyTextureID);
+        cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
     }
 
     private void GetGBufferRT()
     {
-        int width = renderingData.width;
-        int height = renderingData.height;
+        int width = renderingData.cameraData.width;
+        int height = renderingData.cameraData.height;
 
-        cmd.GetTemporaryRT(gBufferNameIDs[0], renderingData.cameraColorDescriptor, renderingData.cameraColorFilterMode);    //Albedo
+        cmd.GetTemporaryRT(gBufferNameIDs[0], renderingData.cameraData.cameraColorDescriptor, renderingData.cameraData.cameraColorFilterMode);    //Albedo
         cmd.GetTemporaryRT(gBufferNameIDs[1], width, height, 0, FilterMode.Point, RenderTextureFormat.ARGBFloat);   //normal
         cmd.GetTemporaryRT(gBufferNameIDs[2], width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);  //Metallic/Roughness/Ao
-        cmd.GetTemporaryRT(gBufferNameIDs[3], renderingData.cameraColorDescriptor, FilterMode.Point);   //Emission
+        cmd.GetTemporaryRT(gBufferNameIDs[3], renderingData.cameraData.cameraColorDescriptor, FilterMode.Point);   //Emission
     }
 
     void ClearCmdRenderTarget()
     {
-        cmd.SetRenderTarget(gBufferTargets, renderingData.cameraDepthAttachmentId);
+        cmd.SetRenderTarget(gBufferTargets, ShaderDataID.cameraDepthAttachmentId);
         
-        CameraClearFlags flags = renderingData.camera.clearFlags;
+        CameraClearFlags flags = renderingData.cameraData.camera.clearFlags;
         cmd.ClearRenderTarget(
             flags <= CameraClearFlags.Depth,
             flags <= CameraClearFlags.Color,
             flags == CameraClearFlags.Color ?
-                renderingData.camera.backgroundColor.linear : Color.clear
+                renderingData.cameraData.camera.backgroundColor.linear : Color.clear
         );
     }
 
     void SetDrawingSettings(out DrawingSettings drawingSettings, out FilteringSettings filteringSettings)
     {
-        SortingSettings sortingSettings = new SortingSettings(renderingData.camera)
+        SortingSettings sortingSettings = new SortingSettings(renderingData.cameraData.camera)
         {
             criteria = SortingCriteria.CommonOpaque
         };
@@ -93,19 +110,5 @@ public class GBufferPass
                 PerObjectData.LightProbe};
 
         filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
-    }
-    
-    private void ExecuteBuffer()
-    {
-        renderingData.context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
-    }
-
-    public void CleanUp()
-    {
-        foreach (var gBufferID in gBufferNameIDs)
-        {
-            cmd.ReleaseTemporaryRT(gBufferID);
-        }
     }
 }

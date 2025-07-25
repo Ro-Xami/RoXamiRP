@@ -1,21 +1,20 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class PostPass
+public class PostPass : RoXamiRenderPass
 {
-    public bool IsActive => renderer != null;
+    public PostPass(RenderPassEvent evt)
+    {
+        renderPassEvent = evt;
+    }
+    public bool IsActive => rendererAsset != null;
     
     const string bufferName = "RoXami Post";
     CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName,
     };
-
-    private RenderingData renderingData;
-    ScriptableRenderContext context;
-    Camera camera;
-    bool isHDR;
-    RoXamiRenderer renderer;
+    RoXamiRendererAsset rendererAsset;
     
     static readonly int postSource0Id = Shader.PropertyToID("_PostSource0");
     static readonly int postSource1Id = Shader.PropertyToID("_PostSource1");
@@ -33,28 +32,25 @@ public class PostPass
         combine
     };
 
-    public void Setup(RenderingData renderData )
+    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        this.renderingData = renderData;
-        this.context = renderingData.context;
-        this.camera = renderingData.camera;
-        this.renderer = camera.cameraType <= CameraType.SceneView ? renderingData.renderer : null;
-        this.isHDR = renderingData.isHDR;
-    }
-
-    public void Render()
-    {
+        rendererAsset = renderingData.cameraData.camera.cameraType <= CameraType.SceneView ? renderingData.RendererAsset : null;
+        
         cmd.BeginSample("RoXami Bloom");
-        SetupBloom(renderingData.cameraColorAttachmentId);
+        SetupBloom(renderingData);
         cmd.EndSample("RoXami Bloom");
         
-        context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
+        ExecuteCommandBuffer(context, cmd);
     }
 
-    void SetupBloom(int sourceID)
+    public override void CleanUp()
     {
-        RoXamiRenderer.BloomSettings bloom = renderer.bloomSettings;
+        base.CleanUp();
+    }
+
+    void SetupBloom(RenderingData renderingData)
+    {
+        RoXamiRendererAsset.BloomSettings bloom = rendererAsset.bloomSettings;
         int sampleCount = bloom.maxSampleCount;
 
         if (sampleCount <= 0)
@@ -63,9 +59,10 @@ public class PostPass
         }
 
         //get the rt size and format
-        int width = renderingData.width;
-        int height = renderingData.height;
-        RenderTextureFormat format = isHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
+        int width = renderingData.cameraData.width;
+        int height = renderingData.cameraData.height;
+        RenderTextureFormat format = renderingData.cameraData.camera.allowHDR ? 
+            RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
         FilterMode filter = FilterMode.Bilinear;
         
         //Set bloom Shader datas
@@ -76,7 +73,7 @@ public class PostPass
         
         //Filter
         cmd.GetTemporaryRT(bloomFilterID , width, height,0,filter , format);
-        Draw(sourceID , bloomFilterID, Pass.filter);
+        Draw(ShaderDataID.cameraColorAttachmentId , bloomFilterID, Pass.filter);
         
         //DownSample
         int[] bloomDownSampleIDs = new int[sampleCount];
@@ -114,7 +111,7 @@ public class PostPass
             Draw(bloomUpSampleIDs[i] , bloomUpSampleIDs[i - 1] , Pass.upSample);
         }
         cmd.SetGlobalTexture(postSource1Id , bloomUpSampleIDs[0]);
-        Draw(sourceID , BuiltinRenderTextureType.CameraTarget , Pass.combine);
+        Draw(ShaderDataID.cameraColorAttachmentId , BuiltinRenderTextureType.CameraTarget , Pass.combine);
         
         for (int i = 0; i < sampleCount; i++)
         {
@@ -131,7 +128,7 @@ public class PostPass
             to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
         );
         cmd.DrawProcedural(
-            Matrix4x4.identity, renderer.postMaterial, (int)pass,
+            Matrix4x4.identity, rendererAsset.postMaterial, (int)pass,
             MeshTopology.Triangles, 3
         );
     }
