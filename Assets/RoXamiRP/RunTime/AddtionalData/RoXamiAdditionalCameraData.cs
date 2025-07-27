@@ -7,10 +7,20 @@ public enum CameraRenderType
     Overlay
 }
 
+public static class RoXamiCameraExtensions
+{
+    public static RoXamiAdditionalCameraData GetRoXamiAdditionalCameraData(this Camera camera)
+    {
+        camera.TryGetComponent(out RoXamiAdditionalCameraData data);
+        return data;
+    }
+}
+
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Camera))]
 public class RoXamiAdditionalCameraData : MonoBehaviour
 {
-    [SerializeField] CameraRenderType cameraRenderType;
-    [SerializeField] RoXamiRendererAsset roXamiRendererAsset;
+    [SerializeField] public CameraRenderType cameraRenderType;
+    [SerializeField] public RoXamiRendererAsset roXamiRendererAsset;
 }
+

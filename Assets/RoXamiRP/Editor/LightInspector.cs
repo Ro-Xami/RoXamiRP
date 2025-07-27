@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 
 [CanEditMultipleObjects]
-[CustomEditorForRenderPipeline(typeof(Light), typeof(RoXamiRPAssest))]
+[CustomEditor(typeof(Light))]
 public class LightInspector : LightEditor
 {
     public override void OnInspectorGUI()

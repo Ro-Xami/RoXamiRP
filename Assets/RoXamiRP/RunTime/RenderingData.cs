@@ -3,12 +3,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 public struct RenderingData
 {
-    public bool isGPUInstancing;
-    public bool isDynamicBatching;
     public CullingResults cullingResults;
     public CameraData cameraData;
-    public ScriptableRenderContext context;
-    public RoXamiRendererAsset RendererAsset;
+    public RoXamiRendererAsset rendererAsset;
     public ShadowSettings shadowSettings;
     public ScreenSpaceShadowsData screenSpaceShadowsData;
 }
@@ -41,5 +38,6 @@ public static class ShaderDataID
     public static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
     public static readonly int cameraColorAttachmentId= Shader.PropertyToID("_CameraColorAttachment");
     public static readonly int cameraDepthCopyTextureID= Shader.PropertyToID("_CameraDepthTexture");
-    public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
+    public static readonly int cameraColorCopyTextureID= Shader.PropertyToID("_CameraColorTexture");
+    public static readonly int matrixInvVP_ID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
 }

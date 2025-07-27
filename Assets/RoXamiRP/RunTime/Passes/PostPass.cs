@@ -34,7 +34,7 @@ public class PostPass : RoXamiRenderPass
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        rendererAsset = renderingData.cameraData.camera.cameraType <= CameraType.SceneView ? renderingData.RendererAsset : null;
+        rendererAsset = renderingData.cameraData.camera.cameraType <= CameraType.SceneView ? renderingData.rendererAsset : null;
         
         cmd.BeginSample("RoXami Bloom");
         SetupBloom(renderingData);

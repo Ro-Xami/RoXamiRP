@@ -27,10 +27,10 @@ namespace RoXamiRenderPipeline
 
         private static ScreenSpaceShadowsData screenSpaceShadowsData = new ScreenSpaceShadowsData();
 
-        public void Setup(RenderingData renderingData)
+        public void Setup(ScriptableRenderContext scriptableRenderContext, RenderingData renderingData)
         {
             this.cullingResults = renderingData.cullingResults;
-            this.context = renderingData.context;
+            this.context = scriptableRenderContext;
             this.settings = renderingData.shadowSettings;
         }
 
@@ -88,7 +88,7 @@ namespace RoXamiRenderPipeline
 
             //directional light's camera is orthographic
             ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
-                cullingResults, lightIndex); //, BatchCullingProjectionType.Orthographic);
+                cullingResults, lightIndex, BatchCullingProjectionType.Orthographic);
 
             //only 4 cascades, get cascade data
             int cascadeCount = maxCascades;

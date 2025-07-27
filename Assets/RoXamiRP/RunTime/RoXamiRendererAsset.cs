@@ -6,6 +6,15 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RoXamiRenderer Asset", menuName ="RoXamiRP/RoXamiRenderer Asset")]
 public class RoXamiRendererAsset : ScriptableObject
 {
+    public CommonSettings commonSettings;
+    
+    [Serializable]
+    public class CommonSettings
+    {
+        public bool enableGpuInstancing = true;
+        public bool enableDynamicBatching = false;
+    }
+    
     public Material depthToPositionWSMaterial;
     public Material postMaterial;
     public Material deferredMaterial;

@@ -108,7 +108,7 @@ public abstract class RoXamiRenderPass
     public RenderPassEvent renderPassEvent {get; set;}
 
 
-    public virtual void SetUp(ref RenderingData renderingData)
+    public virtual void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
     {
         
     }
@@ -123,7 +123,7 @@ public abstract class RoXamiRenderPass
         
     }
 
-    public void ExecuteCommandBuffer(ScriptableRenderContext context, CommandBuffer cmd)
+    protected void ExecuteCommandBuffer(ScriptableRenderContext context, CommandBuffer cmd)
     {
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();

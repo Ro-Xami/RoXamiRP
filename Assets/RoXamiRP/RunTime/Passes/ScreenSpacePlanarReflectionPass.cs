@@ -21,7 +21,7 @@ public class ScreenSpacePlanarReflectionPass
     static readonly int texelSizeID = Shader.PropertyToID("_texelSize");
     static readonly int heightID = Shader.PropertyToID("_height");
 
-    public void SetUp(RenderingData renderData)
+    public void SetUp(ScriptableRenderContext context, RenderingData renderData)
     {
         renderingData = renderData;
 
@@ -37,15 +37,15 @@ public class ScreenSpacePlanarReflectionPass
         cmd.SetRenderTarget(ssprTextureID, 
             RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
         cmd.BeginSample(bufferName);
-        ExecuteBuffer();
+        ExecuteBuffer(context);
         SSPRCompute();
         cmd.EndSample(bufferName);
-        ExecuteBuffer();
+        ExecuteBuffer(context);
     }
     
     void SSPRCompute()
     {
-        compute = renderingData.RendererAsset.screenSpacePlanarReflectionCompute;
+        compute = renderingData.rendererAsset.screenSpacePlanarReflectionCompute;
         int ssprKernel = compute.FindKernel(ssprKernelName);
         //int holeKernel = compute.FindKernel(holeKernelName);
         
@@ -77,9 +77,9 @@ public class ScreenSpacePlanarReflectionPass
         cmd.ReleaseTemporaryRT(heightBufferID);
     }
 
-    void ExecuteBuffer()
+    void ExecuteBuffer(ScriptableRenderContext context)
     {
-        renderingData.context.ExecuteCommandBuffer(cmd);
+        context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
     }
 }

@@ -14,9 +14,11 @@ public class DeferredPass : RoXamiRenderPass
         name = bufferName
     };
 
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+    private ScriptableRenderContext context;
+
+    public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderingData)
     {
-        context = renderingData.context;
+        context = scriptableRenderContext;
 
         cmd.BeginSample(bufferName);
         ExecuteCommandBuffer(context, cmd);
@@ -41,7 +43,7 @@ public class DeferredPass : RoXamiRenderPass
             RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
         
          cmd.DrawProcedural(
-             Matrix4x4.identity, renderingData.RendererAsset.deferredMaterial, 0,
+             Matrix4x4.identity, renderingData.rendererAsset.deferredMaterial, 0,
              MeshTopology.Triangles, 3
          );
     }

@@ -34,11 +34,6 @@ public class GBufferPass : RoXamiRenderPass
     };
     RenderingData renderingData;
 
-    public override void SetUp(ref RenderingData renderingData)
-    {
-        base.SetUp(ref renderingData);
-    }
-
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
     {
         renderingData = renderData;
@@ -49,8 +44,8 @@ public class GBufferPass : RoXamiRenderPass
         ExecuteCommandBuffer(context, cmd);
         
         SetDrawingSettings(out var drawingSettings, out var filteringSettings);
-        renderingData.context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-        renderingData.context.Submit();
+        context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+        context.Submit();
         
         CopyCameraDepth();
         
@@ -103,8 +98,8 @@ public class GBufferPass : RoXamiRenderPass
         };
 
         drawingSettings = new DrawingSettings(toonGBufferShaderTagId, sortingSettings) { 
-            enableDynamicBatching = renderingData.isDynamicBatching , 
-            enableInstancing = renderingData.isGPUInstancing , 
+            enableDynamicBatching = renderingData.rendererAsset.commonSettings.enableDynamicBatching , 
+            enableInstancing = renderingData.rendererAsset.commonSettings.enableGpuInstancing , 
             perObjectData = 
                 PerObjectData.ReflectionProbes |
                 PerObjectData.LightProbe};

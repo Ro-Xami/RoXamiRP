@@ -22,12 +22,14 @@ public class ForwardPass : RoXamiRenderPass
     };
 
     private RenderingData renderingData;
+    private ScriptableRenderContext context;
     
-    static readonly ScreenSpacePlanarReflectionPass ssprPass = new ScreenSpacePlanarReflectionPass();
+    //static readonly ScreenSpacePlanarReflectionPass ssprPass = new ScreenSpacePlanarReflectionPass();
 
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
+    public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderData)
     {
         renderingData = renderData;
+        context = scriptableRenderContext;
         
         //Opaque==========================================================================
         SetRenderTarget(opaqueCmd);
@@ -39,7 +41,7 @@ public class ForwardPass : RoXamiRenderPass
         opaqueCmd.EndSample(opaqueBufferName);
         ExecuteCommandBuffer(context, opaqueCmd);
         
-        ssprPass.SetUp(renderingData);
+        //ssprPass.SetUp(context, renderingData);
         
         //Transparent=======================================================================
         SetRenderTarget(transparentCmd);
@@ -54,7 +56,7 @@ public class ForwardPass : RoXamiRenderPass
     
     public override void CleanUp()
     {
-        ssprPass.CleanUp();
+        //ssprPass.CleanUp();
     }
 
     private void SetRenderTarget(CommandBuffer cmd)
@@ -74,8 +76,8 @@ public class ForwardPass : RoXamiRenderPass
         };
 
         drawingSettings = new DrawingSettings(ShaderDataID.unlitShaderTagId, sortingSettings) { 
-            enableDynamicBatching = renderingData.isDynamicBatching , 
-            enableInstancing = renderingData.isGPUInstancing , 
+            enableDynamicBatching = renderingData.rendererAsset.commonSettings.enableDynamicBatching , 
+            enableInstancing = renderingData.rendererAsset.commonSettings.enableGpuInstancing , 
             perObjectData = 
                 PerObjectData.ReflectionProbes |
                 PerObjectData.LightProbe};
@@ -83,13 +85,13 @@ public class ForwardPass : RoXamiRenderPass
 
         filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
-        renderingData.context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+        context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
 
-        renderingData.context.DrawSkybox(renderingData.cameraData.camera);
+        context.DrawSkybox(renderingData.cameraData.camera);
 
         CopyCameraColor(opaqueCmd);
 
-        renderingData.context.Submit();
+        context.Submit();
     }
 
     void CopyCameraColor(CommandBuffer cmd)
@@ -104,11 +106,11 @@ public class ForwardPass : RoXamiRenderPass
         drawingSettings.sortingSettings = sortingSettings;
         filteringSettings.renderQueueRange = RenderQueueRange.transparent;
         
-        renderingData.context.DrawRenderers(
+        context.DrawRenderers(
             renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
         
         CopyCameraColor(transparentCmd);
         
-        renderingData.context.Submit();
+        context.Submit();
     }
 }

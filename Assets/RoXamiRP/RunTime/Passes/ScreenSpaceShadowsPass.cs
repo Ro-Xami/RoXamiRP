@@ -58,7 +58,7 @@ public class ScreenSpaceShadowsPass : RoXamiRenderPass
 
     private void ComputeScreenSpaceShadows(int width, int height, ScreenSpaceShadowsData screenSpaceShadowsData)
     {
-        ComputeShader cs = renderingData.RendererAsset.screenSpaceShadowsCompute;
+        ComputeShader cs = renderingData.rendererAsset.screenSpaceShadowsCompute;
         int kernel = cs.FindKernel(kernelName);
 
         cmd.SetComputeVectorParam(cs,

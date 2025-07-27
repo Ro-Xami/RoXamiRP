@@ -241,6 +241,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
+  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -340,6 +341,21 @@ MonoBehaviour:
   m_MoveSpeed: 10
   m_MoveSpeedIncrement: 2.5
   m_Turbo: 10
+--- !u!114 &330585548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c021c09acc9e4ba5aec45493d400980d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraRenderType: 0
+  roXamiRendererAsset: {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920,
+    type: 2}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

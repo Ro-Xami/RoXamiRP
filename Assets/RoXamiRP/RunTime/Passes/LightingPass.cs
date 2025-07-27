@@ -43,19 +43,14 @@ public class LightingPass : RoXamiRenderPass
         name = bufferName
     };
 
-    public override void SetUp(ref RenderingData renderingData)
-    {
-        base.SetUp(ref renderingData);
-    }
-
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+    public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderingData)
     {
         cullingResults = renderingData.cullingResults;
-        context = renderingData.context;
+        context = scriptableRenderContext;
         
         cmd.BeginSample(bufferName);
 
-        shadows.Setup(renderingData);
+        shadows.Setup(context, renderingData);
 
         SetupDirectionalLight();
         
