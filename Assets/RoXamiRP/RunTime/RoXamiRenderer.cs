@@ -4,21 +4,39 @@ using UnityEngine.Rendering;
 
 public class RoXamiRenderer
 {
-    List<RoXamiRenderFeature> features = new List<RoXamiRenderFeature>();
     readonly List<RoXamiRenderPass> activePasses = new List<RoXamiRenderPass>(32);
 
     private readonly LightingPass lightPass = new LightingPass(RenderPassEvent.BeforeRenderingShadows);
     private readonly RenderingPrePasses prePasses = new RenderingPrePasses(RenderPassEvent.BeforeRenderingPrePasses);
     private readonly GBufferPass gBufferPass =  new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer);
+    private readonly ScreenSpaceShadowsPass ssShadowsPass =  new ScreenSpaceShadowsPass(RenderPassEvent.AfterRenderingGbuffer);
     private readonly DeferredPass deferredPass = new DeferredPass(RenderPassEvent.BeforeRenderingDeferredLights);
-    private readonly ScreenSpaceShadowsPass ssShadowsPass =  new ScreenSpaceShadowsPass(RenderPassEvent.AfterRenderingDeferredLights);
-    private readonly ForwardPass forwardPass = new ForwardPass(RenderPassEvent.AfterRenderingOpaques);
+    private readonly ForwardPass forwardPass = new ForwardPass(RenderPassEvent.BeforeRenderingOpaques);
     private readonly PostPass postPass = new PostPass(RenderPassEvent.BeforeRenderingPostProcessing);
 
     public RoXamiRenderer()
     {
-        CreatePasses();
+        // CreatePasses();
+        //
+        // SortStable(activePasses);
+    }
 
+    public void AddFeatures(RoXamiRendererAsset asset, ref RenderingData renderingData)
+    {
+        CreatePasses();
+        Debug.Log(asset.roXamiRenderFeatures.Count);
+        foreach (var feature in asset.roXamiRenderFeatures)
+        {
+            if (feature == null)
+            {
+                Debug.Log("null");
+                return;
+            }
+            Debug.Log(feature.name);
+
+            feature.AddRenderPasses(this, ref renderingData);
+        }
+        
         SortStable(activePasses);
     }
 
@@ -53,16 +71,9 @@ public class RoXamiRenderer
         activePasses.Add(prePasses);
         activePasses.Add(gBufferPass);
         activePasses.Add(deferredPass);
-        //activePasses.Add(ssShadowsPass);
+        activePasses.Add(ssShadowsPass);
         activePasses.Add(forwardPass);
-        //activePasses.Add(postPass);
-        // foreach (var feature in asset.roXamiRenderFeatures)
-        // {
-        //     if (feature != null)
-        //     {
-        //         feature.AddRenderPasses(this, ref renderingData);
-        //     }
-        // }
+        activePasses.Add(postPass);
     }
 
     private static void SortStable(List<RoXamiRenderPass> list)
@@ -82,5 +93,6 @@ public class RoXamiRenderer
     public void EnqueuePass(RoXamiRenderPass pass)
     {
         activePasses.Add(pass);
+        Debug.Log(pass);
     }
 }

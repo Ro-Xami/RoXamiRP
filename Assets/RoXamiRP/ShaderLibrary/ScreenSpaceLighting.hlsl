@@ -8,7 +8,6 @@ SAMPLER(sampler_ScreenSpaceShadowsTexture);
 
 float SampleScreenSpaceShadows(float2 screenSpaceUV)
 {
-    return 1;
     return SAMPLE_TEXTURE2D(_ScreenSpaceShadowsTexture, sampler_ScreenSpaceShadowsTexture, screenSpaceUV).r;
 }
 

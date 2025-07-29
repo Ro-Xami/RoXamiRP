@@ -20,7 +20,7 @@ public partial class CameraRender
 
     public void Render(
         ScriptableRenderContext scriptableRenderContext , Camera cameraIndex , 
-        ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset)
+        ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset)
     {
         context = scriptableRenderContext;
         camera = cameraIndex;
@@ -29,13 +29,13 @@ public partial class CameraRender
         PrepareForSceneWindow();
         SetCommonData();
         
-        SetUpRenderingData(shadowSettings , rendererAsset);
-        //SetUpCameraColorDepthRT();
+        SetUpRenderingData(shadowSettings , rendererAsset, shaderAsset);
+        SetUpCameraColorDepthRT();
+        
+        renderer.AddFeatures(rendererAsset, ref renderingData);
         
         cmd.BeginSample(SampleName);
         ExecuteBuffer();
-        
-        SetUpCameraColorDepthRT();
         
         renderer.CameraSetup(cmd, ref renderingData);
         renderer.ExecuteRoXamiRenderPass(context, ref renderingData);
@@ -65,12 +65,11 @@ public partial class CameraRender
         renderer.CameraCleanUp();
     }
     
-    void SetUpRenderingData(ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset)
+    void SetUpRenderingData(ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset)
     {
         if (!camera.TryGetCullingParameters(out ScriptableCullingParameters p))
         {
-            Debug.LogWarning($"Camera \"{camera.name}\" failed to get culling parameters. Skipping render.");
-            return; // ⛔ 不渲染该相机
+            return;
         }
 
         p.shadowDistance = Mathf.Min(shadowSettings.maxDistance , camera.farClipPlane);
@@ -79,6 +78,7 @@ public partial class CameraRender
         renderingData.shadowSettings = shadowSettings;
         renderingData.rendererAsset = rendererAsset;
         renderingData.cullingResults = cullingResults;
+        renderingData.shaderAsset = shaderAsset;
         renderingData.cameraData.camera = camera;
         renderingData.cameraData.width = camera.pixelWidth;
         renderingData.cameraData.height = camera.pixelHeight;
@@ -91,7 +91,7 @@ public partial class CameraRender
         RenderTextureDescriptor cameraColorDescriptor = 
             new RenderTextureDescriptor(width, height);
         cameraColorDescriptor.depthBufferBits = 0;
-        cameraColorDescriptor.colorFormat = renderingData.cameraData.camera.allowHDR ? 
+        cameraColorDescriptor.colorFormat = renderingData.rendererAsset.commonSettings.enableHDR ? 
             RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
         FilterMode cameraColorFilterMode = FilterMode.Bilinear;
     

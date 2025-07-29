@@ -18,8 +18,12 @@ void ScreenSpaceShadows (uint3 id : SV_DispatchThreadID)
     }
     float2 screenSpaceUV = id.xy * _TextureSize.zw;
 
+    
+    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 1).x;
+    depth = GetReverseDepth(depth);
+    
+    float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
     float3 normalWS = _GBuffer1.SampleLevel(sampler_GBuffer1, screenSpaceUV, 0).xyz;
-    float3 positionWS = _WorldSpacePositionTexture.SampleLevel(sampler_WorldSpacePositionTexture, screenSpaceUV, 1).xyz;
     float shadow = GetDirectionalShadowAttenuation (positionWS , normalWS);
     
     _ScreenSpaceShadowsTexture[id.xy] = float4(shadow.xxx, 1);

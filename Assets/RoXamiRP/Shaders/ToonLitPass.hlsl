@@ -1,10 +1,5 @@
 #ifndef ROXAMIRP_TOONLITPASS_INCLUDE
 #define ROXAMIRP_TOONLITPASS_INCLUDE
-
-#pragma multi_compile _instancing
-#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
-#pragma shader_feature_local _ALPHACLIP_ON
-
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
 

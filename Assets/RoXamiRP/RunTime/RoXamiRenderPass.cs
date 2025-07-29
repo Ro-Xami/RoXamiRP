@@ -128,7 +128,6 @@ public abstract class RoXamiRenderPass
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
     }
-
     
     public static bool operator <(RoXamiRenderPass lhs, RoXamiRenderPass rhs)
     {

@@ -22,13 +22,6 @@ float3 SampleCameraColor(float2 uv)
 {
     return SAMPLE_TEXTURE2D(_CameraColorTexture, sampler_CameraColorTexture, uv).rgb;
 }
-
-TEXTURE2D(_WorldSpacePositionTexture);
-SAMPLER(sampler_WorldSpacePositionTexture);
-float3 SampleWorldSpacePosition(float2 uv)
-{
-    return SAMPLE_TEXTURE2D(_WorldSpacePositionTexture, sampler_WorldSpacePositionTexture, uv).rgb;
-}
 //=====================Function=======================
 
 float GetReverseDepth(float depth)

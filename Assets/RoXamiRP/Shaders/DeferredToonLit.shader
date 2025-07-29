@@ -33,6 +33,7 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 			#pragma target 3.5
 			#pragma vertex FullScreenTriangle
 			#pragma fragment DeferredToonLitPassFragment
+			#pragma multi_compile _ SCREENSPACE_SHADOWS
 			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 
 			TEXTURE2D(_GBuffer0);
@@ -48,7 +49,10 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 			Input GetInputData(Varyings IN)
 			{
 				Input OUT = (Input)0;
-				OUT.positionWS = SampleWorldSpacePosition(IN.uv);
+				float depth = SampleCameraDepth(IN.uv);
+				depth = GetReverseDepth(depth);
+				
+				OUT.positionWS = CalculateDepthToPositionWS(depth, IN.uv);
 			    OUT.normalWS = SAMPLE_TEXTURE2D(_GBuffer1, sampler_GBuffer1, IN.uv).xyz;
 			    OUT.viewWS = GetViewDirWS(OUT.positionWS);
 			    OUT.screenSpaceUV = IN.uv;

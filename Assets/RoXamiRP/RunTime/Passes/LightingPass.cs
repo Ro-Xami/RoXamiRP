@@ -52,9 +52,7 @@ public class LightingPass : RoXamiRenderPass
 
         shadows.Setup(context, renderingData);
 
-        SetupDirectionalLight();
-        
-        shadows.GetScreenSpaceShadowsData(out renderingData.screenSpaceShadowsData);
+        SetupDirectionalLight(renderingData);
 
         cmd.EndSample(bufferName);
         ExecuteCommandBuffer(context, cmd);
@@ -65,7 +63,7 @@ public class LightingPass : RoXamiRenderPass
         shadows.CleanUp();
     }
 
-    void SetupDirectionalLight()
+    void SetupDirectionalLight(RenderingData  renderingData)
     {
         int addLightCount = 0;
         int dirLightCount = 0;
@@ -112,7 +110,7 @@ public class LightingPass : RoXamiRenderPass
             }
         }
 
-        shadows.Render(dirLight, dirLightIndex);
+        shadows.Render(dirLight, dirLightIndex, renderingData);
         cmd.SetGlobalVector(dirLightColorId, dirLightColor);
         cmd.SetGlobalVector(dirLightDirectionId, dirLightDirection);
         

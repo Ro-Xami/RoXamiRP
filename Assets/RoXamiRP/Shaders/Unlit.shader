@@ -108,7 +108,6 @@ Shader "RoXami RP/Unlit"
 				float2 screenSpaceUV = IN.srcPos.xy / IN.srcPos.w;
 				float depth = SampleCameraDepth(screenSpaceUV);
 				float3 color = SampleCameraColor(screenSpaceUV);
-				float3 position = SampleWorldSpacePosition(screenSpaceUV);
 				//position = CalculateDepthToPositionWS(depth, screenSpaceUV);
 				float shadow = SampleScreenSpaceShadows(screenSpaceUV);
 				float4 lastColor = SampleSSPRTexture(screenSpaceUV);
@@ -116,7 +115,6 @@ Shader "RoXami RP/Unlit"
 
 				return float4(lastColor.rgb, 1);
 				return float4(shadow.xxx, 1);
-				return float4(position.xyz,1);
 				return albedo;
 			}
 

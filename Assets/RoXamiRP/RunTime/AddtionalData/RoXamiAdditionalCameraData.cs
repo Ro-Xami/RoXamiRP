@@ -14,6 +14,16 @@ public static class RoXamiCameraExtensions
         camera.TryGetComponent(out RoXamiAdditionalCameraData data);
         return data;
     }
+    
+    public static RoXamiRendererAsset GetRoXamiRendererAsset(this Camera camera)
+    {
+        if (camera.TryGetComponent<RoXamiAdditionalCameraData>(out var data) && data.roXamiRendererAsset != null)
+        {
+            return data.roXamiRendererAsset;
+        }
+
+        return RoXamiRendererAsset.defaultAsset;
+    }
 }
 
 [DisallowMultipleComponent]

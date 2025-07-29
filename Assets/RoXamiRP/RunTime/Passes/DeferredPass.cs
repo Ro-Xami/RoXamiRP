@@ -43,7 +43,7 @@ public class DeferredPass : RoXamiRenderPass
             RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
         
          cmd.DrawProcedural(
-             Matrix4x4.identity, renderingData.rendererAsset.deferredMaterial, 0,
+             Matrix4x4.identity, renderingData.shaderAsset.deferredMaterial, 0,
              MeshTopology.Triangles, 3
          );
     }

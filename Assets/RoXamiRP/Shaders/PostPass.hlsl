@@ -122,4 +122,9 @@ float4 BloomCombineFragment(Varyings IN) : SV_TARGET
     return s0 + s1 * _bloomIntensity;
 }
 
+float4 FinalBlitFragment(Varyings IN) : SV_TARGET
+{
+    return GetSource0(IN.uv);
+}
+
 #endif

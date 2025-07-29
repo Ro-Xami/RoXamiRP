@@ -34,8 +34,12 @@ Shader "RoXami RP/ToonLit"
 			#pragma target 3.5
 			#pragma vertex ToonLitPassVertex
 			#pragma fragment ToonLitPassFragment
+			#pragma multi_compile _ SCREENSPACE_SHADOWS
+			#pragma multi_compile _instancing
+			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
+			#pragma shader_feature_local _ALPHACLIP_ON
 
-			#include_with_pragmas "Assets/RoXamiRP/Shaders/ToonLitPass.hlsl"
+			#include "Assets/RoXamiRP/Shaders/ToonLitPass.hlsl"
 
 			ENDHLSL
 		}

@@ -76,5 +76,16 @@
 				#pragma fragment BloomCombineFragment
 			ENDHLSL
 		}
+
+		Pass
+		{
+			Name "FinalBlit"
+			
+			HLSLPROGRAM
+				#pragma target 3.5
+				#pragma vertex FullScreenTriangle
+				#pragma fragment FinalBlitFragment
+			ENDHLSL
+		}
 	}
 }

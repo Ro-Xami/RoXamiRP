@@ -8,7 +8,7 @@ public class ScreenSpaceShadowsPass : RoXamiRenderPass
         renderPassEvent = evt;
     }
     const string bufferName = "RoXami ScreenSpaceShadows";
-    private static readonly CommandBuffer cmd = new CommandBuffer()
+    private static readonly CommandBuffer cmd = new()
     {
         name = bufferName,
     };
@@ -20,12 +20,6 @@ public class ScreenSpaceShadowsPass : RoXamiRenderPass
         "_DIRECTIONAL_PCF7",
     };
     
-    private static readonly int
-        directionalLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
-        directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices"),
-        cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres"),
-        shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
-    
     static readonly int screenSpaceShadowsTextureID = Shader.PropertyToID("_ScreenSpaceShadowsTexture");
     static readonly int textureSizeID = Shader.PropertyToID("_TextureSize");
     private const string kernelName = "ScreenSpaceShadows";
@@ -34,21 +28,32 @@ public class ScreenSpaceShadowsPass : RoXamiRenderPass
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
     {
         renderingData = renderData;
-        int width = renderingData.cameraData.width;
-        int height = renderingData.cameraData.height;
 
-        cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
-            width, height, 0, FilterMode.Point, RenderTextureFormat.R16,
-            RenderTextureReadWrite.Linear, 1, true);
-        cmd.SetRenderTarget(screenSpaceShadowsTextureID, 
-            RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
-        cmd.BeginSample(bufferName);
-        ExecuteCommandBuffer(context, cmd);
+        if (renderingData.rendererAsset.commonSettings.enableScreenSpaceShadows)
+        {
+            cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+            int width = renderingData.cameraData.width;
+            int height = renderingData.cameraData.height;
+            cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
+                width, height, 0, FilterMode.Point, RenderTextureFormat.R16,
+                RenderTextureReadWrite.Linear, 1, true);
+            cmd.SetRenderTarget(screenSpaceShadowsTextureID, 
+                RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+            cmd.BeginSample(bufferName);
+            ExecuteCommandBuffer(context, cmd);
         
-        ComputeScreenSpaceShadows(width, height, renderingData.screenSpaceShadowsData);
+            ComputeScreenSpaceShadows(width, height);
 
-        cmd.EndSample(bufferName);
-        ExecuteCommandBuffer(context, cmd);
+            cmd.EndSample(bufferName);
+            ExecuteCommandBuffer(context, cmd);
+        }
+        else
+        {
+            cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+            cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
+                1, 1, 0, FilterMode.Point, RenderTextureFormat.R8);
+            ExecuteCommandBuffer(context, cmd);
+        }
     }
     
     public override void CleanUp()
@@ -56,44 +61,20 @@ public class ScreenSpaceShadowsPass : RoXamiRenderPass
         cmd.ReleaseTemporaryRT(screenSpaceShadowsTextureID);
     }
 
-    private void ComputeScreenSpaceShadows(int width, int height, ScreenSpaceShadowsData screenSpaceShadowsData)
+    private void ComputeScreenSpaceShadows(int width, int height)
     {
-        ComputeShader cs = renderingData.rendererAsset.screenSpaceShadowsCompute;
-        int kernel = cs.FindKernel(kernelName);
-
-        cmd.SetComputeVectorParam(cs,
-            textureSizeID, new Vector4(width, height, 1f / width, 1f / height));
-        cmd.SetComputeVectorParam(cs,
-            directionalLightShadowDataId, screenSpaceShadowsData.directionalLightShadowData);
-        cmd.SetComputeVectorArrayParam(cs,
-            cascadeCullingSpheresId, screenSpaceShadowsData.cascadeCullingSpheres);
-        cmd.SetComputeMatrixArrayParam(cs,
-            directionalShadowMatricesID, screenSpaceShadowsData.directionalShadowMatrices);
-        cmd.SetComputeVectorParam(cs,
-            shadowDistanceFadeId, screenSpaceShadowsData.shadowDistanceFade);
-        cmd.SetComputeTextureParam(cs, kernel,
-            screenSpaceShadowsData.directionalShadowAtlasID, screenSpaceShadowsData.directionalShadowAtlasID);
-        cmd.SetComputeTextureParam(cs, kernel, 
-            screenSpaceShadowsTextureID, screenSpaceShadowsTextureID);
+        ComputeShader cs = renderingData.shaderAsset.screenSpaceShadowComputeShader;
+         int kernel = cs.FindKernel(kernelName);
         
-        int threadGroupX = Mathf.CeilToInt(width / 8.0f);
-        int threadGroupY = Mathf.CeilToInt(height / 8.0f);
-        cmd.DispatchCompute(cs, kernel, threadGroupX, threadGroupY, 1);
+         cmd.SetComputeVectorParam(cs,
+             textureSizeID, new Vector4(width, height, 1f / width, 1f / height));
+         cmd.SetComputeTextureParam(cs, kernel,
+             ShaderDataID.directionalShadowAtlasID, ShaderDataID.directionalShadowAtlasID);
+         cmd.SetComputeTextureParam(cs, kernel, 
+             screenSpaceShadowsTextureID, screenSpaceShadowsTextureID);
+        
+         int threadGroupX = Mathf.CeilToInt(width / 8.0f);
+         int threadGroupY = Mathf.CeilToInt(height / 8.0f);
+         cmd.DispatchCompute(cs, kernel, threadGroupX, threadGroupY, 1);
     }
-    
-    // void SetKeywords()
-    // {
-    //     int enabledIndex = (int)settings.directional.filter - 1;
-    //     for (int i = 0; i < directionalFilterKeywords.Length; i++)
-    //     {
-    //         if (i == enabledIndex)
-    //         {
-    //             cmd.compute(directionalFilterKeywords[i]);
-    //         }
-    //         else
-    //         {
-    //             cmd.DisableShaderKeyword(directionalFilterKeywords[i]);
-    //         }
-    //     }
-    // }
 }

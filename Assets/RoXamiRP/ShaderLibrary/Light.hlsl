@@ -40,7 +40,11 @@ Light GetMainLight(Input inputData)
 
     light.direction = normalize(_DirectionalLightDirection.xyz);
     light.color = _DirectionalLightColor.xyz;
+#if defined(SCREENSPACE_SHADOWS)
 	light.shadowAttenuation = SampleScreenSpaceShadows(inputData.screenSpaceUV);
+#else
+	light.shadowAttenuation = 1;
+#endif
 
 	return light;
 }
