@@ -1,12 +1,11 @@
-﻿
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 [ExcludeFromPreset]
 public abstract class RoXamiRenderFeature : ScriptableObject, IDisposable
 {
-    protected abstract void Create();
+    public abstract void Create();
     
     public abstract void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData);
 

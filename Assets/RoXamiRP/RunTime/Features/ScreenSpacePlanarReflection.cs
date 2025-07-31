@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
+[Serializable]
 public class ScreenSpacePlanarReflection : RoXamiRenderFeature
 {
     private class ScreenSpacePlanarReflectionPass : RoXamiRenderPass
@@ -10,11 +11,10 @@ public class ScreenSpacePlanarReflection : RoXamiRenderFeature
         private readonly ComputeShader compute;
         private readonly float planeHeight;
         private readonly string sampleName;
-        public ScreenSpacePlanarReflectionPass(ComputeShader cs, float height, string name)
+        public ScreenSpacePlanarReflectionPass(ComputeShader cs, float height)
         {
             this.compute = cs;
             this.planeHeight = height;
-            this.sampleName = name;
         }
         const string bufferName = "RoXami SSPR Pass";
         private readonly CommandBuffer cmd = new CommandBuffer()
@@ -57,7 +57,6 @@ public class ScreenSpacePlanarReflection : RoXamiRenderFeature
         void SSPRCompute()
         {
             int ssprKernel = compute.FindKernel(ssprKernelName);
-            //int holeKernel = compute.FindKernel(holeKernelName);
             
             int width = renderingData.cameraData.width;
             int height = renderingData.cameraData.height;
@@ -94,19 +93,22 @@ public class ScreenSpacePlanarReflection : RoXamiRenderFeature
         }
     }
 
-    [SerializeField] private ComputeShader ssprCompute;
-    [SerializeField] private float planeHeight = 0;
+    public ComputeShader ssprCompute;
+    public float planeHeight = 0;
     private ScreenSpacePlanarReflectionPass pass;
 
-    protected override void Create()
+    public override void Create()
     {
-        pass = new ScreenSpacePlanarReflectionPass(ssprCompute, planeHeight, this.name);
-        pass.renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
+        pass = new ScreenSpacePlanarReflectionPass(ssprCompute, planeHeight);
+        pass.renderPassEvent = RenderPassEvent.AfterRenderingSkybox;
     }
 
     public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
     {
+        if (ssprCompute == null)
+        {
+            return;
+        }
         renderer.EnqueuePass(pass);
-        Debug.Log(pass);
     }
 }

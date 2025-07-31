@@ -15,22 +15,22 @@ public static class RoXamiCameraExtensions
         return data;
     }
     
-    public static RoXamiRendererAsset GetRoXamiRendererAsset(this Camera camera)
-    {
-        if (camera.TryGetComponent<RoXamiAdditionalCameraData>(out var data) && data.roXamiRendererAsset != null)
-        {
-            return data.roXamiRendererAsset;
-        }
-
-        return RoXamiRendererAsset.defaultAsset;
-    }
+    // public static RoXamiRendererAsset GetRoXamiRendererAsset(this Camera camera)
+    // {
+    //     if (camera.TryGetComponent<RoXamiAdditionalCameraData>(out var data) && data.roXamiRendererAsset != null)
+    //     {
+    //         return data.roXamiRendererAsset;
+    //     }
+    //
+    //     return RoXamiRendererAsset.defaultAsset;
+    // }
 }
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Camera))]
 public class RoXamiAdditionalCameraData : MonoBehaviour
 {
-    [SerializeField] public CameraRenderType cameraRenderType;
-    [SerializeField] public RoXamiRendererAsset roXamiRendererAsset;
+    public int roXamiRendererAssetID = 0;
+    public CameraRenderType cameraRenderType;
 }
 

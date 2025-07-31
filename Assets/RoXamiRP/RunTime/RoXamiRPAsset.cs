@@ -7,6 +7,8 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "RoXamiRPAsset", menuName = "RoXamiRP/RoXamiRP Asset")]
 public class RoXamiRPAsset : RenderPipelineAsset , IDisposable
 {
+    public RoXamiRendererAsset[] rendererAssets;
+    
     [SerializeField]
     ShadowSettings shadowSettings = default;
     
@@ -15,7 +17,7 @@ public class RoXamiRPAsset : RenderPipelineAsset , IDisposable
 
     protected override RenderPipeline CreatePipeline()
     {
-        return new RoXamiRP(shadowSettings, shaderAsset);
+        return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets);
     }
     
     public void Dispose()
@@ -76,9 +78,9 @@ public class ShadowSettings
     {
         atlasSize = MapSize._2048,
         filter = FilterModeSetting.PCF2x2,
-        cascadeRotio1 = 0.3f,
-        cascadeRotio2 = 0.6f,
-        cascadeRotio3 = 0.8f,
+        cascadeRatio1 = 0.3f,
+        cascadeRatio2 = 0.6f,
+        cascadeRatio3 = 0.8f,
         cascadeFade = 0.1f
     };
 }
@@ -95,9 +97,9 @@ public struct Directional
     public FilterModeSetting filter;
 
     [Range(0f, 1f)]
-    public float cascadeRotio1, cascadeRotio2, cascadeRotio3;
+    public float cascadeRatio1, cascadeRatio2, cascadeRatio3;
 
-    public Vector3 CascadeRatios => new Vector3(cascadeRotio1, cascadeRotio2, cascadeRotio3);
+    public Vector3 CascadeRatios => new Vector3(cascadeRatio1, cascadeRatio2, cascadeRatio3);
 
     [Range(0.001f, 1f)]
     public float cascadeFade;

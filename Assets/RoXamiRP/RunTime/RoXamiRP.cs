@@ -11,13 +11,15 @@ public class RoXamiRP : RenderPipeline
     private const bool lightsUseLinearIntensity = true;
     readonly ShadowSettings shadowSettings;
     readonly ShaderAsset shaderAsset;
+    readonly RoXamiRendererAsset[] rendererAssets;
 
-    public RoXamiRP(ShadowSettings shadowSettings, ShaderAsset shaderAsset)
+    public RoXamiRP(ShadowSettings shadowSettings, ShaderAsset shaderAsset, RoXamiRendererAsset[] rendererAssets)
     {
         GraphicsSettings.useScriptableRenderPipelineBatching = enableSrpBatcher;
         GraphicsSettings.lightsUseLinearIntensity = lightsUseLinearIntensity;
         this.shadowSettings = shadowSettings;
         this.shaderAsset = shaderAsset;
+        this.rendererAssets = rendererAssets;
     }
     protected override void Render(
         ScriptableRenderContext context, Camera[] cameras
@@ -28,8 +30,22 @@ public class RoXamiRP : RenderPipeline
     {
         foreach (var camera in cameras)
         {
-            var asset = camera.GetRoXamiRendererAsset();
-            cameraRender.Render(context, camera, shadowSettings , asset, shaderAsset);
+            var additionalCameraData = camera.GetRoXamiAdditionalCameraData();
+            
+            RoXamiRendererAsset renderAsset;
+            if (additionalCameraData == null)
+            {
+                renderAsset = RoXamiRendererAsset.defaultAsset;
+            }
+            else
+            {
+                renderAsset = 
+                    additionalCameraData.roXamiRendererAssetID < rendererAssets.Length ?
+                        rendererAssets[additionalCameraData.roXamiRendererAssetID] : 
+                        RoXamiRendererAsset.defaultAsset;
+            }
+ 
+            cameraRender.Render(context, camera, shadowSettings , renderAsset, shaderAsset);
         }
     }
 }

@@ -9,8 +9,8 @@ public class RoXamiRendererAsset : ScriptableObject
     public CommonSettings commonSettings;
 
     public BloomSettings bloomSettings;
-    
-    public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>();
+
+    public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>(10);
     
     public static RoXamiRendererAsset defaultAsset;
 

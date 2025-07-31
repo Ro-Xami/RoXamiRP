@@ -31,8 +31,7 @@ public partial class CameraRender
         
         SetUpRenderingData(shadowSettings , rendererAsset, shaderAsset);
         SetUpCameraColorDepthRT();
-        
-        renderer.AddFeatures(rendererAsset, ref renderingData);
+        renderer.InitializedActiveRenderPass(rendererAsset, ref renderingData);
         
         cmd.BeginSample(SampleName);
         ExecuteBuffer();
