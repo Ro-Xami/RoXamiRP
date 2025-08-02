@@ -80,14 +80,8 @@ public class GBufferPass : RoXamiRenderPass
     void ClearCmdRenderTarget()
     {
         cmd.SetRenderTarget(gBufferTargets, ShaderDataID.cameraDepthAttachmentId);
-        
-        CameraClearFlags flags = renderingData.cameraData.camera.clearFlags;
-        cmd.ClearRenderTarget(
-            flags <= CameraClearFlags.Depth,
-            flags <= CameraClearFlags.Color,
-            flags == CameraClearFlags.Color ?
-                renderingData.cameraData.camera.backgroundColor.linear : Color.clear
-        );
+
+        cmd.ClearRenderTarget(true, true, Color.clear);
     }
 
     void SetDrawingSettings(out DrawingSettings drawingSettings, out FilteringSettings filteringSettings)

@@ -23,7 +23,7 @@ public class ForwardOpaquePass : RoXamiRenderPass
         renderingData = renderData;
         context = scriptableRenderContext;
 
-        SetRenderTarget(cmd);
+        SetRenderTarget();
         cmd.BeginSample(bufferName);
         ExecuteCommandBuffer(context, cmd);
 
@@ -37,13 +37,21 @@ public class ForwardOpaquePass : RoXamiRenderPass
     {
     }
 
-    private void SetRenderTarget(CommandBuffer cmd)
+    private void SetRenderTarget()
     {
         cmd.SetRenderTarget(
             ShaderDataID.cameraColorAttachmentId,
             RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
             ShaderDataID.cameraDepthAttachmentId,
             RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+        
+        if (!renderingData.rendererAsset.commonSettings.enableDeferredRendering)
+        {
+            cmd.ClearRenderTarget(
+                true, 
+                renderingData.cameraData.renderType == CameraRenderType.Base, 
+                Color.clear);
+        }
     }
 
     void DrawOpaque()

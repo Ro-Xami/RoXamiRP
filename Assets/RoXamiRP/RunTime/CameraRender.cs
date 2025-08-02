@@ -19,7 +19,8 @@ public partial class CameraRender
     };
 
     public void Render(
-        ScriptableRenderContext scriptableRenderContext , Camera cameraIndex , 
+        ScriptableRenderContext scriptableRenderContext , 
+        Camera cameraIndex, AdditionalCameraData additionalCameraData,
         ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset)
     {
         context = scriptableRenderContext;
@@ -29,8 +30,13 @@ public partial class CameraRender
         PrepareForSceneWindow();
         SetCommonData();
         
-        SetUpRenderingData(shadowSettings , rendererAsset, shaderAsset);
-        SetUpCameraColorDepthRT();
+        SetUpRenderingData(shadowSettings , rendererAsset, shaderAsset, additionalCameraData);
+        
+         if (renderingData.cameraData.renderType == CameraRenderType.Base)
+         {
+            SetUpCameraColorDepthRT();
+        }
+        
         renderer.InitializedActiveRenderPass(rendererAsset, ref renderingData);
         
         cmd.BeginSample(SampleName);
@@ -57,14 +63,18 @@ public partial class CameraRender
     
     void CleanUp()
     {
-        cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentId);
-        cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentId);
-        cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorCopyTextureID);
-        cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthCopyTextureID);
+        if (renderingData.cameraData is { renderType: CameraRenderType.Base, beOverlay: false} ||
+            renderingData.cameraData.renderType == CameraRenderType.Overlay)
+        {
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentId);
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentId);
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorCopyTextureID);
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthCopyTextureID);
+        }
         renderer.CameraCleanUp();
     }
     
-    void SetUpRenderingData(ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset)
+    void SetUpRenderingData(ShadowSettings shadowSettings , RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset, AdditionalCameraData additionalCameraData)
     {
         if (!camera.TryGetCullingParameters(out ScriptableCullingParameters p))
         {
@@ -81,6 +91,8 @@ public partial class CameraRender
         renderingData.cameraData.camera = camera;
         renderingData.cameraData.width = camera.pixelWidth;
         renderingData.cameraData.height = camera.pixelHeight;
+        renderingData.cameraData.renderType = additionalCameraData.cameraRenderType;
+        renderingData.cameraData.beOverlay = additionalCameraData.beOverLay;
     }
     
     private void SetUpCameraColorDepthRT()

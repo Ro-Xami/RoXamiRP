@@ -47,7 +47,6 @@ public class RoXamiRendererAssetInspector : Editor
             if (renderFeature == null) continue;
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            
             Editor featureEditor = Editor.CreateEditor(renderFeature);
             featureEditor.OnInspectorGUI();
 

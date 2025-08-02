@@ -5,14 +5,27 @@ using UnityEngine.Rendering;
 [CustomEditor(typeof(RoXamiAdditionalCameraData))]
 public class RoXamiAdditionalCameraDataInspector : Editor
 {
-    RoXamiAdditionalCameraData additionalCameraData;
+    RoXamiAdditionalCameraData roAddCamData;
     public void OnEnable()
     {
-        additionalCameraData = target as RoXamiAdditionalCameraData;
+        roAddCamData = target as RoXamiAdditionalCameraData;
     }
     
     public override void OnInspectorGUI()
     {
+        RoXamiRenderAssetMenu();
+        
+        EditorGUILayout.Space(20);
+        
+        base.OnInspectorGUI();
+    }
+
+    void RoXamiRenderAssetMenu()
+    {
+        EditorGUILayout.BeginHorizontal();
+        
+        EditorGUILayout.LabelField("RoXamiRendererAsset");
+        
         RoXamiRPAsset rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
         if (rpAsset == null)
         {
@@ -21,12 +34,9 @@ public class RoXamiAdditionalCameraDataInspector : Editor
         var rendererAssets = rpAsset.rendererAssets;
         
         string assetName = 
-            additionalCameraData.roXamiRendererAssetID + 1 > rendererAssets.Length ? 
-            "Null Renderer" : rendererAssets[additionalCameraData.roXamiRendererAssetID].name;
-
-        EditorGUILayout.BeginHorizontal();
+            roAddCamData.additionalCameraData.roXamiRendererAssetID + 1 > rendererAssets.Length ? 
+                "Null Renderer" : rendererAssets[roAddCamData.additionalCameraData.roXamiRendererAssetID].name;
         
-        EditorGUILayout.LabelField("RoXamiRendererAsset");
         if (GUILayout.Button(assetName))
         {
             RoXamiRenderAssetMenu(rendererAssets);
@@ -34,7 +44,7 @@ public class RoXamiAdditionalCameraDataInspector : Editor
         
         EditorGUILayout.EndHorizontal();
     }
-
+    
     private void RoXamiRenderAssetMenu(RoXamiRendererAsset[] rendererAssets)
     {
         GenericMenu menu = new GenericMenu();
@@ -44,7 +54,7 @@ public class RoXamiAdditionalCameraDataInspector : Editor
             int assetIndex = i;
             menu.AddItem(new GUIContent(rendererAsset.name), false, () =>
             {
-                additionalCameraData.roXamiRendererAssetID = assetIndex;
+                roAddCamData.additionalCameraData.roXamiRendererAssetID = assetIndex;
                 
             });
             menu.ShowAsContext();

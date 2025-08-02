@@ -9,28 +9,60 @@ public enum CameraRenderType
 
 public static class RoXamiCameraExtensions
 {
-    public static RoXamiAdditionalCameraData GetRoXamiAdditionalCameraData(this Camera camera)
+    public static AdditionalCameraData GetRoXamiAdditionalCameraData(this Camera camera)
     {
         camera.TryGetComponent(out RoXamiAdditionalCameraData data);
-        return data;
+        
+        AdditionalCameraData additionalCameraData = data == null?
+            RoXamiAdditionalCameraData.DefaultAdditionalCameraData:
+            data.additionalCameraData ?? 
+            RoXamiAdditionalCameraData.DefaultAdditionalCameraData;
+        
+        return additionalCameraData;
     }
-    
-    // public static RoXamiRendererAsset GetRoXamiRendererAsset(this Camera camera)
-    // {
-    //     if (camera.TryGetComponent<RoXamiAdditionalCameraData>(out var data) && data.roXamiRendererAsset != null)
-    //     {
-    //         return data.roXamiRendererAsset;
-    //     }
-    //
-    //     return RoXamiRendererAsset.defaultAsset;
-    // }
+}
+
+[System.Serializable]
+public class AdditionalCameraData
+{
+    [HideInInspector] public int roXamiRendererAssetID;
+    public CameraRenderType cameraRenderType;
+    public bool beOverLay;
+
+    public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, bool beOverLay)
+    {
+        this.roXamiRendererAssetID = roXamiRendererAssetID;
+        this.cameraRenderType = cameraRenderType;
+        this.beOverLay = beOverLay;
+    }
 }
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Camera))]
 public class RoXamiAdditionalCameraData : MonoBehaviour
 {
-    public int roXamiRendererAssetID = 0;
-    public CameraRenderType cameraRenderType;
+    private static AdditionalCameraData defaultAdditionalCameraData;
+    public static AdditionalCameraData DefaultAdditionalCameraData
+    {
+        get
+        {
+            if (defaultAdditionalCameraData == null)
+            {
+                if (!(RoXamiRPAsset)GraphicsSettings.renderPipelineAsset)
+                {
+                    Debug.LogError("There's no RoXami render pipeline asset in GraphicsSettings.");
+                    return null;
+                }
+                
+                var rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
+                defaultAdditionalCameraData = 
+                    new AdditionalCameraData(0, CameraRenderType.Base, false);
+            }
+            return defaultAdditionalCameraData;
+        }
+    }
+    
+    [SerializeField]
+    public AdditionalCameraData additionalCameraData;
 }
 

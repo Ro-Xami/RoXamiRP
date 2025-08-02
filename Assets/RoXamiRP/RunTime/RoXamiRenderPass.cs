@@ -128,6 +128,18 @@ public abstract class RoXamiRenderPass
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
     }
+
+    protected void ClearRenderTargetWithUnityAPI(CommandBuffer cmd, Camera camera)
+    {
+        CameraClearFlags flags = camera.clearFlags;
+        
+        cmd.ClearRenderTarget(
+        flags <= CameraClearFlags.Depth,
+        flags <= CameraClearFlags.Color,
+        flags == CameraClearFlags.Color ?
+        camera.backgroundColor.linear : Color.clear
+        );
+    }
     
     public static bool operator <(RoXamiRenderPass lhs, RoXamiRenderPass rhs)
     {

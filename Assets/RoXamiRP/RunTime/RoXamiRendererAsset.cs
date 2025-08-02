@@ -29,8 +29,9 @@ public class CommonSettings
     public bool enableHDR = false;
     public bool enableGpuInstancing = false;
     public bool enableDynamicBatching = false;
-    public bool enablePostProcessing = false;
+    public bool enableDeferredRendering = true;
     public bool enableScreenSpaceShadows = false;
+    public bool enablePostProcessing = false;
 }
 
 [Serializable]

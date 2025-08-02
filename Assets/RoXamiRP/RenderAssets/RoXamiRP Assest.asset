@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c63cc618ef867a4e87c41a176293b97, type: 3}
   m_Name: RoXamiRP Assest
   m_EditorClassIdentifier: 
-  rendererAssets:
-  - {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920, type: 2}
+  rendererAssets: []
   shadowSettings:
     maxDistance: 50
     distanceFade: 0.194

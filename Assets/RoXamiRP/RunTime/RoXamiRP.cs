@@ -32,20 +32,12 @@ public class RoXamiRP : RenderPipeline
         {
             var additionalCameraData = camera.GetRoXamiAdditionalCameraData();
             
-            RoXamiRendererAsset renderAsset;
-            if (additionalCameraData == null)
-            {
-                renderAsset = RoXamiRendererAsset.defaultAsset;
-            }
-            else
-            {
-                renderAsset = 
-                    additionalCameraData.roXamiRendererAssetID < rendererAssets.Length ?
-                        rendererAssets[additionalCameraData.roXamiRendererAssetID] : 
-                        RoXamiRendererAsset.defaultAsset;
-            }
+            RoXamiRendererAsset renderAsset = 
+                additionalCameraData.roXamiRendererAssetID < rendererAssets.Length ?
+                    rendererAssets[additionalCameraData.roXamiRendererAssetID] : 
+                    RoXamiRendererAsset.defaultAsset;
  
-            cameraRender.Render(context, camera, shadowSettings , renderAsset, shaderAsset);
+            cameraRender.Render(context, camera, additionalCameraData, shadowSettings , renderAsset, shaderAsset);
         }
     }
 }

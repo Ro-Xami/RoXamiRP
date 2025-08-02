@@ -15,6 +15,8 @@ public struct CameraData
     public Camera camera;
     public int width;
     public int height;
+    public CameraRenderType renderType;
+    public bool beOverlay;
     public RenderTextureDescriptor cameraColorDescriptor;
     public RenderTextureDescriptor cameraDepthDescriptor;
     public FilterMode cameraColorFilterMode;

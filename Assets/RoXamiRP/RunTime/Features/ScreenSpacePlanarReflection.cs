@@ -10,7 +10,6 @@ public class ScreenSpacePlanarReflection : RoXamiRenderFeature
     {
         private readonly ComputeShader compute;
         private readonly float planeHeight;
-        private readonly string sampleName;
         public ScreenSpacePlanarReflectionPass(ComputeShader cs, float height)
         {
             this.compute = cs;
