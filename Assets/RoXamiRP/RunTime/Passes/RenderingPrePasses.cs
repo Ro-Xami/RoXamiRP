@@ -15,5 +15,8 @@ public class RenderingPrePasses : RoXamiRenderPass
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         context.SetupCameraProperties(renderingData.cameraData.camera);
+        
+        var camera = renderingData.cameraData.camera;
+        VolumeManager.instance.Update(camera.transform, camera.cullingMask);
     }
 }

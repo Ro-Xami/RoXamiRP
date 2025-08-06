@@ -17,7 +17,6 @@ public class RoXamiRendererAssetInspector : Editor
     {
         asset = target as RoXamiRendererAsset;
         commonSettings = serializedObject.FindProperty("commonSettings");
-        bloomSettings = serializedObject.FindProperty("bloomSettings");
         roXamiRenderFeatures = serializedObject.FindProperty("roXamiRenderFeatures");
 
         CollectRenderFeatureTypes();
@@ -36,7 +35,6 @@ public class RoXamiRendererAssetInspector : Editor
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(commonSettings);
-        EditorGUILayout.PropertyField(bloomSettings);
 
         EditorGUILayout.Space(20);
         EditorGUILayout.LabelField("Render Features", EditorStyles.boldLabel);

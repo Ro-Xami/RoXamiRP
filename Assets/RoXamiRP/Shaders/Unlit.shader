@@ -113,7 +113,7 @@ Shader "RoXami RP/Unlit"
 				float4 lastColor = SampleSSPRTexture(screenSpaceUV);
 				lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
 
-				return float4(0,0,1,1);
+				//return float4(0,0,1,1);
 				return float4(lastColor.rgb, 1);
 				return float4(shadow.xxx, 1);
 				return albedo;

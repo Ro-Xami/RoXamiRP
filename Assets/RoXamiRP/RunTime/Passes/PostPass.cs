@@ -1,6 +1,12 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
+public interface IPostProcessComponent
+{
+    bool IsActive();
+    bool IsTileCompatible();
+}
+
 public class PostPass : RoXamiRenderPass
 {
     public PostPass(RenderPassEvent evt)
@@ -9,6 +15,7 @@ public class PostPass : RoXamiRenderPass
     }
 
     public bool IsActive;
+    private VolumeStack stack;
     
     const string bufferName = "RoXami Post";
     CommandBuffer cmd = new CommandBuffer
@@ -22,6 +29,7 @@ public class PostPass : RoXamiRenderPass
     static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
     static readonly int bloomParam = Shader.PropertyToID("_bloomParam");
     static readonly int bloomIntensity = Shader.PropertyToID("_bloomIntensity");
+
 
     enum Pass
     {
@@ -37,17 +45,32 @@ public class PostPass : RoXamiRenderPass
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
     {
         renderingData = renderData;
+        stack = VolumeManager.instance.stack;
         
         cmd.BeginSample("RoXami Bloom");
         ExecuteCommandBuffer(context, cmd);
 
         if (renderingData.rendererAsset.commonSettings.enablePostProcessing)
         {
-            SetupBloom();
+            Bloom bloomSettings = stack.GetComponent<Bloom>();
+            if (bloomSettings.IsActive())
+            {
+                SetupBloom(bloomSettings);
+            }
+
+            // if (renderingData.cameraData.renderType == CameraRenderType.Base &&
+            //     renderingData.cameraData.beOverlay)
+            // {
+            //     //FinalBlit
+            //     Draw(BuiltinRenderTextureType.CameraTarget, 
+            //         ShaderDataID.cameraColorAttachmentId, Pass.finalBlit);
+            // }
         }
         else
         {
-            FinalBlit();
+            //FinalBlit
+            Draw(ShaderDataID.cameraColorAttachmentId, 
+                BuiltinRenderTextureType.CameraTarget, Pass.finalBlit);
         }
         cmd.EndSample("RoXami Bloom");
         ExecuteCommandBuffer(context, cmd);
@@ -66,10 +89,9 @@ public class PostPass : RoXamiRenderPass
     }
 
     #region Bloom
-    void SetupBloom()
+    void SetupBloom(Bloom bloomSettings)
     {
-        BloomSettings bloom = renderingData.rendererAsset.bloomSettings;
-        int sampleCount = bloom.maxSampleCount;
+        int sampleCount = bloomSettings.maxSampleCount.value;
 
         if (sampleCount <= 0)
         {
@@ -84,10 +106,11 @@ public class PostPass : RoXamiRenderPass
         FilterMode filter = FilterMode.Bilinear;
         
         //Set bloom Shader datas
-        float threshold = Mathf.GammaToLinearSpace(bloom.threshold);
+        float threshold = Mathf.GammaToLinearSpace(bloomSettings.threshold.value);
         float thresholdKnee = threshold * 0.5f; // Hardcoded soft knee
-        cmd.SetGlobalVector(bloomParam , new Vector4(threshold , thresholdKnee, bloom.clampMax , bloom.scatter));
-        cmd.SetGlobalFloat(bloomIntensity , bloom.intensity);
+        cmd.SetGlobalVector(bloomParam , new Vector4(
+            threshold , thresholdKnee, bloomSettings.clampMax.value , bloomSettings.scatter.value));
+        cmd.SetGlobalFloat(bloomIntensity , bloomSettings.intensity.value);
         
         //Filter
         cmd.GetTemporaryRT(bloomFilterID , width, height,0,filter , format);

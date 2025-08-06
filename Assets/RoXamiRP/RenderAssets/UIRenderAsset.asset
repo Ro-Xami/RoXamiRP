@@ -16,8 +16,9 @@ MonoBehaviour:
     enableHDR: 0
     enableGpuInstancing: 0
     enableDynamicBatching: 0
-    enablePostProcessing: 0
+    enableDeferredRendering: 0
     enableScreenSpaceShadows: 0
+    enablePostProcessing: 0
   bloomSettings:
     intensity: 1
     clampMax: 100

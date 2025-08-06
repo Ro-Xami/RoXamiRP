@@ -2,13 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "RoXamiRenderer Asset", menuName ="RoXamiRP/RoXamiRenderer Asset")]
 public class RoXamiRendererAsset : ScriptableObject
 {
     public CommonSettings commonSettings;
-
-    public BloomSettings bloomSettings;
 
     public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>(10);
     
@@ -32,14 +31,4 @@ public class CommonSettings
     public bool enableDeferredRendering = true;
     public bool enableScreenSpaceShadows = false;
     public bool enablePostProcessing = false;
-}
-
-[Serializable]
-public class  BloomSettings
-{
-    [Min(0f)]public float intensity = 1f;
-    [Min(0f)]public float clampMax = 5f;
-    [Range(0f , 1f)]public float threshold = 0.9f;
-    [Range(0f , 1f)]public float scatter = 0.7f;
-    [Range(0f , 10f)]public int maxSampleCount = 5;
 }
