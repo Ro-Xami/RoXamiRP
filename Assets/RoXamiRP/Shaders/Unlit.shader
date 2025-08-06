@@ -3,7 +3,7 @@ Shader "RoXami RP/Unlit"
 	Properties
 	{
 		_BaseColor ("Base Color" , color) = (1,1,1,1)
-		_BaseMap ("Base Map" , 2D) = "white" {}
+		_MainTex ("Base Map" , 2D) = "white" {}
 		[Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src Blend", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 0
 		[Enum(Off, 0, On, 1)] _ZWrite ("Z Write", Float) = 1
@@ -32,12 +32,12 @@ Shader "RoXami RP/Unlit"
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
 
-			TEXTURE2D(_BaseMap);
-			SAMPLER(sampler_BaseMap);
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
 			CBUFFER_START(UnityPerMaterial)
 				float4 _BaseColor;
-				float4 _BaseMap_ST;
+				float4 _MainTex_ST;
 				float _cutout;
 			CBUFFER_END
 
@@ -75,7 +75,7 @@ Shader "RoXami RP/Unlit"
 				half3 positionWS = TransformObjectToWorld(IN.positionOS.xyz);
 				OUT.positionCS = TransformWorldToHClip(positionWS);
 				OUT.color = IN.color * _BaseColor;
-				OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
+				OUT.uv = TRANSFORM_TEX(IN.uv , _MainTex);
 				OUT.srcPos = ComputeScreenPos(OUT.positionCS);
 
 				return OUT;
@@ -99,7 +99,7 @@ Shader "RoXami RP/Unlit"
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
 
-				half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor * IN.color;
+				half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv) * _BaseColor * IN.color;
 
 				#ifdef _ALPHACLIP_ON
 				clip(albedo.a - _cutout);
@@ -113,7 +113,7 @@ Shader "RoXami RP/Unlit"
 				float4 lastColor = SampleSSPRTexture(screenSpaceUV);
 				lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
 
-				//return float4(0,0,1,1);
+				return albedo;
 				return float4(lastColor.rgb, 1);
 				return float4(shadow.xxx, 1);
 				return albedo;

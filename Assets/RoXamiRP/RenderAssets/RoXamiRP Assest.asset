@@ -21,9 +21,9 @@ MonoBehaviour:
     directional:
       atlasSize: 2048
       filter: 3
-      cascadeRatio1: 0.3
-      cascadeRatio2: 0.6
-      cascadeRatio3: 0.8
+      cascadeRatio1: 0.149
+      cascadeRatio2: 0.411
+      cascadeRatio3: 0.66
       cascadeFade: 1
   shaderAsset:
     screenSpaceShadowComputeShader: {fileID: 7200000, guid: a8c4476fc8586e3479414139329386ec,

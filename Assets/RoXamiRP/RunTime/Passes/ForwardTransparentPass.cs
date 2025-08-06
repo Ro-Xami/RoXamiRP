@@ -3,79 +3,83 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-public class ForwardTransparentPass : RoXamiRenderPass
+namespace RoXamiRenderPipeline
 {
-    public ForwardTransparentPass(RenderPassEvent evt)
+    public class ForwardTransparentPass : RoXamiRenderPass
     {
-        renderPassEvent = evt;
-    }
-    
-    static readonly string transparentBufferName = "RoXami Forward Transparent";
-    static readonly CommandBuffer transparentCmd = new CommandBuffer()
-    {
-        name = transparentBufferName
-    };
-
-    private RenderingData renderingData;
-    private ScriptableRenderContext context;
-
-    public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderData)
-    {
-        renderingData = renderData;
-        context = scriptableRenderContext;
-        
-        SetRenderTarget(transparentCmd);
-        transparentCmd.BeginSample(transparentBufferName);
-        ExecuteCommandBuffer(context, transparentCmd);
-        
-        DrawTransparent();
-
-        transparentCmd.EndSample(transparentBufferName);
-        ExecuteCommandBuffer(context, transparentCmd);
-    }
-    
-    public override void CleanUp()
-    {
-    }
-
-    private void SetRenderTarget(CommandBuffer cmd)
-    {
-        cmd.SetRenderTarget(
-            ShaderDataID.cameraColorAttachmentId,
-            RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-            ShaderDataID.cameraDepthAttachmentId,
-            RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
-    }
-
-    void CopyCameraColor(CommandBuffer cmd)
-    {
-        cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
-        cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
-    }
-
-    void DrawTransparent()
-    {
-        SortingSettings sortingSettings = new SortingSettings(renderingData.cameraData.camera)
+        public ForwardTransparentPass(RenderPassEvent evt)
         {
-            criteria = SortingCriteria.CommonTransparent
-        };
-        DrawingSettings drawingSettings = new DrawingSettings(ShaderDataID.unlitShaderTagId, sortingSettings)
+            renderPassEvent = evt;
+        }
+
+        static readonly string transparentBufferName = "RoXami Forward Transparent";
+
+        static readonly CommandBuffer transparentCmd = new CommandBuffer()
         {
-            enableDynamicBatching = 
-                renderingData.rendererAsset.commonSettings.enableDynamicBatching , 
-            enableInstancing = 
-                renderingData.rendererAsset.commonSettings.enableGpuInstancing , 
-            perObjectData = 
-                PerObjectData.ReflectionProbes | PerObjectData.LightProbe
+            name = transparentBufferName
         };
-        drawingSettings.SetShaderPassName(1 , ShaderDataID.toonLitShaderTagId);
-        FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
-        
-        context.DrawRenderers(
-            renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-        
-        CopyCameraColor(transparentCmd);
-        
-        context.Submit();
+
+        private RenderingData renderingData;
+        private ScriptableRenderContext context;
+
+        public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderData)
+        {
+            renderingData = renderData;
+            context = scriptableRenderContext;
+
+            SetRenderTarget(transparentCmd);
+            transparentCmd.BeginSample(transparentBufferName);
+            ExecuteCommandBuffer(context, transparentCmd);
+
+            DrawTransparent();
+
+            transparentCmd.EndSample(transparentBufferName);
+            ExecuteCommandBuffer(context, transparentCmd);
+        }
+
+        public override void CleanUp()
+        {
+        }
+
+        private void SetRenderTarget(CommandBuffer cmd)
+        {
+            cmd.SetRenderTarget(
+                ShaderDataID.cameraColorAttachmentId,
+                RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
+                ShaderDataID.cameraDepthAttachmentId,
+                RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+        }
+
+        void CopyCameraColor(CommandBuffer cmd)
+        {
+            cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
+            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
+        }
+
+        void DrawTransparent()
+        {
+            SortingSettings sortingSettings = new SortingSettings(renderingData.cameraData.camera)
+            {
+                criteria = SortingCriteria.CommonTransparent
+            };
+            DrawingSettings drawingSettings = new DrawingSettings(ShaderDataID.unlitShaderTagId, sortingSettings)
+            {
+                enableDynamicBatching =
+                    renderingData.rendererAsset.commonSettings.enableDynamicBatching,
+                enableInstancing =
+                    renderingData.rendererAsset.commonSettings.enableGpuInstancing,
+                perObjectData =
+                    PerObjectData.ReflectionProbes | PerObjectData.LightProbe
+            };
+            drawingSettings.SetShaderPassName(1, ShaderDataID.toonLitShaderTagId);
+            FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
+
+            context.DrawRenderers(
+                renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+
+            CopyCameraColor(transparentCmd);
+
+            context.Submit();
+        }
     }
 }

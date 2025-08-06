@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 
-public class RenderingPrePasses : RoXamiRenderPass
+namespace RoXamiRenderPipeline
 {
-    public RenderingPrePasses(RenderPassEvent evt)
+    public class RenderingPrePasses : RoXamiRenderPass
     {
-        renderPassEvent = evt;
-    }
+        public RenderingPrePasses(RenderPassEvent evt)
+        {
+            renderPassEvent = evt;
+        }
 
-    public override void SetUp(CommandBuffer buffer, ref RenderingData renderingData)
-    {
-    }
+        public override void SetUp(CommandBuffer buffer, ref RenderingData renderingData)
+        {
+        }
 
-    public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
-    {
-        context.SetupCameraProperties(renderingData.cameraData.camera);
-        
-        var camera = renderingData.cameraData.camera;
-        VolumeManager.instance.Update(camera.transform, camera.cullingMask);
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+        {
+            context.SetupCameraProperties(renderingData.cameraData.camera);
+
+            var camera = renderingData.cameraData.camera;
+            VolumeManager.instance.Update(camera.transform, camera.cullingMask);
+        }
     }
 }

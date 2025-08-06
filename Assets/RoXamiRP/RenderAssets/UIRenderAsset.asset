@@ -19,10 +19,4 @@ MonoBehaviour:
     enableDeferredRendering: 0
     enableScreenSpaceShadows: 0
     enablePostProcessing: 0
-  bloomSettings:
-    intensity: 1
-    clampMax: 100
-    threshold: 0.98
-    scatter: 0.7
-    maxSampleCount: 6
   roXamiRenderFeatures: []

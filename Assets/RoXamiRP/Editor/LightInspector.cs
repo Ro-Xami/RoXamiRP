@@ -1,18 +1,22 @@
 using UnityEngine;
 using UnityEditor;
 
-[CanEditMultipleObjects]
-[CustomEditor(typeof(Light))]
-public class LightInspector : LightEditor
+namespace RoXamiRenderPipeline
 {
-    public override void OnInspectorGUI()
+    [CanEditMultipleObjects]
+        [CustomEditor(typeof(Light))]
+
+    public class LightInspector : LightEditor
     {
-        base.OnInspectorGUI();
-        if (!settings.lightType.hasMultipleDifferentValues &&
-            (LightType)settings.lightType.enumValueIndex == LightType.Spot)
+        public override void OnInspectorGUI()
         {
-            settings.DrawInnerAndOuterSpotAngle();
-            settings.ApplyModifiedProperties();
+            base.OnInspectorGUI();
+            if (!settings.lightType.hasMultipleDifferentValues &&
+                (LightType)settings.lightType.enumValueIndex == LightType.Spot)
+            {
+                settings.DrawInnerAndOuterSpotAngle();
+                settings.ApplyModifiedProperties();
+            }
         }
     }
 }

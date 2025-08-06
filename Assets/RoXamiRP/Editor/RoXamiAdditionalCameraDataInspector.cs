@@ -2,62 +2,66 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[CustomEditor(typeof(RoXamiAdditionalCameraData))]
-public class RoXamiAdditionalCameraDataInspector : Editor
+namespace RoXamiRenderPipeline
 {
-    RoXamiAdditionalCameraData roAddCamData;
-    public void OnEnable()
-    {
-        roAddCamData = target as RoXamiAdditionalCameraData;
-    }
-    
-    public override void OnInspectorGUI()
-    {
-        RoXamiRenderAssetMenu();
-        
-        EditorGUILayout.Space(20);
-        
-        base.OnInspectorGUI();
-    }
+    [CustomEditor(typeof(RoXamiAdditionalCameraData))]
 
-    void RoXamiRenderAssetMenu()
+    public class RoXamiAdditionalCameraDataInspector : Editor
     {
-        EditorGUILayout.BeginHorizontal();
-        
-        EditorGUILayout.LabelField("RoXamiRendererAsset");
-        
-        RoXamiRPAsset rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
-        if (rpAsset == null)
+        RoXamiAdditionalCameraData roAddCamData;
+
+        public void OnEnable()
         {
-            return;
+            roAddCamData = target as RoXamiAdditionalCameraData;
         }
-        var rendererAssets = rpAsset.rendererAssets;
-        
-        string assetName = 
-            roAddCamData.additionalCameraData.roXamiRendererAssetID + 1 > rendererAssets.Length ? 
-                "Null Renderer" : rendererAssets[roAddCamData.additionalCameraData.roXamiRendererAssetID].name;
-        
-        if (GUILayout.Button(assetName))
+
+        public override void OnInspectorGUI()
         {
-            RoXamiRenderAssetMenu(rendererAssets);
+            RoXamiRenderAssetMenu();
+
+            EditorGUILayout.Space(20);
+
+            base.OnInspectorGUI();
         }
-        
-        EditorGUILayout.EndHorizontal();
-    }
-    
-    private void RoXamiRenderAssetMenu(RoXamiRendererAsset[] rendererAssets)
-    {
-        GenericMenu menu = new GenericMenu();
-        for (int i = 0; i < rendererAssets.Length; i++)
+
+        void RoXamiRenderAssetMenu()
         {
-            var rendererAsset = rendererAssets[i];
-            int assetIndex = i;
-            menu.AddItem(new GUIContent(rendererAsset.name), false, () =>
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUILayout.LabelField("RoXamiRendererAsset");
+
+            RoXamiRPAsset rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
+            if (rpAsset == null)
             {
-                roAddCamData.additionalCameraData.roXamiRendererAssetID = assetIndex;
-                
-            });
-            menu.ShowAsContext();
+                return;
+            }
+
+            var rendererAssets = rpAsset.rendererAssets;
+
+            string assetName =
+                roAddCamData.additionalCameraData.roXamiRendererAssetID + 1 > rendererAssets.Length
+                    ? "Null Renderer"
+                    : rendererAssets[roAddCamData.additionalCameraData.roXamiRendererAssetID].name;
+
+            if (GUILayout.Button(assetName))
+            {
+                RoXamiRenderAssetMenu(rendererAssets);
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void RoXamiRenderAssetMenu(RoXamiRendererAsset[] rendererAssets)
+        {
+            GenericMenu menu = new GenericMenu();
+            for (int i = 0; i < rendererAssets.Length; i++)
+            {
+                var rendererAsset = rendererAssets[i];
+                int assetIndex = i;
+                menu.AddItem(new GUIContent(rendererAsset.name), false,
+                    () => { roAddCamData.additionalCameraData.roXamiRendererAssetID = assetIndex; });
+                menu.ShowAsContext();
+            }
         }
     }
 }

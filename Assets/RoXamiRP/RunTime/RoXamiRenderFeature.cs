@@ -2,30 +2,34 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[ExcludeFromPreset]
-public abstract class RoXamiRenderFeature : ScriptableObject, IDisposable
+namespace RoXamiRenderPipeline
 {
-    public abstract void Create();
-    
-    public abstract void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData);
+    [ExcludeFromPreset]
 
-    public void OnEnable()
+    public abstract class RoXamiRenderFeature : ScriptableObject, IDisposable
     {
-        Create();
-    }
+        public abstract void Create();
 
-    public void OnValidate()
-    {
-        Create();
-    }
+        public abstract void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData);
 
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+        public void OnEnable()
+        {
+            Create();
+        }
 
-    protected virtual void Dispose(bool disposing)
-    {
+        public void OnValidate()
+        {
+            Create();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+        }
     }
 }

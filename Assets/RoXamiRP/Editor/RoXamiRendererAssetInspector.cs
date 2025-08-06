@@ -3,142 +3,149 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
-[CustomEditor(typeof(RoXamiRendererAsset))]
-public class RoXamiRendererAssetInspector : Editor
+namespace RoXamiRenderPipeline
 {
-    private RoXamiRendererAsset asset;
-    private SerializedProperty commonSettings, bloomSettings, roXamiRenderFeatures;
+    [CustomEditor(typeof(RoXamiRendererAsset))]
 
-    private List<Type> renderFeatureTypes;
-    private GenericMenu featureMenu;
-
-    void OnEnable()
+    public class RoXamiRendererAssetInspector : Editor
     {
-        asset = target as RoXamiRendererAsset;
-        commonSettings = serializedObject.FindProperty("commonSettings");
-        roXamiRenderFeatures = serializedObject.FindProperty("roXamiRenderFeatures");
+        private RoXamiRendererAsset asset;
+        private SerializedProperty commonSettings, bloomSettings, roXamiRenderFeatures;
 
-        CollectRenderFeatureTypes();
-    }
+        private List<Type> renderFeatureTypes;
+        private GenericMenu featureMenu;
 
-    void CollectRenderFeatureTypes()
-    {
-        renderFeatureTypes = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(a => a.GetTypes())
-            .Where(t => t.IsSubclassOf(typeof(RoXamiRenderFeature)) && !t.IsAbstract)
-            .ToList();
-    }
-
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-
-        EditorGUILayout.PropertyField(commonSettings);
-
-        EditorGUILayout.Space(20);
-        EditorGUILayout.LabelField("Render Features", EditorStyles.boldLabel);
-
-        for (int i = 0; i < asset.roXamiRenderFeatures.Count; i++)
+        void OnEnable()
         {
-            var renderFeature = asset.roXamiRenderFeatures[i];
-            if (renderFeature == null) continue;
+            asset = target as RoXamiRendererAsset;
+            commonSettings = serializedObject.FindProperty("commonSettings");
+            roXamiRenderFeatures = serializedObject.FindProperty("roXamiRenderFeatures");
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            Editor featureEditor = Editor.CreateEditor(renderFeature);
-            featureEditor.OnInspectorGUI();
+            CollectRenderFeatureTypes();
+        }
 
-            EditorGUILayout.Space();
+        void CollectRenderFeatureTypes()
+        {
+            renderFeatureTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.IsSubclassOf(typeof(RoXamiRenderFeature)) && !t.IsAbstract)
+                .ToList();
+        }
+
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
+
+            EditorGUILayout.PropertyField(commonSettings);
+
+            EditorGUILayout.Space(20);
+            EditorGUILayout.LabelField("Render Features", EditorStyles.boldLabel);
+
+            for (int i = 0; i < asset.roXamiRenderFeatures.Count; i++)
+            {
+                var renderFeature = asset.roXamiRenderFeatures[i];
+                if (renderFeature == null) continue;
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                Editor featureEditor = CreateEditor(renderFeature);
+                featureEditor.OnInspectorGUI();
+
+                EditorGUILayout.Space();
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Remove Feature", GUILayout.Width(120)))
+                {
+                    string path = AssetDatabase.GetAssetPath(asset);
+                    asset.roXamiRenderFeatures.RemoveAt(i);
+                    AssetDatabase.RemoveObjectFromAsset(renderFeature);
+                    DestroyImmediate(renderFeature, true);
+
+                    EditorUtility.SetDirty(asset);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.ImportAsset(path);
+                    AssetDatabase.Refresh();
+                    break;
+                }
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+            }
+
+
             EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Remove Feature", GUILayout.Width(120)))
+            if (GUILayout.Button("Add RenderFeature"))
             {
-                string path = AssetDatabase.GetAssetPath(asset);
-                asset.roXamiRenderFeatures.RemoveAt(i);
-                AssetDatabase.RemoveObjectFromAsset(renderFeature);
-                DestroyImmediate(renderFeature, true);
-
-                EditorUtility.SetDirty(asset);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.ImportAsset(path);
-                AssetDatabase.Refresh();
-                break;
+                ShowAddFeatureMenu();
             }
+
+            if (GUILayout.Button("Remove All"))
+            {
+                RemoveUnusedFeatures();
+            }
+
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.EndVertical();
+
+            serializedObject.ApplyModifiedProperties();
         }
 
-
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Add RenderFeature"))
+        void ShowAddFeatureMenu()
         {
-            ShowAddFeatureMenu();
-        }
-        if (GUILayout.Button("Remove All"))
-        {
-            RemoveUnusedFeatures();
-        }
-        EditorGUILayout.EndHorizontal();
-
-        serializedObject.ApplyModifiedProperties();
-    }
-
-    void ShowAddFeatureMenu()
-    {
-        featureMenu = new GenericMenu();
-        foreach (var type in renderFeatureTypes)
-        {
-            featureMenu.AddItem(new GUIContent(type.Name), false, () =>
+            featureMenu = new GenericMenu();
+            foreach (var type in renderFeatureTypes)
             {
-                AddFeature(type);
-            });
-        }
-        featureMenu.ShowAsContext();
-    }
-
-    void AddFeature(Type type)
-    {
-        string path = AssetDatabase.GetAssetPath(asset);
-
-        var feature = ScriptableObject.CreateInstance(type) as RoXamiRenderFeature;
-        if (feature == null)
-        {
-            return;
-        }
-        feature.name = type.Name;
-
-        AssetDatabase.AddObjectToAsset(feature, path);
-        asset.roXamiRenderFeatures.Add(feature);
-
-
-        EditorUtility.SetDirty(asset);
-        EditorUtility.SetDirty(feature);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.ImportAsset(path);
-        AssetDatabase.Refresh();
-    }
-
-
-    void RemoveUnusedFeatures()
-    {
-        string path = AssetDatabase.GetAssetPath(asset);
-        
-        var featuresToRemove = new List<RoXamiRenderFeature>(asset.roXamiRenderFeatures);
-        asset.roXamiRenderFeatures.Clear();
-
-        foreach (var feature in featuresToRemove)
-        {
-            if (feature != null)
-            {
-                AssetDatabase.RemoveObjectFromAsset(feature);
-                UnityEngine.Object.DestroyImmediate(feature, true);
+                featureMenu.AddItem(new GUIContent(type.Name), false, () => { AddFeature(type); });
             }
+
+            featureMenu.ShowAsContext();
         }
 
-        EditorUtility.SetDirty(asset);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.ImportAsset(path);
-        AssetDatabase.Refresh();
-    }
+        void AddFeature(Type type)
+        {
+            string path = AssetDatabase.GetAssetPath(asset);
 
+            var feature = CreateInstance(type) as RoXamiRenderFeature;
+            if (feature == null)
+            {
+                return;
+            }
+
+            feature.name = type.Name;
+
+            AssetDatabase.AddObjectToAsset(feature, path);
+            asset.roXamiRenderFeatures.Add(feature);
+
+
+            EditorUtility.SetDirty(asset);
+            EditorUtility.SetDirty(feature);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.ImportAsset(path);
+            AssetDatabase.Refresh();
+        }
+
+
+        void RemoveUnusedFeatures()
+        {
+            string path = AssetDatabase.GetAssetPath(asset);
+
+            var featuresToRemove = new List<RoXamiRenderFeature>(asset.roXamiRenderFeatures);
+            asset.roXamiRenderFeatures.Clear();
+
+            foreach (var feature in featuresToRemove)
+            {
+                if (feature != null)
+                {
+                    AssetDatabase.RemoveObjectFromAsset(feature);
+                    DestroyImmediate(feature, true);
+                }
+            }
+
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.ImportAsset(path);
+            AssetDatabase.Refresh();
+        }
+
+    }
 }
