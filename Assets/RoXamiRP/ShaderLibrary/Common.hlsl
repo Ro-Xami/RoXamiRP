@@ -1,6 +1,7 @@
 #ifndef ROXAMIRP_COMMON_INCLUDE
 #define ROXAMIRP_COMMON_INCLUDE
 
+//====================================CoreRP Include================================
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/UnityInput.hlsl"
@@ -17,6 +18,7 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
 
+//====================================RoXamiRP Include=================================s
 #include "Assets/RoXamiRP/ShaderLibrary/RoXamiInput.hlsl"
 #define MATRIX_I_VP _RoXamiRP_MatrixInvVP
 //#define ROXAMIRP_UV_STARTS_AT_TOP _ProjectionParams.x

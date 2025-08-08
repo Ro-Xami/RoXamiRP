@@ -1,6 +1,8 @@
+#pragma kernel SSPRCompute
+
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
-#pragma kernel SSPRCompute
+
 //#pragma kernel SSPRHole
 
 RWTexture2D<float4> _SSPRTexture;
