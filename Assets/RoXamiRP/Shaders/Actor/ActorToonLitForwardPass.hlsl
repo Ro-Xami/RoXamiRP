@@ -1,20 +1,7 @@
-#ifndef ROXAMIRP_TOONLITPASS_INCLUDE
-#define ROXAMIRP_TOONLITPASS_INCLUDE
-#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+﻿#ifndef ACTORTOON_LIT_FORWARDPASS_INCLUDE
+#define ACTORTOON_LIT_FORWARDPASS_INCLUDE
+
 #include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
-
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
-
-CBUFFER_START(UnityPerMaterial)
-	float4 _BaseMap_ST;
-	float4 _BaseColor;
-	float _cutout;
-	float _roughness;
-	float _metallic;
-	float _ao;
-	float3 _emissive;
-CBUFFER_END
 
 struct Attributes {
 	float4 positionOS : POSITION;
@@ -32,7 +19,7 @@ struct Varyings {
 	float3 positionWS : TEXCOORD1;
 	float3 normalWS : TEXCOORD2;
 	float3 tangentWS : TEXCOORD3;
-	float3 bitangentWS : TEXCOORD4;
+	float3 biTangentWS : TEXCOORD4;
 	float3 viewWS : TEXCOORD5;
 	float4 srcPos : TEXCOORD6;
 	float4 color : COLOR;
@@ -48,7 +35,11 @@ Varyings ToonLitPassVertex(Attributes IN)
 
 	OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
 	OUT.positionCS = TransformWorldToHClip(OUT.positionWS);
+	
 	OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
+	OUT.tangentWS = TransformObjectToWorldNormal(IN.tangentOS.xyz);
+	OUT.biTangentWS = GetBiTangent(OUT.normalWS, OUT.tangentWS, IN.tangentOS.w);
+	
 	OUT.viewWS = GetViewDirWS(OUT.positionWS);
 	OUT.color = IN.color * _BaseColor;
 	OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
@@ -72,14 +63,28 @@ Input GetInputData(Varyings IN)
 Surface GetSurfaceData(Varyings IN)
 {
 	Surface OUT = (Surface)0;
-	float4 base = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * IN.color;
-	OUT.albedo = base.rgb;
-	OUT.normal = IN.normalWS;
-	OUT.roughness = _roughness;
-	OUT.metallic = _metallic;
-	OUT.emissive = _emissive;
-	OUT.ao = _ao;
-	OUT.alpha = base.a;
+	float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * IN.color;
+	float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, IN.uv);
+	float4 mra = SAMPLE_TEXTURE2D(_MraMap, sampler_MraMap, IN.uv);
+	float3 emission = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, IN.uv);
+
+	float3 albedo = baseMap.rgb;
+	float alpha = baseMap.a;
+	float3 normal = TransformNormalMapToNormal(
+		normalMap, _normalStrength,
+		IN.normalWS, IN.tangentWS, IN.biTangentWS);
+	float metallic = mra.r * _metallic;
+	float roughness = mra.g * _roughness;
+	float ao = mra.b * _ao;
+	float emissive = _emissive * emission;
+	
+	OUT.albedo = albedo;
+	OUT.normal = normal;
+	OUT.metallic = metallic;
+	OUT.roughness = roughness;
+	OUT.ao = ao;
+	OUT.emissive = emissive;
+	OUT.alpha = alpha;
 
 	return OUT;
 }
@@ -87,18 +92,19 @@ Surface GetSurfaceData(Varyings IN)
 float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 {
 	UNITY_SETUP_INSTANCE_ID(IN);
-
-	#ifdef _ALPHACLIP_ON
-	clip(albedo.a - _cutout);
-	#endif
-
+	
 	Input inputData = GetInputData(IN);
 	Surface surfaceData = GetSurfaceData(IN);
 
 	float4 color = CalculateToonLighting(inputData , surfaceData);
 
-	return color;
-    return float4(surfaceData.albedo, 1);
+	#ifdef _ALPHACLIP_ON
+		clip(surfaceData.alpha - _cutout);
+	#endif
+
+	//return float4(IN.normalWS, 1);
+	//return float4(surfaceData.normal, 1);
+    return color;
 }
 
 #endif

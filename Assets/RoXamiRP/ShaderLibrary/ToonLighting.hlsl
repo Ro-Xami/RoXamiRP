@@ -121,16 +121,16 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
 	for (int additionLightIndex = 0 ; additionLightIndex < additionalLightCount ; additionLightIndex++)
 	{
 		Light additionalLight = GetAdditionalLight(additionLightIndex , inputData);
-		float NoL = saturate(dot(additionalLight.direction , inputData.normalWS));
+		float NoL = saturate(dot(additionalLight.direction , normalDir));
 		additionalLightColor += additionalLight.color * NoL * additionalLight.shadowAttenuation;
 	}
 
     float3 lightColor = light.color;
     float3 lightDir = normalize(light.direction);
     float3 halfDir = SafeNormalize(inputData.viewWS + lightDir);
-    float NoH = max(saturate(dot(inputData.normalWS, halfDir)), 0.0001);
-    float NoL = max(saturate(dot(inputData.normalWS, lightDir)) , 0.0001);
-    float NoV = max(saturate(dot(inputData.normalWS, inputData.viewWS)), 0.01);
+    float NoH = max(saturate(dot(normalDir, halfDir)), 0.0001);
+    float NoL = max(saturate(dot(normalDir, lightDir)) , 0.0001);
+    float NoV = max(saturate(dot(normalDir, inputData.viewWS)), 0.01);
     float HoV = max(saturate(dot(inputData.viewWS, lightDir)), 0.0001);
     float HoL = max(saturate(dot(halfDir, lightDir)), 0.0001);
 
@@ -140,7 +140,7 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
     float4 finalColor = float4(0, 0, 0, 0);
     finalColor.rgb =
         DirectionalLight(HoL, NoL, NoV, NoH, albedo, roughness, metallic, F0 , lightColor, inputData.viewWS) +
-        InDirectionalLight(NoV, inputData.normalWS, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi) +
+        InDirectionalLight(NoV, normalDir, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi) +
         emission +
         additionalLightColor * albedo;
     finalColor.a = surfaceData.alpha;
