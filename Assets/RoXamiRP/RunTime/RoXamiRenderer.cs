@@ -6,29 +6,38 @@ namespace RoXamiRenderPipeline
 {
     public class RoXamiRenderer
     {
-        readonly List<RoXamiRenderPass> activePasses = new List<RoXamiRenderPass>(32);
+        readonly List<RoXamiRenderPass> activePasses = 
+            new List<RoXamiRenderPass>(32);
 
-        private readonly LightingPass lightPass = new LightingPass(RenderPassEvent.BeforeRenderingShadows);
+        private readonly LightingPass lightPass = 
+            new LightingPass(RenderPassEvent.BeforeRenderingShadows);
 
-        private readonly RenderingPrePasses
-            prePasses = new RenderingPrePasses(RenderPassEvent.BeforeRenderingPrePasses);
+        private readonly RenderingPrePasses prePasses = 
+            new RenderingPrePasses(RenderPassEvent.BeforeRenderingPrePasses);
 
-        private readonly GBufferPass gBufferPass = new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer);
+        private readonly GBufferPass gBufferPass = 
+            new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer);
 
         private readonly ScreenSpaceShadowsPass ssShadowsPass =
             new ScreenSpaceShadowsPass(RenderPassEvent.AfterRenderingGbuffer);
 
-        private readonly DeferredPass deferredPass = new DeferredPass(RenderPassEvent.BeforeRenderingDeferredLights);
+        private readonly DeferredPass deferredPass = 
+            new DeferredPass(RenderPassEvent.BeforeRenderingDeferredLights);
 
         private readonly ForwardOpaquePass forwardOpaquePass =
             new ForwardOpaquePass(RenderPassEvent.BeforeRenderingOpaques);
 
-        private readonly DrawSkyboxPass drawSkyboxPass = new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox);
+        private readonly DrawSkyboxPass drawSkyboxPass = 
+            new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox);
 
         private readonly ForwardTransparentPass forwardTransparentPass =
             new ForwardTransparentPass(RenderPassEvent.BeforeRenderingTransparents);
 
-        private readonly PostPass postPass = new PostPass(RenderPassEvent.BeforeRenderingPostProcessing);
+        private readonly PostPass postPass = 
+            new PostPass(RenderPassEvent.BeforeRenderingPostProcessing);
+
+        private readonly FinalBlitPass finalBlitPass = 
+            new FinalBlitPass(RenderPassEvent.AfterRendering);
 
         public RoXamiRenderer()
         {
@@ -70,7 +79,7 @@ namespace RoXamiRenderPipeline
         {
             activePasses.Add(lightPass);
             activePasses.Add(prePasses);
-            if (renderingData.rendererAsset.commonSettings.enableDeferredRendering)
+            if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
             {
                 activePasses.Add(gBufferPass);
                 activePasses.Add(deferredPass);
@@ -78,13 +87,22 @@ namespace RoXamiRenderPipeline
             }
 
             activePasses.Add(forwardOpaquePass);
-            if (renderingData.cameraData.renderType == CameraRenderType.Base)
+            if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
             {
                 activePasses.Add(drawSkyboxPass);
             }
 
             activePasses.Add(forwardTransparentPass);
-            activePasses.Add(postPass);
+
+            if (renderingData.runtimeData.enablePostProcessing)
+            {
+                activePasses.Add(postPass);
+            }
+
+            if (renderingData.runtimeData.isFinalBlit)
+            {
+                activePasses.Add(finalBlitPass);
+            }
         }
 
         private void AddRenderFeatures(RoXamiRendererAsset asset, ref RenderingData renderingData)

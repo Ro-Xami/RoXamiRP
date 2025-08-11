@@ -12,7 +12,7 @@ namespace RoXamiRenderPipeline
     public class RoXamiRendererAssetInspector : Editor
     {
         private RoXamiRendererAsset asset;
-        private SerializedProperty commonSettings, bloomSettings, roXamiRenderFeatures;
+        private SerializedProperty rendererSettings, bloomSettings, roXamiRenderFeatures;
 
         private List<Type> renderFeatureTypes;
         private GenericMenu featureMenu;
@@ -20,7 +20,7 @@ namespace RoXamiRenderPipeline
         void OnEnable()
         {
             asset = target as RoXamiRendererAsset;
-            commonSettings = serializedObject.FindProperty("commonSettings");
+            rendererSettings = serializedObject.FindProperty("rendererSettings");
             roXamiRenderFeatures = serializedObject.FindProperty("roXamiRenderFeatures");
 
             CollectRenderFeatureTypes();
@@ -38,7 +38,7 @@ namespace RoXamiRenderPipeline
         {
             serializedObject.Update();
 
-            EditorGUILayout.PropertyField(commonSettings);
+            EditorGUILayout.PropertyField(rendererSettings);
 
             EditorGUILayout.Space(20);
             EditorGUILayout.LabelField("Render Features", EditorStyles.boldLabel);

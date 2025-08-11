@@ -49,11 +49,11 @@ namespace RoXamiRenderPipeline
                 ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 
-            if (!renderingData.rendererAsset.commonSettings.enableDeferredRendering)
+            if (!renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
             {
                 cmd.ClearRenderTarget(
                     true,
-                    renderingData.cameraData.renderType == CameraRenderType.Base,
+                    renderingData.cameraData.cameraRenderType == CameraRenderType.Base,
                     Color.clear);
             }
         }
@@ -67,8 +67,8 @@ namespace RoXamiRenderPipeline
 
             DrawingSettings drawingSettings = new DrawingSettings(ShaderDataID.unlitShaderTagId, sortingSettings)
             {
-                enableDynamicBatching = renderingData.rendererAsset.commonSettings.enableDynamicBatching,
-                enableInstancing = renderingData.rendererAsset.commonSettings.enableGpuInstancing,
+                enableDynamicBatching = renderingData.commonSettings.enableDynamicBatching,
+                enableInstancing = renderingData.commonSettings.enableGpuInstancing,
                 perObjectData =
                     PerObjectData.ReflectionProbes |
                     PerObjectData.LightProbe

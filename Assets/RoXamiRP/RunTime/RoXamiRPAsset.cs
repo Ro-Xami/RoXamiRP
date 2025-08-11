@@ -12,13 +12,15 @@ namespace RoXamiRenderPipeline
     {
         public RoXamiRendererAsset[] rendererAssets;
 
+        public CommonSettings commonSettings;
+
         [SerializeField] ShadowSettings shadowSettings = default;
 
         [SerializeField] private ShaderAsset shaderAsset = new ShaderAsset();
 
         protected override RenderPipeline CreatePipeline()
         {
-            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets);
+            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings);
         }
 
         public void Dispose()
@@ -68,6 +70,14 @@ namespace RoXamiRenderPipeline
         }
 
         public ComputeShader screenSpaceShadowComputeShader;
+    }
+    
+    [Serializable]
+    public class CommonSettings
+    {
+        public bool enableGpuInstancing = false;
+        public bool enableDynamicBatching = false;
+        public bool isHDR;
     }
 
     [Serializable]

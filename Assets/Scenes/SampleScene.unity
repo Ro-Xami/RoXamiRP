@@ -417,7 +417,11 @@ MonoBehaviour:
   additionalCameraData:
     roXamiRendererAssetID: 0
     cameraRenderType: 0
-    beOverLay: 1
+    cameraStack:
+    - {fileID: 1867074213}
+    enableHDR: 1
+    enableScreenSpaceShadows: 1
+    enablePostProcessing: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -484,7 +488,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2147483647
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
@@ -1402,7 +1406,7 @@ GameObject:
   - component: {fileID: 1867074213}
   - component: {fileID: 1867074212}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: UI_Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1423,7 +1427,10 @@ MonoBehaviour:
   additionalCameraData:
     roXamiRendererAssetID: 1
     cameraRenderType: 1
-    beOverLay: 0
+    cameraStack: []
+    enableHDR: 0
+    enableScreenSpaceShadows: 0
+    enablePostProcessing: 0
 --- !u!20 &1867074213
 Camera:
   m_ObjectHideFlags: 0

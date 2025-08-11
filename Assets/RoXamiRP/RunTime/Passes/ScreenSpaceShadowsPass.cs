@@ -43,7 +43,7 @@ namespace RoXamiRenderPipeline
                 return;
             }
 
-            if (renderingData.rendererAsset.commonSettings.enableScreenSpaceShadows)
+            if (renderingData.runtimeData.enableScreenSpaceShadows)
             {
                 cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 int width = renderingData.cameraData.width;

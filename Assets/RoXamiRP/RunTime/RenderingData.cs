@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RoXamiRenderPipeline;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,21 +11,29 @@ namespace RoXamiRenderPipeline
         public CullingResults cullingResults;
         public CameraData cameraData;
         public RoXamiRendererAsset rendererAsset;
+        public CommonSettings commonSettings;
         public ShadowSettings shadowSettings;
         public ShaderAsset shaderAsset;
+        public RuntimeData runtimeData;
     }
 
     public struct CameraData
     {
         public Camera camera;
+        public CameraRenderType cameraRenderType;
         public int width;
         public int height;
-        public CameraRenderType renderType;
-        public bool beOverlay;
         public RenderTextureDescriptor cameraColorDescriptor;
         public RenderTextureDescriptor cameraDepthDescriptor;
         public FilterMode cameraColorFilterMode;
         public FilterMode cameraDepthFilterMode;
+    }
+
+    public struct RuntimeData
+    {
+        public bool isFinalBlit;
+        public bool enableScreenSpaceShadows;
+        public bool enablePostProcessing;
     }
 
     public static class ShaderDataID
@@ -36,9 +45,24 @@ namespace RoXamiRenderPipeline
         public static readonly int cameraColorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
         public static readonly int cameraDepthCopyTextureID = Shader.PropertyToID("_CameraDepthTexture");
         public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_CameraColorTexture");
+        
+        public static readonly int postSource0Id = Shader.PropertyToID("_PostSource0");
+        public static readonly int postSource1Id = Shader.PropertyToID("_PostSource1");
+        
         public static readonly int matrixInvVP_ID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
 
         public static readonly int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
         public const string enableScreenSpaceShadowsID = "SCREENSPACE_SHADOWS";
     }
+    
+    public enum PostShaderPass
+    {
+        copy,
+        filter,
+        blurH,
+        blurV,
+        upSample,
+        combine,
+        finalBlit
+    };
 }

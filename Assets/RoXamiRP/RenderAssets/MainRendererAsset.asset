@@ -26,12 +26,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b6c9ef11b4f0ff4caee24f274079247, type: 3}
   m_Name: MainRendererAsset
   m_EditorClassIdentifier: 
-  commonSettings:
-    enableHDR: 1
-    enableGpuInstancing: 1
-    enableDynamicBatching: 0
+  rendererSettings:
     enableDeferredRendering: 1
-    enableScreenSpaceShadows: 1
-    enablePostProcessing: 1
   roXamiRenderFeatures:
   - {fileID: -4680105873266707396}

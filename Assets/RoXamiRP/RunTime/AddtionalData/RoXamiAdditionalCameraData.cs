@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -30,13 +31,15 @@ namespace RoXamiRenderPipeline
     {
         [HideInInspector] public int roXamiRendererAssetID;
         public CameraRenderType cameraRenderType;
-        public bool beOverLay;
+        public List<Camera> cameraStack = new List<Camera>();
+        public bool enableScreenSpaceShadows = false;
+        public bool enablePostProcessing = false;
 
-        public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, bool beOverLay)
+        public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, List<Camera> cameraStack)
         {
             this.roXamiRendererAssetID = roXamiRendererAssetID;
             this.cameraRenderType = cameraRenderType;
-            this.beOverLay = beOverLay;
+            this.cameraStack = cameraStack;
         }
     }
 
@@ -60,7 +63,7 @@ namespace RoXamiRenderPipeline
 
                     var rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
                     defaultAdditionalCameraData =
-                        new AdditionalCameraData(0, CameraRenderType.Base, false);
+                        new AdditionalCameraData(0, CameraRenderType.Base, null);
                 }
 
                 return defaultAdditionalCameraData;

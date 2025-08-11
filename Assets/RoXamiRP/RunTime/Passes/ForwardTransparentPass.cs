@@ -65,9 +65,9 @@ namespace RoXamiRenderPipeline
             DrawingSettings drawingSettings = new DrawingSettings(ShaderDataID.unlitShaderTagId, sortingSettings)
             {
                 enableDynamicBatching =
-                    renderingData.rendererAsset.commonSettings.enableDynamicBatching,
+                    renderingData.commonSettings.enableDynamicBatching,
                 enableInstancing =
-                    renderingData.rendererAsset.commonSettings.enableGpuInstancing,
+                    renderingData.commonSettings.enableGpuInstancing,
                 perObjectData =
                     PerObjectData.ReflectionProbes | PerObjectData.LightProbe
             };

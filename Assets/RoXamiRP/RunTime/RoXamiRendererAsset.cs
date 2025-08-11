@@ -10,8 +10,8 @@ namespace RoXamiRenderPipeline
 
     public class RoXamiRendererAsset : ScriptableObject
     {
-        public CommonSettings commonSettings;
-
+        public RendererSettings rendererSettings;
+        
         public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>(10);
 
         public static RoXamiRendererAsset defaultAsset;
@@ -25,14 +25,9 @@ namespace RoXamiRenderPipeline
         }
     }
 
-    [Serializable]
-    public class CommonSettings
+    [System.Serializable]
+    public class RendererSettings
     {
-        public bool enableHDR = false;
-        public bool enableGpuInstancing = false;
-        public bool enableDynamicBatching = false;
-        public bool enableDeferredRendering = true;
-        public bool enableScreenSpaceShadows = false;
-        public bool enablePostProcessing = false;
+        public bool enableDeferredRendering;
     }
 }

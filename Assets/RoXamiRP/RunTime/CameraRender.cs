@@ -6,9 +6,7 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
-    public partial
-
-    class CameraRender
+    public partial class CameraRender
     {
         Camera camera;
         ScriptableRenderContext context;
@@ -23,9 +21,9 @@ namespace RoXamiRenderPipeline
         };
 
         public void Render(
-            ScriptableRenderContext scriptableRenderContext,
-            Camera cameraIndex, AdditionalCameraData additionalCameraData,
-            ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset)
+            ScriptableRenderContext scriptableRenderContext, Camera cameraIndex, AdditionalCameraData additionalCameraData,
+            CommonSettings commonSettings, ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset,
+            bool isFinalBlit)
         {
             context = scriptableRenderContext;
             camera = cameraIndex;
@@ -34,9 +32,11 @@ namespace RoXamiRenderPipeline
             PrepareForSceneWindow();
             SetCommonData();
 
-            SetUpRenderingData(shadowSettings, rendererAsset, shaderAsset, additionalCameraData);
+            SetUpRenderingData(
+                commonSettings, shadowSettings, rendererAsset, 
+                shaderAsset, additionalCameraData, isFinalBlit);
 
-            if (renderingData.cameraData.renderType == CameraRenderType.Base)
+            if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
             {
                 SetUpCameraColorDepthRT();
             }
@@ -52,8 +52,6 @@ namespace RoXamiRenderPipeline
             DrawUnsupportedShaders();
             DrawGizmos();
 
-            CleanUp();
-
             cmd.EndSample(SampleName);
             ExecuteBuffer();
             context.Submit();
@@ -65,22 +63,20 @@ namespace RoXamiRenderPipeline
             cmd.Clear();
         }
 
-        void CleanUp()
+        public void CleanUp()
         {
-            if (renderingData.cameraData is { renderType: CameraRenderType.Base, beOverlay: false } ||
-                renderingData.cameraData.renderType == CameraRenderType.Overlay)
+            if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
             {
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentId);
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentId);
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorCopyTextureID);
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthCopyTextureID);
             }
-
             renderer.CameraCleanUp();
         }
 
-        void SetUpRenderingData(ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset,
-            ShaderAsset shaderAsset, AdditionalCameraData additionalCameraData)
+        void SetUpRenderingData(CommonSettings commonSettings, ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset,
+            ShaderAsset shaderAsset, AdditionalCameraData additionalCameraData, bool isFinalBlit)
         {
             if (!camera.TryGetCullingParameters(out ScriptableCullingParameters p))
             {
@@ -90,6 +86,7 @@ namespace RoXamiRenderPipeline
             p.shadowDistance = Mathf.Min(shadowSettings.maxDistance, camera.farClipPlane);
             CullingResults cullingResults = context.Cull(ref p);
 
+            renderingData.commonSettings = commonSettings;
             renderingData.shadowSettings = shadowSettings;
             renderingData.rendererAsset = rendererAsset;
             renderingData.cullingResults = cullingResults;
@@ -97,8 +94,24 @@ namespace RoXamiRenderPipeline
             renderingData.cameraData.camera = camera;
             renderingData.cameraData.width = camera.pixelWidth;
             renderingData.cameraData.height = camera.pixelHeight;
-            renderingData.cameraData.renderType = additionalCameraData.cameraRenderType;
-            renderingData.cameraData.beOverlay = additionalCameraData.beOverLay;
+            renderingData.cameraData.cameraRenderType = additionalCameraData.cameraRenderType;
+            renderingData.runtimeData.isFinalBlit = isFinalBlit;
+            renderingData.runtimeData.enableScreenSpaceShadows = additionalCameraData.enableScreenSpaceShadows;
+            renderingData.runtimeData.enablePostProcessing = 
+                additionalCameraData.enablePostProcessing &&
+                HasAnyVolumeInView();
+        }
+        
+        bool HasAnyVolumeInView()
+        {
+            var volumes = VolumeManager.instance.GetVolumes(camera.cullingMask);
+            
+            foreach (var volume in volumes)
+            {
+                if (volume.enabled && volume.isActiveAndEnabled)
+                    return true;
+            }
+            return false;
         }
 
         private void SetUpCameraColorDepthRT()
@@ -108,9 +121,10 @@ namespace RoXamiRenderPipeline
             RenderTextureDescriptor cameraColorDescriptor =
                 new RenderTextureDescriptor(width, height);
             cameraColorDescriptor.depthBufferBits = 0;
-            cameraColorDescriptor.colorFormat = renderingData.rendererAsset.commonSettings.enableHDR
-                ? RenderTextureFormat.DefaultHDR
-                : RenderTextureFormat.Default;
+            cameraColorDescriptor.colorFormat = 
+                renderingData.commonSettings.isHDR ? 
+                RenderTextureFormat.DefaultHDR : 
+                RenderTextureFormat.Default;
             FilterMode cameraColorFilterMode = FilterMode.Bilinear;
 
             RenderTextureDescriptor cameraDepthDescriptor =

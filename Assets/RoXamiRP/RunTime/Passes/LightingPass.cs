@@ -115,7 +115,7 @@ namespace RoXamiRenderPipeline
                 }
             }
 
-            shadows.Render(dirLight, dirLightIndex, renderingData);
+            shadows.Render(dirLight, dirLightIndex, ref renderingData);
             cmd.SetGlobalVector(dirLightColorId, dirLightColor);
             cmd.SetGlobalVector(dirLightDirectionId, dirLightDirection);
 

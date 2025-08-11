@@ -37,11 +37,16 @@ namespace RoXamiRenderPipeline
             this.settings = renderingData.shadowSettings;
         }
 
-        public void Render(Light light, int lightIndex, RenderingData renderingData)
+        public void Render(Light light, int lightIndex, ref RenderingData renderingData)
         {
-            if (renderingData.rendererAsset.commonSettings.enableScreenSpaceShadows && 
-                light != null && light.shadows != LightShadows.None && light.shadowStrength > 0f && 
-                cullingResults.GetShadowCasterBounds(0, out Bounds b))
+            bool enableScreenSpaceShadows =
+                renderingData.runtimeData.enableScreenSpaceShadows &&
+                light != null && light.shadows != LightShadows.None && light.shadowStrength > 0f &&
+                cullingResults.GetShadowCasterBounds(0, out Bounds b);
+
+            renderingData.runtimeData.enableScreenSpaceShadows = enableScreenSpaceShadows;
+            
+            if (enableScreenSpaceShadows)
             {
                 cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 RenderDirectionalShadows(light, lightIndex);

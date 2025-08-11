@@ -18,8 +18,11 @@ namespace RoXamiRenderPipeline
         {
             context.SetupCameraProperties(renderingData.cameraData.camera);
 
-            var camera = renderingData.cameraData.camera;
-            VolumeManager.instance.Update(camera.transform, camera.cullingMask);
+            if (renderingData.runtimeData.enablePostProcessing)
+            {
+                var camera = renderingData.cameraData.camera;
+                VolumeManager.instance.Update(camera.transform, camera.cullingMask);
+            }
         }
     }
 }
