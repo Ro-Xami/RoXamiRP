@@ -111,11 +111,12 @@ namespace RoXamiRenderPipeline
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (ssprCompute == null)
+            if (ssprCompute == null)// ||
+               // !RoXamiFeatureManager.Instance.isActive(RoXamiFeatureStack.ScreenSpacePlanarReflection))
             {
                 return;
             }
-
+            
             renderer.EnqueuePass(pass);
         }
     }

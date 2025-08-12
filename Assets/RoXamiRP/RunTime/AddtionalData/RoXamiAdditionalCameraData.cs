@@ -32,8 +32,9 @@ namespace RoXamiRenderPipeline
         [HideInInspector] public int roXamiRendererAssetID;
         public CameraRenderType cameraRenderType;
         public List<Camera> cameraStack = new List<Camera>();
-        public bool enableScreenSpaceShadows = false;
-        public bool enablePostProcessing = false;
+        public bool enableScreenSpaceShadows = true;
+        public bool enablePostProcessing = true;
+        public bool enableAntialiasing = false;
 
         public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, List<Camera> cameraStack)
         {

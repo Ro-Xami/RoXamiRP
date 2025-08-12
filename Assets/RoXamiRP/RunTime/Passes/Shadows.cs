@@ -18,6 +18,7 @@ namespace RoXamiRenderPipeline
         };
 
         private const int maxCascades = 4;
+        private const int split = 2;
 
         private static readonly int
             directionalLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
@@ -78,18 +79,14 @@ namespace RoXamiRenderPipeline
             cmd.BeginSample(bufferName);
             ExecuteBuffer();
 
-            int split = 2; //only 4 cascades
-            int tileSize = atlasSize / split; //get 1 cascade texture size
-
-            RenderDirectionalShadows(split, tileSize, light, lightIndex);
+            RenderDirectionalShadowsCascade(light, lightIndex);
 
             cmd.EndSample(bufferName);
             ExecuteBuffer();
         }
 
-        void RenderDirectionalShadows(int split, int tileSize, Light light, int lightIndex)
+        void RenderDirectionalShadowsCascade(Light light, int lightIndex)
         {
-
             //directional light's camera is orthographic
             ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
                 cullingResults, lightIndex);//, BatchCullingProjectionType.Orthographic);
@@ -97,6 +94,8 @@ namespace RoXamiRenderPipeline
             //only 4 cascades, get cascade data
             int cascadeCount = maxCascades;
             Vector3 ratios = settings.directional.CascadeRatios;
+
+            int tileSize = (int)settings.directional.atlasSize / split;
 
             //for different cascades datas
             for (int i = 0; i < cascadeCount; i++)
@@ -114,7 +113,7 @@ namespace RoXamiRenderPipeline
                 cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
 
                 //current cascade's offest on the shadowMap
-                Vector2 atlasOffset = new Vector2(i % split, (float)i / split);
+                Vector2 atlasOffset = new Vector2(i % split, (int)(i / split));
                 cmd.SetViewport(new Rect(atlasOffset.x * tileSize, atlasOffset.y * tileSize, tileSize, tileSize));
 
                 Matrix4x4 matrix = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, atlasOffset, split);

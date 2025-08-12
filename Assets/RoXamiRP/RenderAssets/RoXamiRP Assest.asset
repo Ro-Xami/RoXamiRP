@@ -25,8 +25,8 @@ MonoBehaviour:
     directional:
       atlasSize: 2048
       filter: 3
-      cascadeRatio1: 0.149
-      cascadeRatio2: 0.411
+      cascadeRatio1: 0.165
+      cascadeRatio2: 0.279
       cascadeRatio3: 0.66
       cascadeFade: 1
   shaderAsset:

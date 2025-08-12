@@ -69,7 +69,8 @@ namespace RoXamiRenderPipeline
                         var cameraStack = additionalCameraData.cameraStack[i];
                         if (cameraStack == null)
                         {
-                            Debug.LogError(camera.name + ": camera stack" + i + " is null!");
+                            additionalCameraData.cameraStack.Remove(cameraStack);
+                            Debug.LogError("camera stack" + i + " is null!");
                             continue;
                         }
                         

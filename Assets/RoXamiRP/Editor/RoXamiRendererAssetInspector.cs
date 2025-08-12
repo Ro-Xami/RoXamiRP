@@ -36,6 +36,7 @@ namespace RoXamiRenderPipeline
 
         public override void OnInspectorGUI()
         {
+            Undo.RecordObject(asset, "Change RoXami Renderer Asset");
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(rendererSettings);
