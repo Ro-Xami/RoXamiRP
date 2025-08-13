@@ -89,7 +89,7 @@ namespace RoXamiRenderPipeline
         {
             //directional light's camera is orthographic
             ShadowDrawingSettings shadowSettings = new ShadowDrawingSettings(
-                cullingResults, lightIndex);//, BatchCullingProjectionType.Orthographic);
+                cullingResults, lightIndex, BatchCullingProjectionType.Orthographic);
 
             //only 4 cascades, get cascade data
             int cascadeCount = maxCascades;

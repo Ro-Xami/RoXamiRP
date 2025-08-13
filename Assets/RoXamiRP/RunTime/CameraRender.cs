@@ -52,6 +52,13 @@ namespace RoXamiRenderPipeline
             DrawUnsupportedShaders();
             DrawGizmos();
 
+            renderer.CameraCleanUp();
+            
+            if (isFinalBlit)
+            {
+                CleanUpCameraColorDepthRT();
+            }
+
             cmd.EndSample(SampleName);
             ExecuteBuffer();
             context.Submit();
@@ -63,16 +70,12 @@ namespace RoXamiRenderPipeline
             cmd.Clear();
         }
 
-        public void CleanUp()
+        void CleanUpCameraColorDepthRT()
         {
-            if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
-            {
-                cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentId);
-                cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentId);
-                cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorCopyTextureID);
-                cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthCopyTextureID);
-            }
-            renderer.CameraCleanUp();
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentId);
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentId);
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorCopyTextureID);
+            cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthCopyTextureID);
         }
 
         void SetUpRenderingData(CommonSettings commonSettings, ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset,

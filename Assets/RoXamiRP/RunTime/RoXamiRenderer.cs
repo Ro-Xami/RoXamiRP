@@ -27,8 +27,8 @@ namespace RoXamiRenderPipeline
         private readonly ForwardOpaquePass forwardOpaquePass =
             new ForwardOpaquePass(RenderPassEvent.BeforeRenderingOpaques);
 
-        private readonly DrawSkyboxPass drawSkyboxPass = 
-            new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox);
+        // private readonly DrawSkyboxPass drawSkyboxPass = 
+        //     new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox);
 
         private readonly ForwardTransparentPass forwardTransparentPass =
             new ForwardTransparentPass(RenderPassEvent.BeforeRenderingTransparents);
@@ -87,10 +87,10 @@ namespace RoXamiRenderPipeline
             }
 
             activePasses.Add(forwardOpaquePass);
-            if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
-            {
-                activePasses.Add(drawSkyboxPass);
-            }
+            // if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
+            // {
+            //     activePasses.Add(drawSkyboxPass);
+            // }
 
             activePasses.Add(forwardTransparentPass);
 

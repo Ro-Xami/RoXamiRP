@@ -93,7 +93,6 @@ namespace RoXamiRenderPipeline
                             isFinalOverlayCamera);
                     }
                 }
-                cameraRender.CleanUp();
             }
         }
     }
