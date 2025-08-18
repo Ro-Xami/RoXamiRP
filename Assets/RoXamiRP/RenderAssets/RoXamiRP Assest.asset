@@ -19,6 +19,9 @@ MonoBehaviour:
     enableGpuInstancing: 1
     enableDynamicBatching: 0
     isHDR: 1
+  antialiasingSettings:
+    antialiasingMode: 0
+    antialiasingQuality: 0
   shadowSettings:
     maxDistance: 50
     distanceFade: 0.194

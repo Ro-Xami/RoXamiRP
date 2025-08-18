@@ -7,7 +7,7 @@
 		ZWrite Off
 		
 		HLSLINCLUDE
-		#include "../ShaderLibrary/Common.hlsl"
+		#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 		#include_with_pragmas "PostPass.hlsl"
 		ENDHLSL
 

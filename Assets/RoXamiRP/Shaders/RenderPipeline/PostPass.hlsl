@@ -4,7 +4,7 @@
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/UnityInput.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
-#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
+#include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
 
 TEXTURE2D(_PostSource0);
 TEXTURE2D(_PostSource1);

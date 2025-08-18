@@ -15,6 +15,7 @@ namespace RoXamiRenderPipeline
         public ShadowSettings shadowSettings;
         public ShaderAsset shaderAsset;
         public RuntimeData runtimeData;
+        public AntialiasingSettings antialiasingSettings;
     }
 
     public struct CameraData
@@ -65,4 +66,17 @@ namespace RoXamiRenderPipeline
         combine,
         finalBlit
     };
+    
+    public enum AntialiasingMode
+    {
+        FXAA_Quality,
+        FXAA_Console,
+    };
+
+    public enum AntialiasingQuality
+    {
+        High,
+        Middle,
+        Low
+    }
 }

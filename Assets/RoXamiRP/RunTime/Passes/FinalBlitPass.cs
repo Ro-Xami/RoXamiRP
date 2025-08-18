@@ -18,6 +18,11 @@ namespace RoXamiRenderPipeline
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
+            var aaSettings = renderingData.antialiasingSettings;
+            AntialiasingMode aaMode = aaSettings.antialiasingMode;
+            AntialiasingQuality aaQuality = aaSettings.antialiasingQuality;
+            var mat = renderingData.shaderAsset.antialiasingMaterial;
+
             cmd.BeginSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
 
@@ -28,7 +33,7 @@ namespace RoXamiRenderPipeline
                 ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             cmd.DrawProcedural(
-                Matrix4x4.identity, renderingData.shaderAsset.postMaterial, (int)PostShaderPass.finalBlit,
+                Matrix4x4.identity, mat, (int)aaMode,
                 MeshTopology.Triangles, 3
             );
             

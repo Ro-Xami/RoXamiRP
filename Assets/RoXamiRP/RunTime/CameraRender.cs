@@ -22,7 +22,8 @@ namespace RoXamiRenderPipeline
 
         public void Render(
             ScriptableRenderContext scriptableRenderContext, Camera cameraIndex, AdditionalCameraData additionalCameraData,
-            CommonSettings commonSettings, ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset, ShaderAsset shaderAsset,
+            CommonSettings commonSettings, ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset, 
+            ShaderAsset shaderAsset, AntialiasingSettings antialiasingSettings,
             bool isFinalBlit)
         {
             context = scriptableRenderContext;
@@ -34,7 +35,7 @@ namespace RoXamiRenderPipeline
 
             SetUpRenderingData(
                 commonSettings, shadowSettings, rendererAsset, 
-                shaderAsset, additionalCameraData, isFinalBlit);
+                shaderAsset, additionalCameraData, antialiasingSettings, isFinalBlit);
 
             if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
             {
@@ -79,7 +80,7 @@ namespace RoXamiRenderPipeline
         }
 
         void SetUpRenderingData(CommonSettings commonSettings, ShadowSettings shadowSettings, RoXamiRendererAsset rendererAsset,
-            ShaderAsset shaderAsset, AdditionalCameraData additionalCameraData, bool isFinalBlit)
+            ShaderAsset shaderAsset, AdditionalCameraData additionalCameraData, AntialiasingSettings antialiasingSettings, bool isFinalBlit)
         {
             if (!camera.TryGetCullingParameters(out ScriptableCullingParameters p))
             {
@@ -103,6 +104,7 @@ namespace RoXamiRenderPipeline
             renderingData.runtimeData.enablePostProcessing = 
                 additionalCameraData.enablePostProcessing &&
                 HasAnyVolumeInView();
+            renderingData.antialiasingSettings = antialiasingSettings;
         }
         
         bool HasAnyVolumeInView()

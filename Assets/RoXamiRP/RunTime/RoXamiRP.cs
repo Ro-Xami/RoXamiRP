@@ -15,8 +15,10 @@ namespace RoXamiRenderPipeline
         private readonly ShaderAsset shaderAsset;
         private readonly RoXamiRendererAsset[] rendererAssets;
         private readonly CommonSettings commonSettings;
+        private readonly AntialiasingSettings antialiasingSettings;
 
-        public RoXamiRP(ShadowSettings shadowSettings, ShaderAsset shaderAsset, RoXamiRendererAsset[] rendererAssets, CommonSettings commonSettings)
+        public RoXamiRP(ShadowSettings shadowSettings, ShaderAsset shaderAsset, RoXamiRendererAsset[] rendererAssets, 
+            CommonSettings commonSettings, AntialiasingSettings antialiasingSettings)
         {
             GraphicsSettings.useScriptableRenderPipelineBatching = enableSrpBatcher;
             GraphicsSettings.lightsUseLinearIntensity = lightsUseLinearIntensity;
@@ -24,6 +26,7 @@ namespace RoXamiRenderPipeline
             this.shaderAsset = shaderAsset;
             this.rendererAssets = rendererAssets;
             this.commonSettings = commonSettings;
+            this.antialiasingSettings = antialiasingSettings;
         }
 
         protected override void Render(
@@ -58,7 +61,8 @@ namespace RoXamiRenderPipeline
                     additionalCameraData.cameraStack.Count == 0;
                 cameraRender.Render(
                     context, camera, additionalCameraData, 
-                    commonSettings, shadowSettings, renderAsset, shaderAsset, 
+                    commonSettings, shadowSettings, renderAsset, 
+                    shaderAsset, antialiasingSettings,
                     isSingleBaseCamera);
                 
                 //Overlay Camera
@@ -89,7 +93,8 @@ namespace RoXamiRenderPipeline
                         bool isFinalOverlayCamera = i == additionalCameraData.cameraStack.Count - 1;
                         cameraRender.Render(
                             context, cameraStack, cameraStackAdditionalData, 
-                            commonSettings, shadowSettings, cameraStackRenderAsset, shaderAsset, 
+                            commonSettings, shadowSettings, cameraStackRenderAsset, 
+                            shaderAsset, antialiasingSettings,
                             isFinalOverlayCamera);
                     }
                 }

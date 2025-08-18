@@ -12,7 +12,7 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 		ZTest Always
 		
 		HLSLINCLUDE
-			#include "Assets/RoXamiRP/Shaders/FullScreenTriangle.hlsl"
+			#include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
 			#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"

@@ -7,20 +7,38 @@ using UnityEngine.Serialization;
 namespace RoXamiRenderPipeline
 {
     [CreateAssetMenu(fileName = "RoXamiRPAsset", menuName = "RoXamiRP/RoXamiRP Asset")]
-
     public class RoXamiRPAsset : RenderPipelineAsset, IDisposable
     {
         public RoXamiRendererAsset[] rendererAssets;
 
         public CommonSettings commonSettings;
 
+        public AntialiasingSettings antialiasingSettings;
+
         [SerializeField] ShadowSettings shadowSettings = default;
 
         [SerializeField] private ShaderAsset shaderAsset = new ShaderAsset();
+        
+        private readonly string[] antialiasingQualityKeywords = new string[]
+        {
+            "_AA_HIGH",
+            "_AA_MIDDLE",
+            "_AA_LOW"
+        };
 
         protected override RenderPipeline CreatePipeline()
         {
-            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings);
+            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings, antialiasingSettings);
+        }
+
+        private void OnEnable()
+        {
+            UpdateRoXamiRPSettings();
+        }
+
+        protected override void OnValidate()
+        {
+            UpdateRoXamiRPSettings();
         }
 
         public void Dispose()
@@ -34,13 +52,46 @@ namespace RoXamiRenderPipeline
             CoreUtils.Destroy(shaderAsset.postMaterial);
             CoreUtils.Destroy(shaderAsset.deferredMaterial);
         }
+
+        public void UpdateRoXamiRPSettings()
+        {
+            if (antialiasingSettings != null)
+            {
+                SetAAKeyWords(
+                    antialiasingSettings.antialiasingQuality, 
+                    shaderAsset.antialiasingMaterial);
+            }
+        }
+
+        void SetAAKeyWords(AntialiasingQuality aaQuality, Material mat)
+        {
+            foreach (var key in antialiasingQualityKeywords)
+            {
+                mat.DisableKeyword(key);
+            }
+
+            if ((int)aaQuality >= antialiasingQualityKeywords.Length)
+            {
+                mat.EnableKeyword(antialiasingQualityKeywords[1]);
+            }
+            else
+            {
+                mat.EnableKeyword(antialiasingQualityKeywords[(int)aaQuality]);
+            }
+        }
+    }
+
+    [Serializable]
+    public class AntialiasingSettings
+    {
+        public AntialiasingMode antialiasingMode;
+        public AntialiasingQuality antialiasingQuality;
     }
 
     [Serializable]
     public class ShaderAsset
     {
         Material post;
-
         public Material postMaterial
         {
             get
@@ -55,7 +106,6 @@ namespace RoXamiRenderPipeline
         }
 
         Material deferred;
-
         public Material deferredMaterial
         {
             get
@@ -66,6 +116,20 @@ namespace RoXamiRenderPipeline
                 }
 
                 return deferred;
+            }
+        }
+        
+        Material antialiasing;
+        public Material antialiasingMaterial
+        {
+            get
+            {
+                if (antialiasing == null)
+                {
+                    antialiasing = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/AntiAliasing");
+                }
+
+                return antialiasing;
             }
         }
 
@@ -116,7 +180,7 @@ namespace RoXamiRenderPipeline
 
         public Vector3 CascadeRatios => new Vector3(cascadeRatio1, cascadeRatio2, cascadeRatio3);
 
-        [Range(0.001f, 1f)] public float cascadeFade;
+        [Range(0.001f, 10f)] public float cascadeFade;
     }
 
     public enum MapSize

@@ -26,7 +26,7 @@
 float Square(float x) { return x * x;} 
 float2 Square(float2 x) { return x * x;} 
 float3 Square(float3 x) { return x * x;} 
-float4 Square(float4 x) { return x * x;} 
+float4 Square(float4 x) { return x * x;}
 
 float3 GetViewDirWS(float3 positionWS)
 {
@@ -76,6 +76,15 @@ float4 ComputeScreenPos(float4 positionCS)
 	o.xy = float2(o.x, o.y * _ProjectionParams.x) + o.w;
 	o.zw = positionCS.zw;
 	return o;
+}
+
+/*
+======================================================================
+*/
+
+float GetLuma(float3 col)
+{
+	return 0.213 * col.r + 0.715 * col.g + 0.072 * col.b;
 }
 
 #endif
