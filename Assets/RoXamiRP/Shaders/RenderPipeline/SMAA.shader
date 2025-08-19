@@ -1,0 +1,49 @@
+﻿Shader "RoXami RP/Hide/SMAA"
+{
+	SubShader
+	{
+		Cull Off
+		ZTest Always
+		ZWrite Off
+		
+		HLSLINCLUDE
+		#pragma multi_compile _AA_HIGH _AA_MIDDLE _AA_LOW
+		#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+		#include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
+		#include "Assets/RoXamiRP/Shaders/RenderPipeline/SMAAFragmentPass.hlsl"
+		ENDHLSL
+
+		Pass
+		{
+			Name "SMAA_Edge"
+			
+			HLSLPROGRAM
+			#pragma target 3.5
+			#pragma vertex FullScreenTriangle
+			#pragma fragment SMAA_Edge
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Name "SMAA_Factor"
+			
+			HLSLPROGRAM
+			#pragma target 3.5
+			#pragma vertex FullScreenTriangle
+			#pragma fragment SMAA_Factor
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Name "SMAA_Factor"
+			
+			HLSLPROGRAM
+			#pragma target 3.5
+			#pragma vertex FullScreenTriangle
+			#pragma fragment SMAA_Blend
+			ENDHLSL
+		}
+	}
+}

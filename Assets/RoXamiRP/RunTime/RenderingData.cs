@@ -35,6 +35,7 @@ namespace RoXamiRenderPipeline
         public bool isFinalBlit;
         public bool enableScreenSpaceShadows;
         public bool enablePostProcessing;
+        public bool enableAntialiasing;
     }
 
     public static class ShaderDataID
@@ -71,6 +72,7 @@ namespace RoXamiRenderPipeline
     {
         FXAA_Quality,
         FXAA_Console,
+        Original,
     };
 
     public enum AntialiasingQuality

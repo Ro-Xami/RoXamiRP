@@ -59,7 +59,7 @@ namespace RoXamiRenderPipeline
             {
                 SetAAKeyWords(
                     antialiasingSettings.antialiasingQuality, 
-                    shaderAsset.antialiasingMaterial);
+                    shaderAsset.fxaaMaterial);
             }
         }
 
@@ -119,17 +119,45 @@ namespace RoXamiRenderPipeline
             }
         }
         
-        Material antialiasing;
-        public Material antialiasingMaterial
+        Material fxaa;
+        public Material fxaaMaterial
         {
             get
             {
-                if (antialiasing == null)
+                if (fxaa == null)
                 {
-                    antialiasing = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/AntiAliasing");
+                    fxaa = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/FXAA");
                 }
 
-                return antialiasing;
+                return fxaa;
+            }
+        }
+        
+        Material smaa;
+        public Material smaaMaterial
+        {
+            get
+            {
+                if (smaa == null)
+                {
+                    smaa = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/SMAA");
+                }
+
+                return smaa;
+            }
+        }
+        
+        Material blitFullScreenTriangle;
+        public Material blitFullScreenTriangleMaterial
+        {
+            get
+            {
+                if (blitFullScreenTriangle == null)
+                {
+                    blitFullScreenTriangle = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/BlitFullScreenTriangle");
+                }
+
+                return blitFullScreenTriangle;
             }
         }
 

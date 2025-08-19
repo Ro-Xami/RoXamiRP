@@ -104,6 +104,7 @@ namespace RoXamiRenderPipeline
             renderingData.runtimeData.enablePostProcessing = 
                 additionalCameraData.enablePostProcessing &&
                 HasAnyVolumeInView();
+            renderingData.runtimeData.enableAntialiasing = additionalCameraData.enableAntialiasing;
             renderingData.antialiasingSettings = antialiasingSettings;
         }
         
@@ -123,6 +124,7 @@ namespace RoXamiRenderPipeline
         {
             int width = renderingData.cameraData.width;
             int height = renderingData.cameraData.height;
+            
             RenderTextureDescriptor cameraColorDescriptor =
                 new RenderTextureDescriptor(width, height);
             cameraColorDescriptor.depthBufferBits = 0;

@@ -20,8 +20,6 @@ namespace RoXamiRenderPipeline
         {
             var aaSettings = renderingData.antialiasingSettings;
             AntialiasingMode aaMode = aaSettings.antialiasingMode;
-            AntialiasingQuality aaQuality = aaSettings.antialiasingQuality;
-            var mat = renderingData.shaderAsset.antialiasingMaterial;
 
             cmd.BeginSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
@@ -32,13 +30,46 @@ namespace RoXamiRenderPipeline
                 RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
                 ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
-            cmd.DrawProcedural(
-                Matrix4x4.identity, mat, (int)aaMode,
-                MeshTopology.Triangles, 3
-            );
+
+            var shaderAsset = renderingData.shaderAsset;
+            switch (aaMode)
+            {
+                case AntialiasingMode.FXAA_Quality:
+                    DrawFXAAQuality(shaderAsset);
+                    break;
+                case AntialiasingMode.FXAA_Console:
+                    DrawFXAAConsole(shaderAsset);
+                    break;
+                case AntialiasingMode.Original:
+                    FinalBlit(shaderAsset);
+                    break;
+            }
             
             cmd.EndSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
+        }
+
+        void DrawFXAAQuality(ShaderAsset shaderAsset)
+        {
+            Draw(shaderAsset.fxaaMaterial, 0);
+        }
+        
+        void DrawFXAAConsole(ShaderAsset shaderAsset)
+        {
+            Draw(shaderAsset.fxaaMaterial, 1);
+        }
+
+        void FinalBlit(ShaderAsset shaderAsset)
+        {
+            Draw(shaderAsset.blitFullScreenTriangleMaterial, 0);
+        }
+
+        void Draw(Material mat, int passIndex)
+        {
+            cmd.DrawProcedural(
+                Matrix4x4.identity, mat, passIndex,
+                MeshTopology.Triangles, 3
+            );
         }
     }
 }
