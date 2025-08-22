@@ -37,7 +37,7 @@
 
 		Pass
 		{
-			Name "SMAA_Factor"
+			Name "SMAA_Blend"
 			
 			HLSLPROGRAM
 			#pragma target 3.5

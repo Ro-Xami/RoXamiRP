@@ -72,6 +72,7 @@ namespace RoXamiRenderPipeline
     {
         FXAA_Quality,
         FXAA_Console,
+        SMAA,
         Original,
     };
 
