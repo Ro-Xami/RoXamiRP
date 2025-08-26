@@ -55,28 +55,27 @@ namespace RoXamiRenderPipeline
 
         public void UpdateRoXamiRPSettings()
         {
-            if (antialiasingSettings != null)
-            {
-                SetAAKeyWords(
-                    antialiasingSettings.antialiasingQuality, 
-                    shaderAsset.fxaaMaterial);
-            }
+            SetAAKeyWords();
         }
 
-        void SetAAKeyWords(AntialiasingQuality aaQuality, Material mat)
+        void SetAAKeyWords()
         {
-            foreach (var key in antialiasingQualityKeywords)
+            if (antialiasingSettings != null)
             {
-                mat.DisableKeyword(key);
-            }
+                AntialiasingQuality aaQuality = antialiasingSettings.antialiasingQuality;
+                foreach (var key in antialiasingQualityKeywords)
+                {
+                    Shader.DisableKeyword(key);
+                }
 
-            if ((int)aaQuality >= antialiasingQualityKeywords.Length)
-            {
-                mat.EnableKeyword(antialiasingQualityKeywords[1]);
-            }
-            else
-            {
-                mat.EnableKeyword(antialiasingQualityKeywords[(int)aaQuality]);
+                if ((int)aaQuality >= antialiasingQualityKeywords.Length)
+                {
+                    Shader.EnableKeyword(antialiasingQualityKeywords[1]);
+                }
+                else
+                {
+                    Shader.EnableKeyword(antialiasingQualityKeywords[(int)aaQuality]);
+                }
             }
         }
     }

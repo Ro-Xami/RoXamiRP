@@ -14,6 +14,9 @@ float Luma(float2 uv)
     return GetLuma(SampleCameraAttachment(uv).rgb);
 }
 
+//==============================================================================================
+//Quality
+
 #define maxStep 15
 #define guessStep 8
 
@@ -191,6 +194,9 @@ float4 FXAA_Quality(Varyings IN) : SV_Target
 
     return col;
 }
+
+//============================================================================================
+//Console
 
 // Only used on FXAA Console.
 // This used to be the FXAA_CONSOLE__EDGE_THRESHOLD_MIN define.

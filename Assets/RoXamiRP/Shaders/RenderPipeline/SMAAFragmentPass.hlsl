@@ -19,7 +19,20 @@ float Luma(float2 uv)
     return GetLuma(SampleCameraAttachment(uv).rgb);
 }
 
-#define _edgeThreshold 0.05f
+#define _edgeThreshold 0.04f
+#define _maxStep 8
+#if defined(_AA_HIGH)
+    #define _edgeThreshold 0.03f
+    #define _maxStep 10
+#elif defined(_AA_MIDDLE)
+    #define _edgeThreshold 0.04f
+    #define _maxStep 8
+#elif defined(_AA_LOW)
+    #define _edgeThreshold 0.05f
+    #define _maxStep 6
+#endif
+
+
 float4 SMAA_Edge(Varyings IN) : SV_Target
 {
     float2 uv = IN.uv.xy;
@@ -34,10 +47,10 @@ float4 SMAA_Edge(Varyings IN) : SV_Target
     float roundMax = max(max(N, S), max(E, W));
     
     bool isW = W > _edgeThreshold;
-    isW = isW && W > max(roundMax, wW) * 0.5f;
+    isW = isW && W > (max(roundMax, wW) * 0.5f);
 
     bool isS = S > _edgeThreshold;
-    isS = isS && S > max(roundMax, sS) * 0.5f;
+    isS = isS && S > (max(roundMax, sS) * 0.5f);
 
     float2 edge = 0;
     edge.x = isW ? 1 : 0;
@@ -45,9 +58,6 @@ float4 SMAA_Edge(Varyings IN) : SV_Target
     
     return float4(edge, 0, 1);
 }
-
-#define _roundingFactor 0.25
-#define _maxStep 10
 
 float SearchLeftX(float2 uv)
 {
@@ -106,7 +116,7 @@ float SearchUpY(float2 uv)
     UNITY_UNROLL
     for (i = 0; i < _maxStep; i++)
     {
-        edge = SampleCameraAttachment(uv).g;
+        edge = SampleCameraAttachment(uv).r;
         
         [flatten]
         if (edge < 0.9)
@@ -122,14 +132,14 @@ float SearchUpY(float2 uv)
 float SearchBottomY(float2 uv)
 {
     uv = uv + float2(0, 1.5) * texelSize;
-    float2 move = float2(2, 0) * texelSize;
+    float2 move = float2(0, 2) * texelSize;
     float edge = 0;
     int i = 0;
 
     UNITY_UNROLL
     for (i = 0; i < _maxStep; i++)
     {
-        edge = SampleCameraAttachment(uv).g;
+        edge = SampleCameraAttachment(uv).r;
         
         [flatten]
         if (edge < 0.9)
@@ -155,7 +165,7 @@ bool2 ModeOfSingle(float value)
     else if(value > 0.5)
         mode.y = true;
     else if(value > 0.125)
-        mode.y = true;
+        mode.x = true;
     return mode;
 }
 
@@ -263,9 +273,9 @@ float4 SMAA_Factor(Varyings IN) : SV_Target
 {
     float2 uv = IN.uv.xy;
     float2 edge = SampleCameraAttachment(uv).rg;
-    float4 factor = float4(0.0, 0.0, 0.0, 0.0);
+    float4 factor = 0;
 
-    if (edge.r > 0.1f)
+    if (edge.g > 0.1f)
     {
         float leftStep = SearchLeftX(uv);
         float rightStep = SearchRightX(uv);
@@ -276,22 +286,22 @@ float4 SMAA_Factor(Varyings IN) : SV_Target
         bool2 leftMode = ModeOfSingle(leftValue);
         bool2 rightMode = ModeOfSingle(rightValue);
 
-        float value = GetArea(leftValue, rightValue, leftMode, rightMode);
+        float value = GetArea(leftStep, rightStep, leftMode, rightMode);
         factor.xy = float2(-value, value);
     }
     
-    if (edge.g > 0.1f)
+    if (edge.r > 0.1f)
     {
         float upStep = SearchUpY(uv);
         float bottomStep = SearchBottomY(uv);
 
-        float upValue = SampleCameraAttachment(uv + float2(-0.25, -upStep) * texelSize).r;
-        float bottomValue = SampleCameraAttachment(uv + float2( -0.25, bottomStep + 1) * texelSize).r;
+        float upValue = SampleCameraAttachment(uv + float2(-0.25, -upStep) * texelSize).g;
+        float bottomValue = SampleCameraAttachment(uv + float2( -0.25, bottomStep + 1) * texelSize).g;
         
         bool2 upMode = ModeOfSingle(upValue);
         bool2 bottomMode = ModeOfSingle(bottomValue);
 
-        float value = GetArea(upValue, bottomValue, upMode, bottomMode);
+        float value = GetArea(upStep, bottomStep, upMode, bottomMode);
         factor.zw = float2(-value, value);
     }
 
