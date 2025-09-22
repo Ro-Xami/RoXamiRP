@@ -1,3 +1,4 @@
+#pragma multi_compile_local _DIRECTIONAL_PCF0 _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 #pragma kernel ScreenSpaceShadows
 
 RWTexture2D<float4> _ScreenSpaceShadowsTexture;
@@ -20,11 +21,25 @@ void ScreenSpaceShadows (uint3 id : SV_DispatchThreadID)
 
     
     float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 1).x;
-    depth = GetReverseDepth(depth);
+    //withoutSkybox
+    #if defined(UNITY_REVERSED_Z)
+    if (depth <= FLT_MIN)
+    {
+        _ScreenSpaceShadowsTexture[id.xy] = 1;
+        return;
+    }
+    #else
+    depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
+    if (depth >= 1)
+    {
+        _ScreenSpaceShadowsTexture[id.xy] = 1;
+        return;
+    }
+    #endif
     
     float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
     float3 normalWS = _GBuffer1.SampleLevel(sampler_GBuffer1, screenSpaceUV, 0).xyz;
-    float shadow = GetDirectionalShadowAttenuation (positionWS , normalWS);
+    float shadow = GetDirectionalShadowAttenuation(positionWS , normalWS);
     
     _ScreenSpaceShadowsTexture[id.xy] = float4(shadow.xxx, 1);
 }

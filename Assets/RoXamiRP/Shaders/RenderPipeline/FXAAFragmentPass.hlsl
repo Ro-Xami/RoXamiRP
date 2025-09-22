@@ -134,7 +134,7 @@ float4 FxaaQualityPixelShader(float2 uv, float contrastThreshold, float relative
     }
     if (i == maxStep + 1)
     {
-        searchStepPositive = (isHorizontal ? searchStepDir.x : searchStepDir.y) * maxStep;
+        searchStepPositive = (isHorizontal ? searchStepDir.x : searchStepDir.y) * (maxStep + 1);
     }
 
     UNITY_UNROLL
@@ -150,7 +150,7 @@ float4 FxaaQualityPixelShader(float2 uv, float contrastThreshold, float relative
     }
     if (i == maxStep + 1)
     {
-        searchStepNegative = (isHorizontal ? searchStepDir.x : searchStepDir.y) * maxStep;
+        searchStepNegative = (isHorizontal ? searchStepDir.x : searchStepDir.y) * (maxStep + 1);
     }
 
     float blendEdge;

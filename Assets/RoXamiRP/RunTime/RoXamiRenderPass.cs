@@ -141,6 +141,20 @@ namespace RoXamiRenderPipeline
                 flags == CameraClearFlags.Color ? camera.backgroundColor.linear : Color.clear
             );
         }
+        
+        protected void DrawDontCareDontCare(
+            CommandBuffer cmd, RenderTargetIdentifier from, RenderTargetIdentifier to, 
+            Material mat, int passIndex)
+        {
+            cmd.SetGlobalTexture(ShaderDataID.postSource0Id, from);
+            cmd.SetRenderTarget(
+                to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare
+            );
+            cmd.DrawProcedural(
+                Matrix4x4.identity, mat, passIndex,
+                MeshTopology.Triangles, 3
+            );
+        }
 
         public static bool operator <(RoXamiRenderPass lhs, RoXamiRenderPass rhs)
         {

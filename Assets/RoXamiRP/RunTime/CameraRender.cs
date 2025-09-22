@@ -101,9 +101,6 @@ namespace RoXamiRenderPipeline
             renderingData.cameraData.cameraRenderType = additionalCameraData.cameraRenderType;
             renderingData.runtimeData.isFinalBlit = isFinalBlit;
             renderingData.runtimeData.enableScreenSpaceShadows = additionalCameraData.enableScreenSpaceShadows;
-            renderingData.runtimeData.enablePostProcessing = 
-                additionalCameraData.enablePostProcessing &&
-                HasAnyVolumeInView();
             renderingData.runtimeData.enableAntialiasing = additionalCameraData.enableAntialiasing;
             renderingData.antialiasingSettings = antialiasingSettings;
         }

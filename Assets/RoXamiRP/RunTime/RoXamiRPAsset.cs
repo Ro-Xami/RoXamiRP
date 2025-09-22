@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -9,6 +9,19 @@ namespace RoXamiRenderPipeline
     [CreateAssetMenu(fileName = "RoXamiRPAsset", menuName = "RoXamiRP/RoXamiRP Asset")]
     public class RoXamiRPAsset : RenderPipelineAsset, IDisposable
     {
+        private static RoXamiRPAsset m_Instance;
+        public static RoXamiRPAsset Instance
+        {
+            get
+            {
+                if (m_Instance == null)
+                {
+                    m_Instance = ScriptableObject.CreateInstance<RoXamiRPAsset>();
+                }
+                return m_Instance;
+            }
+        }
+        
         public RoXamiRendererAsset[] rendererAssets;
 
         public CommonSettings commonSettings;
@@ -17,13 +30,21 @@ namespace RoXamiRenderPipeline
 
         [SerializeField] ShadowSettings shadowSettings = default;
 
-        [SerializeField] private ShaderAsset shaderAsset = new ShaderAsset();
+        [SerializeField] public ShaderAsset shaderAsset = new ShaderAsset();
         
         private readonly string[] antialiasingQualityKeywords = new string[]
         {
             "_AA_HIGH",
             "_AA_MIDDLE",
             "_AA_LOW"
+        };
+        
+        private readonly string[] pcfKeyWords = new string[]
+        {
+            "_DIRECTIONAL_PCF0",
+            "_DIRECTIONAL_PCF3",
+            "_DIRECTIONAL_PCF5",
+            "_DIRECTIONAL_PCF7"
         };
 
         protected override RenderPipeline CreatePipeline()
@@ -33,11 +54,13 @@ namespace RoXamiRenderPipeline
 
         private void OnEnable()
         {
+            m_Instance = this;
             UpdateRoXamiRPSettings();
         }
 
         protected override void OnValidate()
         {
+            m_Instance = this;
             UpdateRoXamiRPSettings();
         }
 
@@ -56,6 +79,7 @@ namespace RoXamiRenderPipeline
         public void UpdateRoXamiRPSettings()
         {
             SetAAKeyWords();
+            SetPcfSettings();
         }
 
         void SetAAKeyWords()
@@ -76,6 +100,21 @@ namespace RoXamiRenderPipeline
                 {
                     Shader.EnableKeyword(antialiasingQualityKeywords[(int)aaQuality]);
                 }
+            }
+        }
+
+        void SetPcfSettings()
+        {
+            if (shaderAsset.screenSpaceShadowComputeShader)
+            {
+                var cs = shaderAsset.screenSpaceShadowComputeShader;
+                var filter = shadowSettings.directional.filter;
+                
+                foreach (var key in pcfKeyWords)
+                {
+                    cs.DisableKeyword(key);
+                }
+                cs.EnableKeyword(pcfKeyWords[(int)filter]);
             }
         }
     }
@@ -161,6 +200,7 @@ namespace RoXamiRenderPipeline
         }
 
         public ComputeShader screenSpaceShadowComputeShader;
+        public ComputeShader screenSpaceGIComputeShader;
     }
     
     [Serializable]
@@ -181,7 +221,7 @@ namespace RoXamiRenderPipeline
         public Directional directional = new Directional
         {
             atlasSize = MapSize._2048,
-            filter = FilterModeSetting.PCF2x2,
+            filter = FilterModeSetting.PCF3x3,
             cascadeRatio1 = 0.3f,
             cascadeRatio2 = 0.6f,
             cascadeRatio3 = 0.8f,
@@ -191,10 +231,10 @@ namespace RoXamiRenderPipeline
 
     public enum FilterModeSetting
     {
-        PCF2x2,
+        None,
         PCF3x3,
         PCF5x5,
-        PCF7x7
+        PCF7x7,
     }
 
     [Serializable]

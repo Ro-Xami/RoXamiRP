@@ -34,7 +34,6 @@ namespace RoXamiRenderPipeline
     {
         public bool isFinalBlit;
         public bool enableScreenSpaceShadows;
-        public bool enablePostProcessing;
         public bool enableAntialiasing;
     }
 

@@ -3,12 +3,6 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
-    public interface IPostProcessComponent
-    {
-        bool IsActive();
-        bool IsTileCompatible();
-    }
-
     public class PostPass : RoXamiRenderPass
     {
         public PostPass(RenderPassEvent evt)
@@ -17,38 +11,33 @@ namespace RoXamiRenderPipeline
         }
 
         const string postBufferName = "RoXami Post";
-
         readonly CommandBuffer postCmd = new CommandBuffer
         {
             name = postBufferName,
         };
 
         const string bloomName = "Bloom";
-
         readonly CommandBuffer bloomCmd = new CommandBuffer
         {
             name = bloomName,
         };
 
         const string finalBlitName = "RoXami FinalBlit";
-
         readonly CommandBuffer finalBlitCmd = new CommandBuffer
         {
             name = finalBlitName,
         };
 
         static readonly int tempRtID = Shader.PropertyToID("_TempRT");
-        static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
-        static readonly int bloomParam = Shader.PropertyToID("_bloomParam");
-        static readonly int bloomIntensity = Shader.PropertyToID("_bloomIntensity");
+        private static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
+        static int[] bloomDownSampleIDs;
+        static int[] bloomUpSampleIDs;
 
         RenderingData renderingData;
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
         {
             renderingData = renderData;
-            
-            var stack = VolumeManager.instance.stack;
             
             postCmd.GetTemporaryRT(tempRtID,
                 renderingData.cameraData.cameraColorDescriptor,
@@ -57,18 +46,28 @@ namespace RoXamiRenderPipeline
             postCmd.BeginSample(postBufferName);
             ExecuteCommandBuffer(context, postCmd);
 
-            Bloom bloomSettings = stack.GetComponent<Bloom>();
-            if (bloomSettings.IsActive())
+            Bloom bloomSettings = RoXamiVolume.Instance.bloom;
+            if (bloomSettings.isActive)
             {
                 bloomCmd.BeginSample(bloomName);
                 ExecuteCommandBuffer(context, bloomCmd);
-
+            
                 SetupBloom(bloomSettings);
-
+            
                 bloomCmd.EndSample(bloomName);
                 ExecuteCommandBuffer(context, bloomCmd);
             }
             
+            //Combine
+            Draw(postCmd, ShaderDataID.cameraColorAttachmentId, tempRtID, PostShaderPass.combine);
+            if (bloomSettings.isActive)
+            {
+                for (int i = 0; i < bloomSettings.maxSampleCount; i++)
+                {
+                    bloomCmd.ReleaseTemporaryRT(bloomDownSampleIDs[i]);
+                    bloomCmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
+                }
+            }
             Draw(postCmd, tempRtID, ShaderDataID.cameraColorAttachmentId, PostShaderPass.finalBlit);
 
             postCmd.EndSample(postBufferName);
@@ -83,13 +82,13 @@ namespace RoXamiRenderPipeline
         #region Bloom
         void SetupBloom(Bloom bloomSettings)
         {
-            int sampleCount = bloomSettings.maxSampleCount.value;
-
+            int sampleCount = bloomSettings.maxSampleCount;
+        
             if (sampleCount <= 0)
             {
                 return;
             }
-
+        
             //get the rt size and format
             int width = renderingData.cameraData.width;
             int height = renderingData.cameraData.height;
@@ -99,20 +98,13 @@ namespace RoXamiRenderPipeline
                 RenderTextureFormat.Default;
             FilterMode filter = FilterMode.Bilinear;
 
-            //Set bloom Shader datas
-            float threshold = Mathf.GammaToLinearSpace(bloomSettings.threshold.value);
-            float thresholdKnee = threshold * 0.5f; // Hardcoded soft knee
-            bloomCmd.SetGlobalVector(bloomParam, new Vector4(
-                threshold, thresholdKnee, bloomSettings.clampMax.value, bloomSettings.scatter.value));
-            bloomCmd.SetGlobalFloat(bloomIntensity, bloomSettings.intensity.value);
-
             //Filter
             bloomCmd.GetTemporaryRT(bloomFilterID, width, height, 0, filter, format);
             Draw(bloomCmd, ShaderDataID.cameraColorAttachmentId, bloomFilterID, PostShaderPass.filter);
-
+        
             //DownSample
-            int[] bloomDownSampleIDs = new int[sampleCount];
-            int[] bloomUpSampleIDs = new int[sampleCount];
+            bloomDownSampleIDs = new int[sampleCount];
+            bloomUpSampleIDs = new int[sampleCount];
             int fromID = bloomFilterID;
             for (int i = 0; i < sampleCount; i++)
             {
@@ -121,16 +113,16 @@ namespace RoXamiRenderPipeline
                     sampleCount = i;
                     break;
                 }
-
+        
                 bloomDownSampleIDs[i] = Shader.PropertyToID("_BloomDownSample" + i);
                 bloomUpSampleIDs[i] = Shader.PropertyToID("_BloomUpSample" + i);
-
+        
                 bloomCmd.GetTemporaryRT(bloomDownSampleIDs[i], width, height, 0, filter, format);
                 bloomCmd.GetTemporaryRT(bloomUpSampleIDs[i], width, height, 0, filter, format);
-
+        
                 Draw(bloomCmd, fromID, bloomDownSampleIDs[i], PostShaderPass.blurH);
                 Draw(bloomCmd, bloomDownSampleIDs[i], bloomUpSampleIDs[i], PostShaderPass.blurV);
-
+        
                 fromID = bloomUpSampleIDs[i];
                 //lower the RT's size to the half size, and set Bilinear filterMode, to ues the unity's mipmap
                 //a single mipmap0 1x1 pixel is the mipmap1 2x2 pixel's average color
@@ -138,24 +130,17 @@ namespace RoXamiRenderPipeline
                 width /= 2;
                 height /= 2;
             }
-
+        
             bloomCmd.ReleaseTemporaryRT(bloomFilterID);
-
+        
             //UpSample
             for (int i = sampleCount - 1; i > 0; i--)
             {
                 bloomCmd.SetGlobalTexture(ShaderDataID.postSource1Id, bloomUpSampleIDs[i - 1]);
                 Draw(bloomCmd, bloomUpSampleIDs[i], bloomUpSampleIDs[i - 1], PostShaderPass.upSample);
             }
-
             bloomCmd.SetGlobalTexture(ShaderDataID.postSource1Id, bloomUpSampleIDs[0]);
-            Draw(bloomCmd, ShaderDataID.cameraColorAttachmentId, tempRtID, PostShaderPass.combine);
-
-            for (int i = 0; i < sampleCount; i++)
-            {
-                bloomCmd.ReleaseTemporaryRT(bloomDownSampleIDs[i]);
-                bloomCmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
-            }
+            
         }
         #endregion
 

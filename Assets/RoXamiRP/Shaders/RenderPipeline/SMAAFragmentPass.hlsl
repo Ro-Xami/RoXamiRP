@@ -19,8 +19,6 @@ float Luma(float2 uv)
     return GetLuma(SampleCameraAttachment(uv).rgb);
 }
 
-#define _edgeThreshold 0.04f
-#define _maxStep 8
 #if defined(_AA_HIGH)
     #define _edgeThreshold 0.03f
     #define _maxStep 10
@@ -79,7 +77,6 @@ float SearchLeftX(float2 uv)
         }
         uv -= move;
     }
-    //return min(2 * i + 1, 2 * _maxStep);
     return min(2.0 * (i + edge), 2.0 * _maxStep);
 }
 
@@ -102,7 +99,6 @@ float SearchRightX(float2 uv)
         }
         uv += move;
     }
-    //return min(2 * i + 1, 2 * _maxStep);
     return min(2.0 * (i + edge), 2.0 * _maxStep);
 }
 
@@ -125,7 +121,6 @@ float SearchUpY(float2 uv)
         }
         uv -= move;
     }
-    //return min(2 * i + 1, 2 * _maxStep);
     return min(2.0 * (i + edge), 2.0 * _maxStep);
 }
 
@@ -148,7 +143,6 @@ float SearchBottomY(float2 uv)
         }
         uv += move;
     }
-    //return min(2 * i + 1, 2 * _maxStep);
     return min(2.0 * (i + edge), 2.0 * _maxStep);
 }
 

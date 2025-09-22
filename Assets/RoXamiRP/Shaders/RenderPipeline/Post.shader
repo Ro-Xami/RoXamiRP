@@ -8,7 +8,7 @@
 		
 		HLSLINCLUDE
 		#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-		#include_with_pragmas "PostPass.hlsl"
+		#include "PostPass.hlsl"
 		ENDHLSL
 
 		Pass
@@ -68,12 +68,17 @@
 
 		Pass
 		{
-			Name "Bloom Combine"
+			Name "Combine"
 			
 			HLSLPROGRAM
+				#pragma multi_compile _Bloom
+				#pragma multi_compile_local_fragment _ _ACES_Film_ToneMapping _ACES_Simple_ToneMapping _GT_ToneMapping
+				#pragma multi_compile _ColorAdjustments
+				#pragma multi_compile _DepthOfFeild
+				
 				#pragma target 3.5
 				#pragma vertex FullScreenTriangle
-				#pragma fragment BloomCombineFragment
+				#pragma fragment CombineFragment
 			ENDHLSL
 		}
 

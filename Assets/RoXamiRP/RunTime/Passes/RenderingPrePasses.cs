@@ -17,12 +17,6 @@ namespace RoXamiRenderPipeline
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             context.SetupCameraProperties(renderingData.cameraData.camera);
-
-            if (renderingData.runtimeData.enablePostProcessing)
-            {
-                var camera = renderingData.cameraData.camera;
-                VolumeManager.instance.Update(camera.transform, camera.cullingMask);
-            }
         }
     }
 }

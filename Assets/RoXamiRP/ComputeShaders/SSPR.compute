@@ -24,7 +24,7 @@ void SSPRCompute(uint3 id : SV_DispatchThreadID)
     float2 screenSpaceUV = float2(id.xy) * _texelSize.zw;
 
     float depth = _CameraDepthTexture.
-        SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 1).r;
+        SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 0).r;
 
     //withoutSkybox
     #if defined(UNITY_REVERSED_Z)

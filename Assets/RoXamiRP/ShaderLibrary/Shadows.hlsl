@@ -5,15 +5,17 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
 
 //PCF
-#if defined(_DIRECTIONAL_PCF3)
-	#define DIRECTIONAL_FILTER_SAMPLES 4
-	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_3x3
+#if defined(_DIRECTIONAL_PCF0)
+
+#elif defined(_DIRECTIONAL_PCF3)
+ 	#define DIRECTIONAL_FILTER_SAMPLES 4
+ 	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_3x3
 #elif defined(_DIRECTIONAL_PCF5)
-	#define DIRECTIONAL_FILTER_SAMPLES 9
-	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_5x5
+ 	#define DIRECTIONAL_FILTER_SAMPLES 9
+ 	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_5x5
 #elif defined(_DIRECTIONAL_PCF7)
-	#define DIRECTIONAL_FILTER_SAMPLES 16
-	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_7x7
+ 	#define DIRECTIONAL_FILTER_SAMPLES 16
+ 	#define DIRECTIONAL_FILTER_SETUP SampleShadow_ComputeSamples_Tent_7x7
 #endif
 
 #define MAX_CASCADE_COUNT 4
