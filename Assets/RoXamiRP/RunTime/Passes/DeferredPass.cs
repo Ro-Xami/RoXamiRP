@@ -41,9 +41,9 @@ namespace RoXamiRenderPipeline
         void Draw(RenderingData renderingData)
         {
             cmd.SetRenderTarget(
-                ShaderDataID.cameraColorAttachmentId,
+                renderingData.cameraData.cameraColorAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.cameraData.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 
             cmd.DrawProcedural(

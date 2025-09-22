@@ -36,8 +36,8 @@ namespace RoXamiRenderPipeline
         private readonly PostPass postPass = 
             new PostPass(RenderPassEvent.BeforeRenderingPostProcessing);
 
-        private readonly FinalBlitPass finalBlitPass = 
-            new FinalBlitPass(RenderPassEvent.AfterRendering);
+        private readonly AntialiasingPass antialiasingPass = 
+            new AntialiasingPass(RenderPassEvent.AfterRendering);
 
         public RoXamiRenderer()
         {
@@ -79,6 +79,7 @@ namespace RoXamiRenderPipeline
         {
             activePasses.Add(lightPass);
             activePasses.Add(prePasses);
+            
             if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
             {
                 activePasses.Add(gBufferPass);
@@ -87,21 +88,24 @@ namespace RoXamiRenderPipeline
             }
 
             activePasses.Add(forwardOpaquePass);
-            // if (renderingData.cameraData.cameraRenderType == CameraRenderType.Base)
-            // {
+            
+            if (renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base &&
+                renderingData.cameraData.additionalCameraData.backgroundType == BackgroundType.Skybox)
+            {
                  activePasses.Add(drawSkyboxPass);
-            // }
+            }
 
             activePasses.Add(forwardTransparentPass);
 
-            if (RoXamiVolume.Instance.isActive)
+            if (RoXamiVolume.Instance.isActive && 
+                renderingData.cameraData.additionalCameraData.enablePostProcessing)
             {
                 activePasses.Add(postPass);
             }
 
-            if (renderingData.runtimeData.isFinalBlit)
+            if (renderingData.cameraData.additionalCameraData.enableAntialiasing)
             {
-                activePasses.Add(finalBlitPass);
+                activePasses.Add(antialiasingPass);
             }
         }
 

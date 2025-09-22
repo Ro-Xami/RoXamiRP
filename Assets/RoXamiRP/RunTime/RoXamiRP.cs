@@ -63,7 +63,7 @@ namespace RoXamiRenderPipeline
                     context, camera, additionalCameraData, 
                     commonSettings, shadowSettings, renderAsset, 
                     shaderAsset, antialiasingSettings,
-                    isSingleBaseCamera);
+                    isSingleBaseCamera, true);
                 
                 //Overlay Camera
                 if (!isSingleBaseCamera)
@@ -91,11 +91,13 @@ namespace RoXamiRenderPipeline
                             : RoXamiRendererAsset.defaultAsset;
 
                         bool isFinalOverlayCamera = i == additionalCameraData.cameraStack.Count - 1;
+                        bool isAB = i % 2 != 0;
+                        
                         cameraRender.Render(
                             context, cameraStack, cameraStackAdditionalData, 
                             commonSettings, shadowSettings, cameraStackRenderAsset, 
                             shaderAsset, antialiasingSettings,
-                            isFinalOverlayCamera);
+                            isFinalOverlayCamera, isAB);
                     }
                 }
             }

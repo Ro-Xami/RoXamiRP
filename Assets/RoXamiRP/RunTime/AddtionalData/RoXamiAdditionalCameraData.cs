@@ -11,6 +11,13 @@ namespace RoXamiRenderPipeline
         Overlay
     }
 
+    public enum BackgroundType
+    {
+        Skybox,
+        //Color,
+        None
+    }
+
     public static class RoXamiCameraExtensions
     {
         public static AdditionalCameraData GetRoXamiAdditionalCameraData(this Camera camera)
@@ -30,7 +37,8 @@ namespace RoXamiRenderPipeline
     public class AdditionalCameraData
     {
         [HideInInspector] public int roXamiRendererAssetID;
-        public CameraRenderType cameraRenderType;
+        public CameraRenderType cameraRenderType = CameraRenderType.Base;
+        public BackgroundType backgroundType = BackgroundType.None;
         public List<Camera> cameraStack = new List<Camera>();
         public bool enableScreenSpaceShadows = true;
         public bool enablePostProcessing = true;

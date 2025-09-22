@@ -3,14 +3,14 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
-    public class FinalBlitPass : RoXamiRenderPass
+    public class AntialiasingPass : RoXamiRenderPass
     {
-        public FinalBlitPass(RenderPassEvent evt)
+        public AntialiasingPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
         }
         
-        const string bufferName = "FinalBlitPass";
+        const string bufferName = "AntialiasingPass";
         private CommandBuffer cmd = new CommandBuffer()
         {
             name = bufferName
@@ -63,13 +63,13 @@ namespace RoXamiRenderPipeline
 
         void DrawFXAAQuality(ShaderAsset shaderAsset)
         {
-            Draw(ShaderDataID.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
+            Draw(renderingData.cameraData.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
                 shaderAsset.fxaaMaterial, 0);
         }
         
         void DrawFXAAConsole(ShaderAsset shaderAsset)
         {
-            Draw(ShaderDataID.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
+            Draw(renderingData.cameraData.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
                 shaderAsset.fxaaMaterial, 1);
         }
         
@@ -81,19 +81,19 @@ namespace RoXamiRenderPipeline
             cmd.GetTemporaryRT(smaaFactorRTID, 
                 cameraData.cameraColorDescriptor, FilterMode.Bilinear);
             
-            Draw(ShaderDataID.cameraColorAttachmentId, smaaEdgeRTID,
+            Draw(renderingData.cameraData.cameraColorAttachmentId, smaaEdgeRTID,
                 shaderAsset.smaaMaterial, 0);
             
             Draw(smaaEdgeRTID, smaaFactorRTID,
                 shaderAsset.smaaMaterial, 1);
             
-            Draw(ShaderDataID.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
+            Draw(renderingData.cameraData.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
                 shaderAsset.smaaMaterial, 2);
         }
 
         void FinalBlit(ShaderAsset shaderAsset)
         {
-            Draw(ShaderDataID.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
+            Draw(renderingData.cameraData.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget,
                 shaderAsset.blitFullScreenTriangleMaterial, 0);
         }
 
@@ -104,7 +104,7 @@ namespace RoXamiRenderPipeline
             cmd.SetRenderTarget(
                 to,
                 RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.cameraData.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             
             cmd.DrawProcedural(

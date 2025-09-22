@@ -163,6 +163,9 @@ public class CameraDataInspector : Editor
         
         addData.cameraRenderType = 
             (CameraRenderType)EditorGUILayout.EnumPopup("Render Type", addData.cameraRenderType);
+        
+        addData.backgroundType = 
+            (BackgroundType)EditorGUILayout.EnumPopup("Background Type", addData.backgroundType);
 
         if (addData.cameraRenderType == CameraRenderType.Base)
         {

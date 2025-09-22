@@ -59,7 +59,7 @@ namespace RoXamiRenderPipeline
             }
             
             //Combine
-            Draw(postCmd, ShaderDataID.cameraColorAttachmentId, tempRtID, PostShaderPass.combine);
+            Draw(postCmd, renderingData.cameraData.cameraColorAttachmentId, tempRtID, PostShaderPass.combine);
             if (bloomSettings.isActive)
             {
                 for (int i = 0; i < bloomSettings.maxSampleCount; i++)
@@ -68,7 +68,7 @@ namespace RoXamiRenderPipeline
                     bloomCmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
                 }
             }
-            Draw(postCmd, tempRtID, ShaderDataID.cameraColorAttachmentId, PostShaderPass.finalBlit);
+            Draw(postCmd, tempRtID, renderingData.cameraData.cameraColorAttachmentId, PostShaderPass.finalBlit);
 
             postCmd.EndSample(postBufferName);
             ExecuteCommandBuffer(context, postCmd);
@@ -100,7 +100,7 @@ namespace RoXamiRenderPipeline
 
             //Filter
             bloomCmd.GetTemporaryRT(bloomFilterID, width, height, 0, filter, format);
-            Draw(bloomCmd, ShaderDataID.cameraColorAttachmentId, bloomFilterID, PostShaderPass.filter);
+            Draw(bloomCmd, renderingData.cameraData.cameraColorAttachmentId, bloomFilterID, PostShaderPass.filter);
         
             //DownSample
             bloomDownSampleIDs = new int[sampleCount];

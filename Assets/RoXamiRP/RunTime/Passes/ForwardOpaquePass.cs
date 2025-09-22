@@ -44,16 +44,16 @@ namespace RoXamiRenderPipeline
         private void SetRenderTarget()
         {
             cmd.SetRenderTarget(
-                ShaderDataID.cameraColorAttachmentId,
+                renderingData.cameraData.cameraColorAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.cameraData.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 
             if (!renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
             {
                 cmd.ClearRenderTarget(
                     true,
-                    renderingData.cameraData.cameraRenderType == CameraRenderType.Base,
+                    renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base,
                     Color.clear);
             }
         }
@@ -86,8 +86,8 @@ namespace RoXamiRenderPipeline
         
         void CopyCameraColor(CommandBuffer cmd)
         {
-            cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
-            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
+            cmd.CopyTexture(renderingData.cameraData.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
+            cmd.CopyTexture(renderingData.cameraData.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
         }
     }
 }

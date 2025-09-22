@@ -44,16 +44,16 @@ namespace RoXamiRenderPipeline
         private void SetRenderTarget(CommandBuffer cmd)
         {
             cmd.SetRenderTarget(
-                ShaderDataID.cameraColorAttachmentId,
+                renderingData.cameraData.cameraColorAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.cameraData.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
         }
 
         void CopyCameraColor(CommandBuffer cmd)
         {
-            cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
-            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
+            cmd.CopyTexture(renderingData.cameraData.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
+            cmd.CopyTexture(renderingData.cameraData.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
         }
 
         void DrawTransparent()
