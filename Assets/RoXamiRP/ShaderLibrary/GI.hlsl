@@ -4,21 +4,22 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/ImageBasedLighting.hlsl"
 #include "Input.hlsl"
 #include "Surface.hlsl"
+#include "UnityInput.hlsl"
 
 TEXTURECUBE(unity_SpecCube0);
 SAMPLER(samplerunity_SpecCube0);
 
-CBUFFER_START(RoXamiGI)
-	float4 unity_SHAr;
-	float4 unity_SHAg;
-	float4 unity_SHAb;
-	float4 unity_SHBr;
-	float4 unity_SHBg;
-	float4 unity_SHBb;
-	float4 unity_SHC;
-
-	float4 unity_SpecCube0_HDR;
-CBUFFER_END
+// CBUFFER_START(GI)
+// 	float4 unity_SHAr;
+// 	float4 unity_SHAg;
+// 	float4 unity_SHAb;
+// 	float4 unity_SHBr;
+// 	float4 unity_SHBg;
+// 	float4 unity_SHBb;
+// 	float4 unity_SHC;
+//
+// 	float4 unity_SpecCube0_HDR;
+// CBUFFER_END
 
 struct GI
 {

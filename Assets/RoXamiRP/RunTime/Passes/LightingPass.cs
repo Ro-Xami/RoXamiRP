@@ -54,7 +54,7 @@ namespace RoXamiRenderPipeline
 
             shadows.Setup(context, renderingData);
 
-            SetupDirectionalLight(renderingData);
+            SetupDirectionalLight(ref renderingData);
 
             cmd.EndSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
@@ -65,7 +65,7 @@ namespace RoXamiRenderPipeline
             shadows.CleanUp();
         }
 
-        void SetupDirectionalLight(RenderingData renderingData)
+        void SetupDirectionalLight(ref RenderingData renderingData)
         {
             int addLightCount = 0;
             int dirLightCount = 0;

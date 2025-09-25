@@ -1,23 +1,12 @@
-Shader "RoXami RP/Actor/ActorToonLit"
+Shader "RoXami RP/Actor/ActorToonFace"
 {
 	Properties
 	{
 		_BaseColor ("Base Color" , color) = (1,1,1,1)
 		[NoScaleOffest] _BaseMap ("Base Map" , 2D) = "white" {}
 		
-		[Space(10)][Header(Metallic Roughtness Ao)]
-		[NoScaleOffest] _MraMap ("MRA Map", 2D) = "white" {}
-		_roughness ("Roughness" , Range(0 , 1)) = 0.5
-		_metallic ("Metallic" , Range(0 , 1)) = 0
-		_ao ("AO" , Range(0 , 1)) = 1
-		
-		[Space(10)][Header(Normal)]
-		[NoScaleOffest] _NormalMap ("Normal Map", 2D) = "bump" {}
-		_normalStrength ("Normal Strength", Float) = 0
-		
-		[Space(10)][Header(Emission)]
-		[HDR]_emissive ("Emissive" , Color) = (0,0,0,0)
-		[NoScaleOffest] _EmissionMap ("Emission Map", 2D) = "black" {}
+		[Space(10)][Header(SDF)]
+		[NoScaleOffest] _SdfFaceMap ("Sdf Face Map", 2D) = "white" {}
 		
 		[Space(10)][Header(Lut)]
 		[NoScaleOffest] _LutMap ("Lut Map", 2D) = "white" {}
@@ -26,15 +15,26 @@ Shader "RoXami RP/Actor/ActorToonLit"
 		[Toggle(_ALPHACLIP_ON)] _alphaClip ("Alpha Clip" , float) = 0
 		_cutout ("Cut Out" , Range(0 , 1)) = 0.5
 		
-		[Header(Toon)]
-		_rimColor ("Rim Color", Color) = (1, 1, 1, 1)
-		_rimOffest ("Rim Offest", Float) = 1
-		_rimThreshold ("Rim Threshold", Range(0, 1)) = 0.5
-		
 		[Space(10)][Header(Render Settings)]
 		[Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src Blend", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 0
 		[Enum(Off, 0, On, 1)] _ZWrite ("Z Write", Float) = 1
+		
+		[HideInInspector] _faceFrontDir ("Face Front Dir", Vector) = (1,1,1,1)
+		
+		//[Space(10)][Header(Metallic Roughtness Ao)]
+		[HideInInspector] [NoScaleOffest] _MraMap ("MRA Map", 2D) = "white" {}
+		[HideInInspector] _roughness ("Roughness" , Range(0 , 1)) = 0.5
+		[HideInInspector] _metallic ("Metallic" , Range(0 , 1)) = 0
+		[HideInInspector] _ao ("AO" , Range(0 , 1)) = 1
+		
+		//[Space(10)][Header(Normal)]
+		[HideInInspector] [NoScaleOffest] _NormalMap ("Normal Map", 2D) = "bump" {}
+		[HideInInspector] _normalStrength ("Normal Strength", Float) = 0
+		
+		//[Space(10)][Header(Emission)]
+		[HideInInspector] [HDR]_emissive ("Emissive" , Color) = (0,0,0,0)
+		[HideInInspector] [NoScaleOffest] _EmissionMap ("Emission Map", 2D) = "white" {}
 	}
 	
 	SubShader
@@ -55,11 +55,11 @@ Shader "RoXami RP/Actor/ActorToonLit"
 			#pragma fragment ToonLitPassFragment
 			#pragma multi_compile _ SCREENSPACE_SHADOWS
 			#pragma multi_compile _instancing
+			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 			#pragma shader_feature_local _ALPHACLIP_ON
-
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
-			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitForwardPass.hlsl"
+			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonFaceFragmentPass.hlsl"
 
 			ENDHLSL
 		}

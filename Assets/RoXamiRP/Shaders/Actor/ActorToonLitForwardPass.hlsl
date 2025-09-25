@@ -1,7 +1,7 @@
 ﻿#ifndef ACTORTOON_LIT_FORWARDPASS_INCLUDE
 #define ACTORTOON_LIT_FORWARDPASS_INCLUDE
 
-#include "Assets/RoXamiRP/ShaderLibrary/ToonLighting.hlsl"
+#include "Assets/RoXamiRP/Shaders/Actor/ActorLighting.hlsl"
 
 struct Attributes {
 	float4 positionOS : POSITION;
@@ -65,8 +65,8 @@ Surface GetSurfaceData(Varyings IN)
 	Surface OUT = (Surface)0;
 	float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * IN.color;
 	float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, IN.uv);
-	float4 mra = SAMPLE_TEXTURE2D(_MraMap, sampler_MraMap, IN.uv);
-	float3 emission = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, IN.uv);
+	float4 mra = SAMPLE_TEXTURE2D(_MRAMap, sampler_MRAMap, IN.uv);
+	float3 emission = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, IN.uv).rgb;
 
 	float3 albedo = baseMap.rgb;
 	float alpha = baseMap.a;
@@ -76,7 +76,7 @@ Surface GetSurfaceData(Varyings IN)
 	float metallic = mra.r * _metallic;
 	float roughness = mra.g * _roughness;
 	float ao = mra.b * _ao;
-	float emissive = _emissive * emission;
+	float3 emissive = _emissive * emission;
 	
 	OUT.albedo = albedo;
 	OUT.normal = normal;
@@ -96,14 +96,12 @@ float4 ToonLitPassFragment (Varyings IN) : SV_TARGET
 	Input inputData = GetInputData(IN);
 	Surface surfaceData = GetSurfaceData(IN);
 
-	float4 color = CalculateToonLighting(inputData , surfaceData);
+	float4 color = CalculateActorLighting(inputData , surfaceData);
 
 	#ifdef _ALPHACLIP_ON
 		clip(surfaceData.alpha - _cutout);
 	#endif
 
-	//return float4(IN.normalWS, 1);
-	//return float4(surfaceData.normal, 1);
     return color;
 }
 

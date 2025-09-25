@@ -38,11 +38,11 @@ namespace RoXamiRenderPipeline
     {
         [HideInInspector] public int roXamiRendererAssetID;
         public CameraRenderType cameraRenderType = CameraRenderType.Base;
-        public BackgroundType backgroundType = BackgroundType.None;
+        public BackgroundType backgroundType = BackgroundType.Skybox;
         public List<Camera> cameraStack = new List<Camera>();
         public bool enableScreenSpaceShadows = true;
         public bool enablePostProcessing = true;
-        public bool enableAntialiasing = false;
+        public bool enableAntialiasing = true;
 
         public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, List<Camera> cameraStack)
         {

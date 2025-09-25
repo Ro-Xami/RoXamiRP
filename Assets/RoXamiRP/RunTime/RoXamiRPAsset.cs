@@ -80,6 +80,19 @@ namespace RoXamiRenderPipeline
         {
             SetAAKeyWords();
             SetPcfSettings();
+            SetDirectionalShadowsKeyword();
+        }
+
+        void SetDirectionalShadowsKeyword()
+        {
+            if (shadowSettings != null && shadowSettings.enableDirectionalShadows)
+            {
+                Shader.EnableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+            }
+            else
+            {
+                Shader.DisableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+            }
         }
 
         void SetAAKeyWords()
@@ -214,6 +227,8 @@ namespace RoXamiRenderPipeline
     [Serializable]
     public class ShadowSettings
     {
+        public bool enableDirectionalShadows = true;
+        
         [Min(1f)] public float maxDistance = 500f;
 
         [Range(0.001f, 1f)] public float distanceFade = 0.1f;

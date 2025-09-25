@@ -41,7 +41,7 @@ namespace RoXamiRenderPipeline
         public void Render(Light light, int lightIndex, ref RenderingData renderingData)
         {
             bool isCastShadows =
-                light != null && light.shadows != LightShadows.None && light.shadowStrength > 0f &&
+                light && light.shadows != LightShadows.None && light.shadowStrength > 0f &&
                 cullingResults.GetShadowCasterBounds(0, out Bounds b);
 
             renderingData.runtimeData.isCastShadows = isCastShadows;

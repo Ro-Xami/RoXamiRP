@@ -46,7 +46,6 @@ namespace RoXamiRenderPipeline
             if (renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows &&
                 renderingData.runtimeData.isCastShadows)
             {
-                cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 int width = renderingData.cameraData.width;
                 int height = renderingData.cameraData.height;
                 cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
@@ -64,7 +63,6 @@ namespace RoXamiRenderPipeline
             }
             else
             {
-                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
                     1, 1, 0, FilterMode.Point, RenderTextureFormat.R8);
                 ExecuteCommandBuffer(context, cmd);

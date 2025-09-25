@@ -94,9 +94,9 @@ float3 InDirectionalLight(float NoV , float3 normalWS, float3 viewWS , float3 al
     float3 InDiffuse = SHColor * Kd * albedo;
     
     float3 F_IndirectionLight = Ks;
-    float3 SpecCubecolor = gi.specular;
+    float3 SpecCubeColor = gi.specular;
     float2 LUT = LUT_Approx(roughness, NoV);
-    float3 InSpec = SpecCubecolor * (F_IndirectionLight * LUT.r + LUT.g);
+    float3 InSpec = SpecCubeColor * (F_IndirectionLight * LUT.r + LUT.g);
     return (InDiffuse + InSpec) * occlusion;
     //return InSpec;
 }
@@ -124,6 +124,7 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
 		float NoL = saturate(dot(additionalLight.direction , normalDir));
 		additionalLightColor += additionalLight.color * NoL * additionalLight.shadowAttenuation;
 	}
+    additionalLightColor *= albedo;
 
     float3 lightColor = light.color;
     float3 lightDir = normalize(light.direction);
@@ -142,7 +143,7 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
         DirectionalLight(HoL, NoL, NoV, NoH, albedo, roughness, metallic, F0 , lightColor, inputData.viewWS) +
         InDirectionalLight(NoV, normalDir, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi) +
         emission +
-        additionalLightColor * albedo;
+        additionalLightColor;
     finalColor.a = surfaceData.alpha;
 
     //return float4(NoL.xxx, 1);

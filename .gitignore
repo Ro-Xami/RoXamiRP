@@ -72,3 +72,5 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 Assets/Demo/Niji/GF2/
+Assets/MMD/
+Assets/MMD.meta

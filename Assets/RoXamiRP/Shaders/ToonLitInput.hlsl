@@ -1,5 +1,5 @@
-﻿#ifndef ACTORTOON_LIT_INPUT_INCLUDE
-#define ACTORTOON_LIT_INPUT_INCLUDE
+﻿#ifndef TOONLIT_INPUT_INCLUDE
+#define TOONLIT_INPUT_INCLUDE
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
@@ -19,10 +19,5 @@ float _metallic;
 float _ao;
 float _normalStrength;
 float3 _emissive;
-
-//Face
-float3 _faceFrontDir;
-
 CBUFFER_END
-
 #endif

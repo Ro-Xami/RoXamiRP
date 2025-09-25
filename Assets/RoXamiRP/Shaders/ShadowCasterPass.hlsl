@@ -3,18 +3,6 @@
 
 #include "../ShaderLibrary/Common.hlsl"
 
-#pragma multi_compile_instancing
-#pragma shader_feature_local _ALPHACLIP_ON
-
-TEXTURE2D(_BaseMap);
-SAMPLER(sampler_BaseMap);
-
-CBUFFER_START(UnityPerMaterial)
-	float4 _BaseMap_ST;
-	float4 _BaseColor;
-	float _cutout;
-CBUFFER_END
-
 struct Attributes {
 	float4 positionOS : POSITION;
 	float2 uv : TEXCOORD0;
@@ -55,7 +43,7 @@ real ShadowCasterPassFragment(Varyings IN) : SV_TARGET
 	
 	#ifdef _ALPHACLIP_ON
 	half albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv).a;
-	clip(albedo.a - _cutout);
+	clip(albedo - _cutout);
 	#endif
 	
     return 0;
