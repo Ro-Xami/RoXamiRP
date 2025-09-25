@@ -6,16 +6,19 @@ Shader "RoXami RP/Actor/ActorToonLit"
 		[NoScaleOffest] _BaseMap ("Base Map" , 2D) = "white" {}
 		
 		[Space(10)][Header(Metallic Roughtness Ao)]
+		[Toggle(_MRA_MAP_ON)] _enableMraMap ("Enable MRA Map", Float) = 0
 		[NoScaleOffest] _MraMap ("MRA Map", 2D) = "white" {}
 		_roughness ("Roughness" , Range(0 , 1)) = 0.5
 		_metallic ("Metallic" , Range(0 , 1)) = 0
 		_ao ("AO" , Range(0 , 1)) = 1
 		
 		[Space(10)][Header(Normal)]
+		[Toggle(_NORMAL_MAP_ON)] _enableNormalMap ("Enable Normal Map", Float) = 0
 		[NoScaleOffest] _NormalMap ("Normal Map", 2D) = "bump" {}
 		_normalStrength ("Normal Strength", Float) = 0
 		
 		[Space(10)][Header(Emission)]
+		[Toggle(_EMISSIVE_MAP_ON)] _enableEmissionMap ("Enable Emission Map", Float) = 0
 		[HDR]_emissive ("Emissive" , Color) = (0,0,0,0)
 		[NoScaleOffest] _EmissionMap ("Emission Map", 2D) = "black" {}
 		
@@ -56,7 +59,9 @@ Shader "RoXami RP/Actor/ActorToonLit"
 			#pragma multi_compile _ SCREENSPACE_SHADOWS
 			#pragma multi_compile _instancing
 			#pragma shader_feature_local _ALPHACLIP_ON
-
+			#pragma shader_feature_local _MRA_MAP_ON
+			#pragma shader_feature_local _NORMAL_MAP_ON
+			#pragma shader_feature_local _MRAMAP_ON
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitForwardPass.hlsl"
@@ -80,6 +85,9 @@ Shader "RoXami RP/Actor/ActorToonLit"
 			#pragma fragment ToonGBufferPassFragment
 			#pragma multi_compile_instancing
 			#pragma shader_feature_local _ALPHACLIP_ON
+			#pragma shader_feature_local _MRA_MAP_ON
+			#pragma shader_feature_local _NORMAL_MAP_ON
+			#pragma shader_feature_local _MRAMAP_ON
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/ToonGBufferPass.hlsl"

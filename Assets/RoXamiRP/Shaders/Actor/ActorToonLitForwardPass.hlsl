@@ -63,28 +63,35 @@ Input GetInputData(Varyings IN)
 Surface GetSurfaceData(Varyings IN)
 {
 	Surface OUT = (Surface)0;
-	float4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * IN.color;
-	float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, IN.uv);
-	float4 mra = SAMPLE_TEXTURE2D(_MRAMap, sampler_MRAMap, IN.uv);
-	float3 emission = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, IN.uv).rgb;
+	
+	float4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * IN.color;
+				
+	float3 mra = float3(_metallic , _roughness , _ao);
+	#if defined(_MRAMAP_ON)
+	mra *= SAMPLE_TEXTURE2D(_MRAMap, sampler_MRAMap, IN.uv);
+	#endif
 
-	float3 albedo = baseMap.rgb;
-	float alpha = baseMap.a;
+	float3 emission = _emissive;
+	#if defined(_MRAMAP_ON)
+	emission *= SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, IN.uv).rgb;
+	#endif
+
+	#if defined(_MRAMAP_ON)
+	float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, IN.uv);
 	float3 normal = TransformNormalMapToNormal(
 		normalMap, _normalStrength,
 		IN.normalWS, IN.tangentWS, IN.biTangentWS);
-	float metallic = mra.r * _metallic;
-	float roughness = mra.g * _roughness;
-	float ao = mra.b * _ao;
-	float3 emissive = _emissive * emission;
+	#else
+	float3 normal = IN.normalWS;
+	#endif
 	
-	OUT.albedo = albedo;
+	OUT.albedo = albedo.rgb;
 	OUT.normal = normal;
-	OUT.metallic = metallic;
-	OUT.roughness = roughness;
-	OUT.ao = ao;
-	OUT.emissive = emissive;
-	OUT.alpha = alpha;
+	OUT.metallic = mra.r;
+	OUT.roughness = mra.g;
+	OUT.ao = mra.b;
+	OUT.emissive = emission;
+	OUT.alpha = albedo.a;
 
 	return OUT;
 }

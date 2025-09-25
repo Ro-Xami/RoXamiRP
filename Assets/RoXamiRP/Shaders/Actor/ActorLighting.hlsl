@@ -111,8 +111,8 @@ float4 CalculateActorLighting(Input inputData , Surface surfaceData)
     CommonData commonData = GetCommonData(mainLight, surfaceData, inputData);
 
 	float diffuse = dot(surfaceData.normal, mainLight.direction);
-	diffuse = saturate(
-		(diffuse + 1) * 0.5 * mainLight.shadowAttenuation);
+	diffuse = (diffuse + 1) * 0.5;
+	diffuse = lerp(0.5f, diffuse, mainLight.shadowAttenuation);
 	
 	float3 toonDiffuse = SAMPLE_TEXTURE2D(_LutMap, sampler_LutMap, float2(diffuse, 0)).rgb;
 	float3 toonRim = smoothstep(_rimSmoothLeft, _rimSmoothRight, diffuse) *
@@ -148,9 +148,7 @@ float4 CalculateActorFace(Input inputData , Surface surfaceData, float2 uv)
 	CommonData commonData = GetCommonData(mainLight, surfaceData, inputData);
 
 	float diffuse = dot(surfaceData.normal, mainLight.direction);
-	diffuse = saturate(
-		(diffuse + 1) * 0.5 *
-		mainLight.shadowAttenuation);
+	diffuse = (diffuse + 1) * 0.5;
 
 	diffuse = SDF_NoL(uv, mainLight.direction);
 
