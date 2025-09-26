@@ -39,6 +39,9 @@ namespace RoXamiRenderPipeline
         private readonly AntialiasingPass antialiasingPass = 
             new AntialiasingPass(RenderPassEvent.AfterRendering);
 
+        private readonly FinalBlitPass finalBlitPass = 
+            new FinalBlitPass(RenderPassEvent.AfterRendering + 1);
+
         public RoXamiRenderer()
         {
         }
@@ -46,7 +49,7 @@ namespace RoXamiRenderPipeline
         public void InitializedActiveRenderPass(RoXamiRendererAsset asset, ref RenderingData renderingData)
         {
             activePasses.Clear();
-            AddRenderPasses(renderingData);
+            AddBaseRenderPasses(renderingData);
             AddRenderFeatures(asset, ref renderingData);
             SortStable(activePasses);
         }
@@ -75,11 +78,13 @@ namespace RoXamiRenderPipeline
             }
         }
 
-        private void AddRenderPasses(RenderingData renderingData)
+        private void AddBaseRenderPasses(RenderingData renderingData)
         {
             activePasses.Add(lightPass);
             activePasses.Add(prePasses);
             
+            //=========================================================================
+            //Deferred
             if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
             {
                 activePasses.Add(gBufferPass);
@@ -87,6 +92,8 @@ namespace RoXamiRenderPipeline
                 activePasses.Add(ssShadowsPass);
             }
 
+            //=========================================================================
+            //Forward
             activePasses.Add(forwardOpaquePass);
             
             if (renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base &&
@@ -97,16 +104,31 @@ namespace RoXamiRenderPipeline
 
             activePasses.Add(forwardTransparentPass);
 
-            if (RoXamiVolume.Instance.isActive && 
-                renderingData.cameraData.additionalCameraData.enablePostProcessing)
+            //=========================================================================
+            //Post Antialiasing FinalBlit
+            bool isPost = 
+                RoXamiVolume.Instance.isActive && 
+                renderingData.cameraData.additionalCameraData.enablePostProcessing;
+            bool isAntialiasing = 
+                renderingData.cameraData.additionalCameraData.enableAntialiasing && 
+                renderingData.antialiasingSettings.antialiasingMode != AntialiasingMode.None;
+            if (!isPost && !isAntialiasing && renderingData.runtimeData.isFinalBlit)
             {
-                activePasses.Add(postPass);
+                activePasses.Add(finalBlitPass);
             }
+            else
+            {
+                if (isPost)
+                {
+                    activePasses.Add(postPass);
+                }
 
-            if (renderingData.cameraData.additionalCameraData.enableAntialiasing)
-            {
-                activePasses.Add(antialiasingPass);
+                if (isAntialiasing)
+                {
+                    activePasses.Add(antialiasingPass);
+                }
             }
+            
         }
 
         private void AddRenderFeatures(RoXamiRendererAsset asset, ref RenderingData renderingData)
@@ -117,7 +139,6 @@ namespace RoXamiRenderPipeline
                 {
                     continue;
                 }
-
                 feature.AddRenderPasses(this, ref renderingData);
             }
         }

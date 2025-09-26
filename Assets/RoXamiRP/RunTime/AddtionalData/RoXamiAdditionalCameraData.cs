@@ -37,12 +37,12 @@ namespace RoXamiRenderPipeline
     public class AdditionalCameraData
     {
         [HideInInspector] public int roXamiRendererAssetID;
-        public CameraRenderType cameraRenderType = CameraRenderType.Base;
-        public BackgroundType backgroundType = BackgroundType.Skybox;
-        public List<Camera> cameraStack = new List<Camera>();
-        public bool enableScreenSpaceShadows = true;
-        public bool enablePostProcessing = true;
-        public bool enableAntialiasing = true;
+        public CameraRenderType cameraRenderType;
+        public BackgroundType backgroundType;
+        public List<Camera> cameraStack;
+        public bool enableScreenSpaceShadows;
+        public bool enablePostProcessing;
+        public bool enableAntialiasing;
 
         public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, List<Camera> cameraStack)
         {
@@ -57,7 +57,6 @@ namespace RoXamiRenderPipeline
     public class RoXamiAdditionalCameraData : MonoBehaviour
     {
         private static AdditionalCameraData defaultAdditionalCameraData;
-
         public static AdditionalCameraData DefaultAdditionalCameraData
         {
             get
@@ -73,6 +72,10 @@ namespace RoXamiRenderPipeline
                     var rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
                     defaultAdditionalCameraData =
                         new AdditionalCameraData(0, CameraRenderType.Base, null);
+                    defaultAdditionalCameraData.backgroundType = BackgroundType.Skybox;
+                    defaultAdditionalCameraData.enableScreenSpaceShadows = true;
+                    defaultAdditionalCameraData.enablePostProcessing = true;
+                    defaultAdditionalCameraData.enableAntialiasing = true;
                 }
 
                 return defaultAdditionalCameraData;

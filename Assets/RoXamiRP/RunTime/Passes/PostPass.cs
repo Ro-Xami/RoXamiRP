@@ -16,16 +16,10 @@ namespace RoXamiRenderPipeline
             name = postBufferName,
         };
 
-        const string bloomName = "Bloom";
+        const string bloomName = "RoXami Bloom";
         readonly CommandBuffer bloomCmd = new CommandBuffer
         {
             name = bloomName,
-        };
-
-        const string finalBlitName = "RoXami FinalBlit";
-        readonly CommandBuffer finalBlitCmd = new CommandBuffer
-        {
-            name = finalBlitName,
         };
 
         static readonly int tempRtID = Shader.PropertyToID("_TempRT");
@@ -58,8 +52,22 @@ namespace RoXamiRenderPipeline
                 ExecuteCommandBuffer(context, bloomCmd);
             }
             
-            //Combine
-            Draw(postCmd, renderingData.cameraData.cameraColorAttachmentId, tempRtID, PostShaderPass.combine);
+            Draw
+            (
+                postCmd, 
+                ShaderDataID.cameraColorAttachmentId,
+                //==================================================
+                //Draw to
+                renderingData.runtimeData.isFinalBlit && 
+                !renderingData.cameraData.additionalCameraData.enableAntialiasing && 
+                renderingData.antialiasingSettings.antialiasingMode != AntialiasingMode.None?
+                    BuiltinRenderTextureType.CameraTarget:
+                    ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentId == ShaderDataID.cameraColorAttachmentAId?
+                        ShaderDataID.cameraColorAttachmentBId : ShaderDataID.cameraColorAttachmentAId,
+                //==================================================
+                PostShaderPass.combine
+            );
+            
             if (bloomSettings.isActive)
             {
                 for (int i = 0; i < bloomSettings.maxSampleCount; i++)
@@ -68,17 +76,16 @@ namespace RoXamiRenderPipeline
                     bloomCmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
                 }
             }
-            Draw(postCmd, tempRtID, renderingData.cameraData.cameraColorAttachmentId, PostShaderPass.finalBlit);
 
             postCmd.EndSample(postBufferName);
             ExecuteCommandBuffer(context, postCmd);
         }
-
+        
         public override void CleanUp()
         {
             postCmd.ReleaseTemporaryRT(tempRtID);
         }
-
+        
         #region Bloom
         void SetupBloom(Bloom bloomSettings)
         {
@@ -100,7 +107,7 @@ namespace RoXamiRenderPipeline
 
             //Filter
             bloomCmd.GetTemporaryRT(bloomFilterID, width, height, 0, filter, format);
-            Draw(bloomCmd, renderingData.cameraData.cameraColorAttachmentId, bloomFilterID, PostShaderPass.filter);
+            Draw(bloomCmd, ShaderDataID.cameraColorAttachmentId, bloomFilterID, PostShaderPass.filter);
         
             //DownSample
             bloomDownSampleIDs = new int[sampleCount];

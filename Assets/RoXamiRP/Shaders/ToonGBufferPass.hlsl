@@ -41,7 +41,7 @@ Varyings ToonGBufferPassVertex(Attributes IN)
 
     OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
     OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
-    OUT.tangentWS = TransformObjectToWorldNormal(IN.tangentOS);
+    OUT.tangentWS = TransformObjectToWorldNormal(IN.tangentOS.xyz);
     OUT.biTangentWS = GetBiTangent(OUT.normalWS, OUT.tangentWS, IN.tangentOS.w);
     OUT.color = IN.color * _BaseColor;
     OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);

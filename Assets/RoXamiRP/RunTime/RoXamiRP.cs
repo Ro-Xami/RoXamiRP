@@ -50,57 +50,67 @@ namespace RoXamiRenderPipeline
                 {
                     continue;
                 }
+                RenderBaseCamera(context, additionalCameraData, camera, out var isSingleBaseCamera);
 
-                var renderAsset =
-                    additionalCameraData.roXamiRendererAssetID < rendererAssets.Length ? 
-                        rendererAssets[additionalCameraData.roXamiRendererAssetID]
-                        : RoXamiRendererAsset.defaultAsset;
-
-                bool isSingleBaseCamera = 
-                    additionalCameraData.cameraStack == null || 
-                    additionalCameraData.cameraStack.Count == 0;
-                cameraRender.Render(
-                    context, camera, additionalCameraData, 
-                    commonSettings, shadowSettings, renderAsset, 
-                    shaderAsset, antialiasingSettings,
-                    isSingleBaseCamera, true);
-                
                 //Overlay Camera
                 if (!isSingleBaseCamera)
                 {
                     for (int i = 0; i < additionalCameraData.cameraStack.Count; i++)
                     {
-                        var cameraStack = additionalCameraData.cameraStack[i];
-                        if (cameraStack == null)
-                        {
-                            additionalCameraData.cameraStack.Remove(cameraStack);
-                            Debug.LogError("camera stack" + i + " is null!");
-                            continue;
-                        }
-                        
-                        var cameraStackAdditionalData = cameraStack.GetRoXamiAdditionalCameraData();
-                        if (cameraStackAdditionalData.cameraRenderType != CameraRenderType.Overlay)
-                        {
-                            Debug.LogError(camera.name + ": camera stack" + i + " is not Overlay!");
-                            continue;
-                        }
-                    
-                        var cameraStackRenderAsset = 
-                            cameraStackAdditionalData.roXamiRendererAssetID < rendererAssets.Length ? 
-                            rendererAssets[cameraStackAdditionalData.roXamiRendererAssetID]
-                            : RoXamiRendererAsset.defaultAsset;
-
-                        bool isFinalOverlayCamera = i == additionalCameraData.cameraStack.Count - 1;
-                        bool isAB = i % 2 != 0;
-                        
-                        cameraRender.Render(
-                            context, cameraStack, cameraStackAdditionalData, 
-                            commonSettings, shadowSettings, cameraStackRenderAsset, 
-                            shaderAsset, antialiasingSettings,
-                            isFinalOverlayCamera, isAB);
+                        RenderOverlayCamera(context, additionalCameraData, i, camera);
                     }
                 }
             }
+        }
+        
+        private void RenderBaseCamera(ScriptableRenderContext context, AdditionalCameraData additionalCameraData, Camera camera,
+            out bool isSingleBaseCamera)
+        {
+            var renderAsset =
+                additionalCameraData.roXamiRendererAssetID < rendererAssets.Length ? 
+                    rendererAssets[additionalCameraData.roXamiRendererAssetID]
+                    : RoXamiRendererAsset.defaultAsset;
+
+            isSingleBaseCamera = additionalCameraData.cameraStack == null || 
+                                 additionalCameraData.cameraStack.Count == 0;
+            cameraRender.Render(
+                context, camera, additionalCameraData, 
+                commonSettings, shadowSettings, renderAsset, 
+                shaderAsset, antialiasingSettings,
+                isSingleBaseCamera);
+        }
+
+        private void RenderOverlayCamera(ScriptableRenderContext context, AdditionalCameraData additionalCameraData, int i,
+            Camera camera)
+        {
+            var cameraStack = additionalCameraData.cameraStack[i];
+            if (cameraStack == null)
+            {
+                additionalCameraData.cameraStack.Remove(cameraStack);
+                Debug.LogError("camera stack" + i + " is null!");
+                return;
+            }
+                        
+            var cameraStackAdditionalData = cameraStack.GetRoXamiAdditionalCameraData();
+            if (cameraStackAdditionalData.cameraRenderType != CameraRenderType.Overlay)
+            {
+                Debug.LogError(camera.name + ": camera stack" + i + " is not Overlay!");
+                return;
+            }
+                    
+            var cameraStackRenderAsset = 
+                cameraStackAdditionalData.roXamiRendererAssetID < rendererAssets.Length ? 
+                    rendererAssets[cameraStackAdditionalData.roXamiRendererAssetID]
+                    : RoXamiRendererAsset.defaultAsset;
+
+            bool isFinalOverlayCamera = i == additionalCameraData.cameraStack.Count - 1;
+            bool isAB = i % 2 != 0;
+                        
+            cameraRender.Render(
+                context, cameraStack, cameraStackAdditionalData, 
+                commonSettings, shadowSettings, cameraStackRenderAsset, 
+                shaderAsset, antialiasingSettings,
+                isFinalOverlayCamera);
         }
     }
 }

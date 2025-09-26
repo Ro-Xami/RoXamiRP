@@ -67,7 +67,7 @@ namespace RoXamiRenderPipeline
 
         private void CopyCameraDepth()
         {
-            cmd.CopyTexture(renderingData.cameraData.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
+            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
         }
 
         private void GetGBufferRT()
@@ -87,7 +87,7 @@ namespace RoXamiRenderPipeline
 
         void ClearCmdRenderTarget()
         {
-            cmd.SetRenderTarget(gBufferTargets, renderingData.cameraData.cameraDepthAttachmentId);
+            cmd.SetRenderTarget(gBufferTargets, ShaderDataID.cameraDepthAttachmentId);
 
             cmd.ClearRenderTarget(true, true, Color.clear);
         }

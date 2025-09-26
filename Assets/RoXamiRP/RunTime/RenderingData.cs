@@ -24,8 +24,8 @@ namespace RoXamiRenderPipeline
         public AdditionalCameraData additionalCameraData;
         public int width;
         public int height;
-        public int cameraDepthAttachmentId;
-        public int cameraColorAttachmentId;
+        // public int cameraDepthAttachmentId;
+        // public int cameraColorAttachmentId;
         public RenderTextureDescriptor cameraColorDescriptor;
         public RenderTextureDescriptor cameraDepthDescriptor;
         public FilterMode cameraColorFilterMode;
@@ -35,7 +35,6 @@ namespace RoXamiRenderPipeline
     public struct RuntimeData
     {
         public bool isFinalBlit;
-        public bool isAB;
         public bool isCastShadows;
     }
 
@@ -44,6 +43,9 @@ namespace RoXamiRenderPipeline
         public static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("ToonUnlit");
         public static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
 
+        public static int cameraDepthAttachmentId;
+        public static int cameraColorAttachmentId;
+        
         public static readonly int cameraDepthAttachmentAId = Shader.PropertyToID("_CameraDepthAttachmentA");
         public static readonly int cameraColorAttachmentAId = Shader.PropertyToID("_CameraColorAttachmentA");
         public static readonly int cameraDepthAttachmentBId = Shader.PropertyToID("_CameraDepthAttachmentB");
@@ -77,7 +79,7 @@ namespace RoXamiRenderPipeline
         FXAA_Quality,
         FXAA_Console,
         SMAA,
-        Original,
+        None,
     };
 
     public enum AntialiasingQuality
