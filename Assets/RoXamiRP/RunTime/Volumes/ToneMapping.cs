@@ -29,24 +29,24 @@ namespace RoXamiRenderPipeline
                 switch (toneMappingMode)
                 {
                     case ToneMappingMode.None:
-                        postMaterial.DisableKeyword(acesFilmKeyword);
-                        postMaterial.DisableKeyword(acesSimpleKeyword);
-                        postMaterial.DisableKeyword(gtKeyword);
+                        Shader.DisableKeyword(acesFilmKeyword);
+                        Shader.DisableKeyword(acesSimpleKeyword);
+                        Shader.DisableKeyword(gtKeyword);
                         break;
                     case ToneMappingMode.ACES_Film:
-                        postMaterial.EnableKeyword(acesFilmKeyword);
-                        postMaterial.DisableKeyword(acesSimpleKeyword);
-                        postMaterial.DisableKeyword(gtKeyword);
+                        Shader.EnableKeyword(acesFilmKeyword);
+                        Shader.DisableKeyword(acesSimpleKeyword);
+                        Shader.DisableKeyword(gtKeyword);
                         break;
                     case ToneMappingMode.ACES_Simple:
-                        postMaterial.DisableKeyword(acesFilmKeyword);
-                        postMaterial.EnableKeyword(acesSimpleKeyword);
-                        postMaterial.DisableKeyword(gtKeyword);
+                        Shader.DisableKeyword(acesFilmKeyword);
+                        Shader.EnableKeyword(acesSimpleKeyword);
+                        Shader.DisableKeyword(gtKeyword);
                         break;
                     case ToneMappingMode.GT:
-                        postMaterial.DisableKeyword(acesFilmKeyword);
-                        postMaterial.DisableKeyword(acesSimpleKeyword);
-                        postMaterial.EnableKeyword(gtKeyword);
+                        Shader.DisableKeyword(acesFilmKeyword);
+                        Shader.DisableKeyword(acesSimpleKeyword);
+                        Shader.EnableKeyword(gtKeyword);
                         break;
                     default:
                         break;
@@ -54,9 +54,9 @@ namespace RoXamiRenderPipeline
             }
             else
             {
-                postMaterial.DisableKeyword(acesFilmKeyword);
-                postMaterial.DisableKeyword(acesSimpleKeyword);
-                postMaterial.DisableKeyword(gtKeyword);
+                Shader.DisableKeyword(acesFilmKeyword);
+                Shader.DisableKeyword(acesSimpleKeyword);
+                Shader.DisableKeyword(gtKeyword);
             }
         }
     }

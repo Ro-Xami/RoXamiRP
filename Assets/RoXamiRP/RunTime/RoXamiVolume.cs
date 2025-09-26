@@ -3,18 +3,7 @@ using UnityEngine;
 
 namespace RoXamiRenderPipeline
 {
-    [System.Serializable]
-    public abstract class RoXamiVolumeBase
-    {
-        public bool isActive = false;
-
-        protected Material postMaterial => RoXamiRPAsset.Instance.shaderAsset.postMaterial;
-        protected Material deferredMaterial => RoXamiRPAsset.Instance.shaderAsset.deferredMaterial;
-
-        public abstract void UpdateVolumeSettings();
-    }
-    
-    [ExecuteAlways]
+    [ExecuteInEditMode]
     public class RoXamiVolume : MonoBehaviour
     {
         private static RoXamiVolume m_Instance;
@@ -22,20 +11,19 @@ namespace RoXamiRenderPipeline
         {
             get
             {
-                if (m_Instance == null)
+                if (!m_Instance)
                 {
-                    GameObject go = new GameObject("RoXamiVolume");
-                    go.hideFlags = HideFlags.HideAndDontSave;
+                    GameObject go = new GameObject("RoXami Volume");
                     m_Instance = go.AddComponent<RoXamiVolume>();
                 }
                 return m_Instance;
             }
         }
 
-        public bool isActive = false;
-        [SerializeField] public Bloom bloom = new Bloom();
-        [SerializeField] public ToneMapping toneMapping = new ToneMapping();
-        [SerializeField] public ColorAdjustment colorAdjustment = new ColorAdjustment();
+        public bool isActive;
+        [SerializeField] public Bloom bloom;
+        [SerializeField] public ToneMapping toneMapping;
+        [SerializeField] public ColorAdjustment colorAdjustment;
 
         private void OnEnable()
         {
@@ -49,11 +37,23 @@ namespace RoXamiRenderPipeline
             UpdateVolumesSettings();
         }
 
+// #if UNITY_EDITOR
+//         private void Update()
+//         {
+//             if (!Application.isPlaying)
+//             {
+//                 m_Instance = this;
+//                 UpdateVolumesSettings();
+//             }
+//         }
+// #endif
+
         public void UpdateVolumesSettings()
         {
-            bloom.UpdateVolumeSettings();
-            toneMapping.UpdateVolumeSettings();
-            colorAdjustment.UpdateVolumeSettings();
+            bloom?.UpdateVolumeSettings();
+            toneMapping?.UpdateVolumeSettings();
+            colorAdjustment?.UpdateVolumeSettings();
+
         }
     }
 }

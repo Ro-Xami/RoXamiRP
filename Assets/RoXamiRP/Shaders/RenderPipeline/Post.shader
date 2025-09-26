@@ -72,7 +72,7 @@
 			
 			HLSLPROGRAM
 				#pragma multi_compile _Bloom
-				#pragma multi_compile_local_fragment _ _ACES_Film_ToneMapping _ACES_Simple_ToneMapping _GT_ToneMapping
+				#pragma multi_compile _ _ACES_Film_ToneMapping _ACES_Simple_ToneMapping _GT_ToneMapping
 				#pragma multi_compile _ColorAdjustments
 				#pragma multi_compile _DepthOfFeild
 				

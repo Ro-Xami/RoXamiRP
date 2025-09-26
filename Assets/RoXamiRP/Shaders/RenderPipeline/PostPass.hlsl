@@ -119,7 +119,7 @@ float3 ColorAdjustments(float3 color)
     h = h < 0? h + 1: h > 1? h - 1 : h;
     hsv.x = h;
     hsv.y = saturate(hsv.y + _saturation);
-    hsv.z = max(0, hsv.z + _exposure);
+    hsv.z = max(0, hsv.z * max(1, _exposure + 1));
     
     return HSV2RGB(hsv);
 }

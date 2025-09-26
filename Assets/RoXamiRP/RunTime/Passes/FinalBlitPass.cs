@@ -25,7 +25,14 @@ namespace RoXamiRenderPipeline
             ExecuteCommandBuffer(context, cmd);
             
             DrawDontCareDontCare(cmd, 
-                ShaderDataID.cameraColorAttachmentId, BuiltinRenderTextureType.CameraTarget, 
+                ShaderDataID.cameraColorAttachmentId, 
+                //========================================
+                //to
+                renderingData.runtimeData.isFinalBlit? 
+                    BuiltinRenderTextureType.CameraTarget : 
+                ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentId == ShaderDataID.cameraColorAttachmentAId?
+                    ShaderDataID.cameraColorAttachmentBId: ShaderDataID.cameraColorAttachmentAId, 
+                //========================================
                 renderingData.shaderAsset.blitFullScreenTriangleMaterial, 0);
             
             cmd.EndSample(bufferName);

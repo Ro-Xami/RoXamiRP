@@ -21,17 +21,17 @@ namespace RoXamiRenderPipeline
             //Set bloom Shader datas
             float linearThreshold = Mathf.GammaToLinearSpace(threshold);
             float thresholdKnee = linearThreshold * 0.5f; // Hardcoded soft knee
-            postMaterial.SetVector(bloomParam, new Vector4(
+            Shader.SetGlobalVector(bloomParam, new Vector4(
                 threshold, thresholdKnee, clampMax, scatter));
-            postMaterial.SetFloat(bloomIntensity, intensity);
+            Shader.SetGlobalFloat(bloomIntensity, intensity);
 
             if (isActive)
             {
-                postMaterial.EnableKeyword(bloomKeyword);
+                Shader.EnableKeyword(bloomKeyword);
             }
             else
             {
-                postMaterial.DisableKeyword(bloomKeyword);
+                Shader.DisableKeyword(bloomKeyword);
             }
         }
     }

@@ -431,11 +431,11 @@ MonoBehaviour:
   additionalCameraData:
     roXamiRendererAssetID: 0
     cameraRenderType: 0
-    cameraStack:
-    - {fileID: 1344129324}
+    backgroundType: 0
+    cameraStack: []
     enableScreenSpaceShadows: 1
     enablePostProcessing: 1
-    enableAntialiasing: 0
+    enableAntialiasing: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1000,7 +1000,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!20 &1344129324
 Camera:
   m_ObjectHideFlags: 0
@@ -1067,6 +1067,7 @@ MonoBehaviour:
   additionalCameraData:
     roXamiRendererAssetID: 1
     cameraRenderType: 1
+    backgroundType: 0
     cameraStack: []
     enableScreenSpaceShadows: 0
     enablePostProcessing: 0
@@ -1094,55 +1095,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1438877896
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1438877898}
-  - component: {fileID: 1438877897}
-  m_Layer: 0
-  m_Name: Global Volume
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1438877897
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438877896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IsGlobal: 1
-  priority: 0
-  blendDistance: 0
-  weight: 1
-  sharedProfile: {fileID: 11400000, guid: 6a116b467d3d2b04d9f67a2c67966075, type: 2}
---- !u!4 &1438877898
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438877896}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.030015945, y: 0.005248904, z: 2.4953485}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1443412637
 GameObject:
   m_ObjectHideFlags: 0
@@ -1158,7 +1110,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1443412638
 Transform:
   m_ObjectHideFlags: 0
@@ -1272,6 +1224,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1443412638}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!1 &1603396152
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1603396154}
+  - component: {fileID: 1603396153}
+  m_Layer: 0
+  m_Name: RoXami Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1603396153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603396152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31bd145dae334bdfa1527684dc95f501, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isActive: 1
+  bloom:
+    isActive: 1
+    intensity: 1.09
+    clampMax: 4.62
+    threshold: 2.38
+    scatter: 0.7
+    maxSampleCount: 5
+  toneMapping:
+    isActive: 0
+    toneMappingMode: 0
+  colorAdjustment:
+    isActive: 0
+    exposure: 0
+    hue: 0
+    saturation: 0
+    contrast: 0
+--- !u!4 &1603396154
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603396152}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1704686534
 GameObject:
   m_ObjectHideFlags: 0
@@ -1988,4 +2001,4 @@ SceneRoots:
   - {fileID: 1344129327}
   - {fileID: 1871432683}
   - {fileID: 1860831403}
-  - {fileID: 1438877898}
+  - {fileID: 1603396154}

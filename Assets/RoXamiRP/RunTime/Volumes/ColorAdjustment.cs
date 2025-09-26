@@ -18,19 +18,19 @@ namespace RoXamiRenderPipeline
         {
             if (isActive)
             {
-                postMaterial.EnableKeyword(colorAdjustmentsKeyword);
+                Shader.EnableKeyword(colorAdjustmentsKeyword);
                 SetupColorAdjustment();
             }
             else
             {
-                postMaterial.DisableKeyword(colorAdjustmentsKeyword);
+                Shader.DisableKeyword(colorAdjustmentsKeyword);
             }
         }
         
         void SetupColorAdjustment()
         {
             var factor = new Vector4( hue, saturation, exposure, contrast);
-            postMaterial.SetVector(colorAdjustmentFactorID, factor);
+            Shader.SetGlobalVector(colorAdjustmentFactorID, factor);
         }
     }
 }

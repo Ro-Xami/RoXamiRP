@@ -66,55 +66,60 @@ namespace RoXamiRenderPipeline
 
         private void SetUpCameraAttachment()
         {
-            if (renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base)
+            if (renderingData.cameraData.additionalCameraData.cameraRenderType != CameraRenderType.Base)
             {
-                int width = renderingData.cameraData.width;
-                int height = renderingData.cameraData.height;
-                
-                RenderTextureDescriptor cameraColorDescriptor =
-                    new RenderTextureDescriptor(width, height)
-                    {
-                        depthBufferBits = 0,
-                        colorFormat = renderingData.commonSettings.isHDR ? 
-                            RenderTextureFormat.DefaultHDR : 
-                            RenderTextureFormat.Default
-                    };
-                FilterMode cameraColorFilterMode = FilterMode.Bilinear;
-
-                RenderTextureDescriptor cameraDepthDescriptor =
-                    new RenderTextureDescriptor(width, height)
-                    {
-                        depthBufferBits = 32,
-                        colorFormat = RenderTextureFormat.Depth
-                    };
-                FilterMode cameraDepthFilterMode = FilterMode.Point;
-
-                renderingData.cameraData.cameraColorDescriptor = cameraColorDescriptor;
-                renderingData.cameraData.cameraDepthDescriptor = cameraDepthDescriptor;
-                renderingData.cameraData.cameraColorFilterMode = cameraColorFilterMode;
-                renderingData.cameraData.cameraDepthFilterMode = cameraDepthFilterMode;
-
-                ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentAId;
-                ShaderDataID.cameraDepthAttachmentId = ShaderDataID.cameraDepthAttachmentAId;
-                cmd.GetTemporaryRT(ShaderDataID.cameraColorAttachmentAId, cameraColorDescriptor, cameraColorFilterMode);
-                cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentAId, cameraDepthDescriptor, cameraDepthFilterMode);
-
-                if (!renderingData.runtimeData.isFinalBlit)
-                {
-                    cmd.GetTemporaryRT(ShaderDataID.cameraColorAttachmentBId, cameraColorDescriptor, cameraColorFilterMode);
-                    cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentBId, cameraDepthDescriptor, cameraDepthFilterMode);
-                }
-                
-                cmd.GetTemporaryRT(ShaderDataID.cameraColorCopyTextureID, cameraColorDescriptor, cameraColorFilterMode);
-                cmd.GetTemporaryRT(ShaderDataID.cameraDepthCopyTextureID, cameraDepthDescriptor, cameraDepthFilterMode);
+                return;
             }
+            
+            int width = renderingData.cameraData.width;
+            int height = renderingData.cameraData.height;
+                
+            RenderTextureDescriptor cameraColorDescriptor =
+                new RenderTextureDescriptor(width, height)
+                {
+                    depthBufferBits = 0,
+                    colorFormat = renderingData.commonSettings.isHDR ? 
+                        RenderTextureFormat.DefaultHDR : 
+                        RenderTextureFormat.Default
+                };
+            FilterMode cameraColorFilterMode = FilterMode.Bilinear;
+
+            RenderTextureDescriptor cameraDepthDescriptor =
+                new RenderTextureDescriptor(width, height)
+                {
+                    depthBufferBits = 32,
+                    colorFormat = RenderTextureFormat.Depth
+                };
+            FilterMode cameraDepthFilterMode = FilterMode.Point;
+
+            renderingData.cameraData.cameraColorDescriptor = cameraColorDescriptor;
+            renderingData.cameraData.cameraDepthDescriptor = cameraDepthDescriptor;
+            renderingData.cameraData.cameraColorFilterMode = cameraColorFilterMode;
+            renderingData.cameraData.cameraDepthFilterMode = cameraDepthFilterMode;
+
+            ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentAId;
+            ShaderDataID.cameraDepthAttachmentId = ShaderDataID.cameraDepthAttachmentAId;
+            cmd.GetTemporaryRT(ShaderDataID.cameraColorAttachmentAId, cameraColorDescriptor, cameraColorFilterMode);
+            cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentAId, cameraDepthDescriptor, cameraDepthFilterMode);
+                
+            cmd.GetTemporaryRT(ShaderDataID.cameraColorCopyTextureID, cameraColorDescriptor, cameraColorFilterMode);
+            cmd.GetTemporaryRT(ShaderDataID.cameraDepthCopyTextureID, cameraDepthDescriptor, cameraDepthFilterMode);
+            
+            if (renderingData.runtimeData is { isFinalBlit: true, isAntialiasing: false, isPost: false })
+            {
+                return;
+            }
+            cmd.GetTemporaryRT(ShaderDataID.cameraColorAttachmentBId, cameraColorDescriptor, cameraColorFilterMode);
+            cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentBId, cameraDepthDescriptor, cameraDepthFilterMode);
         }
 
         void CleanUpCameraColorDepthRT()
         {
             cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentAId);
             cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentAId);
-            if (renderingData.cameraData.additionalCameraData.cameraRenderType != CameraRenderType.Base)
+            if (renderingData.runtimeData is { isPost: true, isAntialiasing: true} && 
+                renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base ||
+                renderingData.cameraData.additionalCameraData.cameraRenderType != CameraRenderType.Base)
             {
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentBId);
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentBId);
@@ -149,6 +154,12 @@ namespace RoXamiRenderPipeline
             renderingData.cameraData.additionalCameraData = additionalCameraData;
             
             renderingData.runtimeData.isFinalBlit = isFinalBlit;
+            renderingData.runtimeData.isPost = 
+                RoXamiVolume.Instance.isActive && 
+                renderingData.cameraData.additionalCameraData.enablePostProcessing;
+            renderingData.runtimeData.isAntialiasing = 
+                renderingData.cameraData.additionalCameraData.enableAntialiasing && 
+                renderingData.antialiasingSettings.antialiasingMode != AntialiasingMode.None;
         }
 
         void SetCommonData()

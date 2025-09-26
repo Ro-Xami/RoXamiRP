@@ -36,6 +36,8 @@ namespace RoXamiRenderPipeline
     {
         public bool isFinalBlit;
         public bool isCastShadows;
+        public bool isPost;
+        public bool isAntialiasing;
     }
 
     public static class ShaderDataID

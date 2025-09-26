@@ -106,24 +106,18 @@ namespace RoXamiRenderPipeline
 
             //=========================================================================
             //Post Antialiasing FinalBlit
-            bool isPost = 
-                RoXamiVolume.Instance.isActive && 
-                renderingData.cameraData.additionalCameraData.enablePostProcessing;
-            bool isAntialiasing = 
-                renderingData.cameraData.additionalCameraData.enableAntialiasing && 
-                renderingData.antialiasingSettings.antialiasingMode != AntialiasingMode.None;
-            if (!isPost && !isAntialiasing && renderingData.runtimeData.isFinalBlit)
+            if (renderingData.runtimeData is { isPost: false, isAntialiasing: false, isFinalBlit: true })
             {
                 activePasses.Add(finalBlitPass);
             }
             else
             {
-                if (isPost)
+                if (renderingData.runtimeData.isPost)
                 {
                     activePasses.Add(postPass);
                 }
 
-                if (isAntialiasing)
+                if (renderingData.runtimeData.isAntialiasing)
                 {
                     activePasses.Add(antialiasingPass);
                 }
