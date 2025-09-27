@@ -1,7 +1,7 @@
 #ifndef ROXAMIRP_LIGHT_INCLUDE
 #define ROXAMIRP_LIGHT_INCLUDE
 
-#include "Assets/RoXamiRP/ShaderLibrary/ScreenSpaceLighting.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/ScreenSpaceShadows.hlsl"
 
 #define _MaxAdditionalLightCount 64
 

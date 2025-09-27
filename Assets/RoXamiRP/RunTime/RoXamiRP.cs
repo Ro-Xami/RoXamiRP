@@ -50,6 +50,12 @@ namespace RoXamiRenderPipeline
                 {
                     continue;
                 }
+                
+                // if (camera.name != "Debug Camera")
+                // {
+                //     continue;
+                // }
+                
                 RenderBaseCamera(context, additionalCameraData, camera, out var isSingleBaseCamera);
 
                 //Overlay Camera
@@ -94,7 +100,10 @@ namespace RoXamiRenderPipeline
             var cameraStackAdditionalData = cameraStack.GetRoXamiAdditionalCameraData();
             if (cameraStackAdditionalData.cameraRenderType != CameraRenderType.Overlay)
             {
+                #if UNITY_EDITOR
                 Debug.LogError(camera.name + ": camera stack" + i + " is not Overlay!");
+                #endif
+                
                 return;
             }
                     

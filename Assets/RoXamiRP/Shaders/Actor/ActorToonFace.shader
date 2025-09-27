@@ -43,64 +43,64 @@ Shader "RoXami RP/Actor/ActorToonFace"
 		
 		ENDHLSL
 
-		Pass
-		{
-			Name "ToonLit"
-			Tags {"LightMode" = "ToonLit"}
-			ZWrite [_ZWrite]
-			Blend [_SrcBlend] [_DstBlend]
-			HLSLPROGRAM
-			#pragma target 3.5
-			#pragma vertex ToonLitPassVertex
-			#pragma fragment ToonLitPassFragment
-			#pragma multi_compile _ SCREENSPACE_SHADOWS
-			#pragma multi_compile _instancing
-			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
-			#pragma shader_feature_local _ALPHACLIP_ON
-			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
-			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonFaceFragmentPass.hlsl"
-
-			ENDHLSL
-		}
-
-		Pass
-		{
-			Name "ToonGBuffer"
-			Tags{"LightMode" = "ToonGBuffer"}
-			
-			Stencil
-			{
-				Ref 0
-				Pass Replace
-			}
-			
-			HLSLPROGRAM
-			#pragma vertex ToonGBufferPassVertex
-			#pragma fragment ToonGBufferPassFragment
-			#pragma multi_compile_instancing
-			#pragma shader_feature_local _ALPHACLIP_ON
-			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
-			#include "Assets/RoXamiRP/Shaders/ToonGBufferPass.hlsl"
-
-			ENDHLSL
-		}
-
-		Pass
-		{
-			Name "ShadowCaster"
-			Tags {"LightMode" = "ShadowCaster"}
-			ColorMask 0
-			HLSLPROGRAM
-			#pragma target 3.5
-			#pragma vertex ShadowCasterPassVertex
-			#pragma fragment ShadowCasterPassFragment
-			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
-			#include_with_pragmas "Assets/RoXamiRP/Shaders/ShadowCasterPass.hlsl"
-
-			ENDHLSL
-		}
+//		Pass
+//		{
+//			Name "ToonLit"
+//			Tags {"LightMode" = "ToonLit"}
+//			ZWrite [_ZWrite]
+//			Blend [_SrcBlend] [_DstBlend]
+//			HLSLPROGRAM
+//			#pragma target 3.5
+//			#pragma vertex ToonLitPassVertex
+//			#pragma fragment ToonLitPassFragment
+//			#pragma multi_compile _ SCREENSPACE_SHADOWS
+//			#pragma multi_compile _instancing
+//			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
+//			#pragma shader_feature_local _ALPHACLIP_ON
+//			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+//			#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
+//			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonFaceFragmentPass.hlsl"
+//
+//			ENDHLSL
+//		}
+//
+//		Pass
+//		{
+//			Name "ToonGBuffer"
+//			Tags{"LightMode" = "ToonGBuffer"}
+//			
+//			Stencil
+//			{
+//				Ref 0
+//				Pass Replace
+//			}
+//			
+//			HLSLPROGRAM
+//			#pragma vertex ToonGBufferPassVertex
+//			#pragma fragment ToonGBufferPassFragment
+//			#pragma multi_compile_instancing
+//			#pragma shader_feature_local _ALPHACLIP_ON
+//			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+//			#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
+//			#include "Assets/RoXamiRP/Shaders/ToonGBufferPass.hlsl"
+//
+//			ENDHLSL
+//		}
+//
+//		Pass
+//		{
+//			Name "ShadowCaster"
+//			Tags {"LightMode" = "ShadowCaster"}
+//			ColorMask 0
+//			HLSLPROGRAM
+//			#pragma target 3.5
+//			#pragma vertex ShadowCasterPassVertex
+//			#pragma fragment ShadowCasterPassFragment
+//			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+//			#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
+//			#include_with_pragmas "Assets/RoXamiRP/Shaders/Common/ShadowCasterPass.hlsl"
+//
+//			ENDHLSL
+//		}
 	}
 }

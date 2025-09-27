@@ -10,31 +10,31 @@ namespace RoXamiRenderPipeline
             new List<RoXamiRenderPass>(32);
 
         private readonly LightingPass lightPass = 
-            new LightingPass(RenderPassEvent.BeforeRenderingShadows);
+            new LightingPass(RenderPassEvent.BeforeRenderingShadows + 10);
 
         private readonly RenderingPrePasses prePasses = 
-            new RenderingPrePasses(RenderPassEvent.BeforeRenderingPrePasses);
+            new RenderingPrePasses(RenderPassEvent.BeforeRenderingPrePasses + 10);
 
         private readonly GBufferPass gBufferPass = 
-            new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer);
+            new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer + 10);
 
         private readonly ScreenSpaceShadowsPass ssShadowsPass =
-            new ScreenSpaceShadowsPass(RenderPassEvent.AfterRenderingGbuffer);
+            new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredLights + 9);
 
         private readonly DeferredPass deferredPass = 
-            new DeferredPass(RenderPassEvent.BeforeRenderingDeferredLights);
+            new DeferredPass(RenderPassEvent.BeforeRenderingDeferredLights + 10);
 
         private readonly ForwardOpaquePass forwardOpaquePass =
-            new ForwardOpaquePass(RenderPassEvent.BeforeRenderingOpaques);
+            new ForwardOpaquePass(RenderPassEvent.BeforeRenderingOpaques + 10);
 
         private readonly DrawSkyboxPass drawSkyboxPass = 
-             new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox);
+             new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox + 10);
 
         private readonly ForwardTransparentPass forwardTransparentPass =
-            new ForwardTransparentPass(RenderPassEvent.BeforeRenderingTransparents);
+            new ForwardTransparentPass(RenderPassEvent.BeforeRenderingTransparents + 10);
 
         private readonly PostPass postPass = 
-            new PostPass(RenderPassEvent.BeforeRenderingPostProcessing);
+            new PostPass(RenderPassEvent.BeforeRenderingPostProcessing + 10);
 
         private readonly AntialiasingPass antialiasingPass = 
             new AntialiasingPass(RenderPassEvent.AfterRendering);

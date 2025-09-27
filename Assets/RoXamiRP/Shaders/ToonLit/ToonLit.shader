@@ -1,4 +1,4 @@
-Shader "RoXami RP/ToonGBuffer"
+Shader "RoXami RP/Scene/ToonLit"
 {
 	Properties
 	{
@@ -26,7 +26,7 @@ Shader "RoXami RP/ToonGBuffer"
 		[Toggle(_ALPHACLIP_ON)] _alphaClip ("Alpha Clip" , float) = 0
 		_cutout ("Cut Out" , Range(0 , 1)) = 0.5
 		
-		[Enum(Back, 0, Front, 1, Off, 2)] _cullMode ("Cull Mode", Int) = 0
+		[Enum(Off, 0, Fronr, 1, Back, 2)] _cullMode ("Cull Mode", Int) = 0
 	}
 	
 	SubShader
@@ -52,8 +52,8 @@ Shader "RoXami RP/ToonGBuffer"
 			#pragma shader_feature_local _NORMAL_MAP_ON
 			#pragma shader_feature_local _MRAMAP_ON
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/Shaders/ToonLitInput.hlsl"
-			#include "Assets/RoXamiRP/Shaders/ToonGBufferPass.hlsl"
+			#include "Assets/RoXamiRP/Shaders/ToonLit/ToonLitInput.hlsl"
+			#include "Assets/RoXamiRP/Shaders/ToonLit/ToonLitPass.hlsl"
 			
 			ENDHLSL
 		}
@@ -70,8 +70,8 @@ Shader "RoXami RP/ToonGBuffer"
 			#pragma vertex ShadowCasterPassVertex
 			#pragma fragment ShadowCasterPassFragment
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/Shaders/ToonLitInput.hlsl"
-			#include_with_pragmas "Assets/RoXamiRP/Shaders/ShadowCasterPass.hlsl"
+			#include "Assets/RoXamiRP/Shaders/ToonLit/ToonLitInput.hlsl"
+			#include_with_pragmas "Assets/RoXamiRP/Shaders/Common/ShadowCasterPass.hlsl"
 
 			ENDHLSL
 		}

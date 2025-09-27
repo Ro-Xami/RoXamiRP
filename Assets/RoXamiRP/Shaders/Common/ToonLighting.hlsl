@@ -1,9 +1,9 @@
 #ifndef ROXAMIRP_SHADOWCASTERPASS_INCLUDE
 #define ROXAMIRP_SHADOWCASTERPASS_INCLUDE
-#include "Surface.hlsl"
-#include "Input.hlsl"
-#include "Light.hlsl"
-#include "GI.hlsl"
+#include "Assets//RoXamiRP/ShaderLibrary/Surface.hlsl"
+#include "Assets//RoXamiRP/ShaderLibrary/Input.hlsl"
+#include "Assets//RoXamiRP/ShaderLibrary/Light.hlsl"
+#include "Assets//RoXamiRP/ShaderLibrary/GI.hlsl"
 
 #define linear_F0 0.04
 

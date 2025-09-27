@@ -7,6 +7,7 @@ CBUFFER_START(UnityPerDraw)
 	float4 unity_LODFade;
 	real4 unity_WorldTransformParams;
 
+	//GI
 	float4 unity_SHAr;
 	float4 unity_SHAg;
 	float4 unity_SHAb;

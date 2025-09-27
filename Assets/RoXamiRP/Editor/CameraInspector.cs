@@ -103,6 +103,7 @@ public class CameraDataInspector : Editor
             InternalEditorUtility.layers
         );
         
+        camera.clearFlags = (CameraClearFlags)EditorGUILayout.EnumPopup("ClearFlags", camera.clearFlags);
         camera.backgroundColor = EditorGUILayout.ColorField("Background Color", camera.backgroundColor);
         
         projection = (CameraProjection)EditorGUILayout.EnumPopup("Projection", projection);

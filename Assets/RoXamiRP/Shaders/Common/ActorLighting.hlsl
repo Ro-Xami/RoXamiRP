@@ -1,21 +1,21 @@
 #ifndef ACTOR_LIGHTING_INCLUDE
 #define ACTOR_LIGHTING_INCLUDE
 
-#include "Assets/RoXamiRP/Shaders/Actor/ActorToonLitInput.hlsl"
+#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Surface.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Input.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Light.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/GI.hlsl"
-#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraColorAttachment.hlsl"
 
 #define linear_F0 0.04
 
 #define _rimSmoothLeft 0.5
 #define _rimSmoothRight 0.65
-#define _rimColor float3(1, 1, 1)
-#define _rimOffest 3
-#define _rimThreshold 0.05
+float3 _ActorRimColor;
+float _ActorRimOffest;
+float _ActorRimThreshold;
 
 TEXTURE2D(_LutMap);
 SAMPLER(sampler_LutMap);
@@ -86,24 +86,24 @@ float SDF_NoL(float2 uv, float3 lightDir)
 	return NoL;
 }
 
-float DepthRim(float2 screenSpaceUV , float3 normal , float positionCS_W)
+float DepthRim(float2 screenSpaceUV , float3 normal , float positionCS_W, float depth)
 {
 	float3 normalVS = TransformWorldToViewDir(normal, true);
 	float2 signDir = normalVS.xy;
-	float2 offestSamplePos = screenSpaceUV + _rimOffest * GetCameraDepthTexelSize().xy / positionCS_W * signDir;
+	float2 offestSamplePos = screenSpaceUV + _ActorRimOffest * GetCameraDepthTexelSize().xy / positionCS_W * signDir;
 	float offsetDepth = SampleCameraDepth(offestSamplePos);
-	float depth = SampleCameraDepth(screenSpaceUV);
+	//float depth = SampleCameraDepth(screenSpaceUV);
 	//Rim
 	float linear01EyeOffestDepth = Linear01Depth(offsetDepth , _ZBufferParams);
 	float linear01EyeDepth = Linear01Depth(depth , _ZBufferParams);
 	float depthDiffer = linear01EyeOffestDepth - linear01EyeDepth;
-	float rim = step(_rimThreshold * 0.001, depthDiffer);
+	float rim = step(_ActorRimThreshold * 0.001, depthDiffer);
 	return rim;
 }
 
 //===========================================================================================================================
 //FinalColor
-float4 CalculateActorLighting(Input inputData , Surface surfaceData)
+float4 CalculateActorLighting(Input inputData , Surface surfaceData, float depth)
 {
 	Light mainLight = GetMainLight(inputData);
 	GI gi = GetGI(inputData , surfaceData);
@@ -116,9 +116,9 @@ float4 CalculateActorLighting(Input inputData , Surface surfaceData)
 	
 	float3 toonDiffuse = SAMPLE_TEXTURE2D(_LutMap, sampler_LutMap, float2(diffuse, 0)).rgb;
 	float3 toonRim = smoothstep(_rimSmoothLeft, _rimSmoothRight, diffuse) *
-		DepthRim(inputData.screenSpaceUV, surfaceData.normal, inputData.positionCS.w);
+		DepthRim(inputData.screenSpaceUV, surfaceData.normal, inputData.positionCS.w, depth);
 	
-	float3 mainLightColor = surfaceData.albedo * toonDiffuse + toonRim;
+	float3 mainLightColor = surfaceData.albedo * mainLight.color * toonDiffuse + toonRim;
 
 	return float4(mainLightColor, 1);
 	
@@ -140,7 +140,7 @@ float4 CalculateActorLighting(Input inputData , Surface surfaceData)
     return finalColor;
 }
 
-float4 CalculateActorFace(Input inputData , Surface surfaceData, float2 uv)
+float4 CalculateActorFace(Input inputData , Surface surfaceData, float2 uv, float depth)
 {
 	Light mainLight = GetMainLight(inputData);
 	GI gi = GetGI(inputData , surfaceData);
@@ -156,7 +156,7 @@ float4 CalculateActorFace(Input inputData , Surface surfaceData, float2 uv)
 	
 	float3 toonDiffuse = SAMPLE_TEXTURE2D(_LutMap, sampler_LutMap, float2(diffuse, 0)).rgb;
 	float3 toonRim = smoothstep(_rimSmoothLeft, _rimSmoothRight, diffuse) *
-		DepthRim(inputData.screenSpaceUV, surfaceData.normal, inputData.positionCS.w);
+		DepthRim(inputData.screenSpaceUV, surfaceData.normal, inputData.positionCS.w, depth);
 	
 	float3 mainLightColor = surfaceData.albedo * toonDiffuse + toonRim;
 

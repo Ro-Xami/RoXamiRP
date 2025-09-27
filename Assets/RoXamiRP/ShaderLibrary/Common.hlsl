@@ -33,6 +33,31 @@ float3 GetViewDirWS(float3 positionWS)
 	return normalize(_WorldSpaceCameraPos - positionWS);
 }
 
+//==============================Compute Space=============================================
+float GetReverseDepth(float depth)
+{
+	#if defined(UNITY_REVERSED_Z)
+	float reverseZ = depth;
+	#else
+	float reverseZ = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
+	#endif
+    
+	return reverseZ;
+}
+
+float3 CalculateDepthToPositionWS(float reverseZ, float2 screenUV)
+{
+	float4 ndc = float4(screenUV * 2.0 - 1.0, reverseZ, 1.0);
+
+	if (!_ProjectionParams.x)
+	{
+		ndc.y = -ndc.y;
+	}
+
+	float4 positionWS = mul(MATRIX_I_VP, ndc);
+	return positionWS.xyz / positionWS.w;
+}
+
 //==============================Normal Tangent BiTangent===================================
 float3 GetBiTangent(float3 normal, float3 tangent, float tangentW)
 {
@@ -78,10 +103,7 @@ float4 ComputeScreenPos(float4 positionCS)
 	return o;
 }
 
-/*
-======================================================================
-*/
-
+//======================================================================
 float GetLuma(float3 col)
 {
 	return 0.213 * col.r + 0.715 * col.g + 0.072 * col.b;

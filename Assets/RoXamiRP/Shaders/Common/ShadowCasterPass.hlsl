@@ -1,18 +1,23 @@
 #ifndef ROXAMIRP_TOONLITPASS_INCLUDE
 #define ROXAMIRP_TOONLITPASS_INCLUDE
 
-#include "../ShaderLibrary/Common.hlsl"
+//#include "../ShaderLibrary/Common.hlsl"
 
 struct Attributes {
 	float4 positionOS : POSITION;
-	float2 uv : TEXCOORD0;
+	
+	#ifdef _ALPHACLIP_ON
+		float2 uv : TEXCOORD0;
+	#endif
 
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
  
 struct Varyings {
 	float4 positionCS : SV_POSITION;
-	float2 uv : TEXCOORD0;
+	#ifdef _ALPHACLIP_ON
+		float2 uv : TEXCOORD0;
+	#endif
 
 	UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -24,7 +29,10 @@ Varyings ShadowCasterPassVertex(Attributes IN)
 	UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
 
     OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
-	OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
+	
+	#ifdef _ALPHACLIP_ON
+		OUT.uv = TRANSFORM_TEX(IN.uv , _BaseMap);
+	#endif
 
 	#if UNITY_REVERSED_Z
 		OUT.positionCS.z =
@@ -42,8 +50,8 @@ real ShadowCasterPassFragment(Varyings IN) : SV_TARGET
 	UNITY_SETUP_INSTANCE_ID(IN);
 	
 	#ifdef _ALPHACLIP_ON
-	half albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv).a;
-	clip(albedo - _cutout);
+		half albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv).a;
+		clip(albedo - _cutout);
 	#endif
 	
     return 0;

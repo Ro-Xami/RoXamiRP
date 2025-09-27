@@ -14,7 +14,7 @@ namespace RoXamiRenderPipeline
         partial void PrepareBuffer();
 
 #if UNITY_EDITOR
-        static ShaderTagId[] legacyShaderTagIds =
+        static readonly ShaderTagId[] legacyShaderTagIds =
         {
             new ShaderTagId("Always"),
             new ShaderTagId("ForwardBase"),

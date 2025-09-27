@@ -23,6 +23,8 @@ namespace RoXamiRenderPipeline
         }
         
         public RoXamiRendererAsset[] rendererAssets;
+        
+        public RoXamiGlobalShaderAsset globalShaderAsset;
 
         public CommonSettings commonSettings;
 
@@ -73,6 +75,9 @@ namespace RoXamiRenderPipeline
         private void Dispose(bool disposing)
         {
             CoreUtils.Destroy(shaderAsset.postMaterial);
+            CoreUtils.Destroy(shaderAsset.blitFullScreenTriangleMaterial);
+            CoreUtils.Destroy(shaderAsset.fxaaMaterial);
+            CoreUtils.Destroy(shaderAsset.smaaMaterial);
             CoreUtils.Destroy(shaderAsset.deferredMaterial);
         }
 
@@ -81,6 +86,15 @@ namespace RoXamiRenderPipeline
             SetAAKeyWords();
             SetPcfSettings();
             SetDirectionalShadowsKeyword();
+            SetRoXamiGlobalShaderAsset();
+        }
+
+        void SetRoXamiGlobalShaderAsset()
+        {
+            if (globalShaderAsset)
+            {
+                globalShaderAsset.UpdateGlobalShader();
+            }
         }
 
         void SetDirectionalShadowsKeyword()
@@ -165,7 +179,7 @@ namespace RoXamiRenderPipeline
                 {
                     deferred = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/DeferredToonLit");
                 }
-
+        
                 return deferred;
             }
         }

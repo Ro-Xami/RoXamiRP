@@ -1258,7 +1258,7 @@ MonoBehaviour:
     isActive: 1
     intensity: 1.09
     clampMax: 4.62
-    threshold: 2.38
+    threshold: 1.11
     scatter: 0.7
     maxSampleCount: 5
   toneMapping:

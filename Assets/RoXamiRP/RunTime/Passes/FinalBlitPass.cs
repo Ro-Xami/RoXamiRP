@@ -10,7 +10,7 @@ namespace RoXamiRenderPipeline
         }
         
         const string bufferName = "FinalBlitPass";
-        private CommandBuffer cmd = new CommandBuffer()
+        private readonly CommandBuffer cmd = new CommandBuffer()
         {
             name = bufferName,
         };

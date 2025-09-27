@@ -19,90 +19,90 @@ namespace RoXamiRenderPipeline
         /// Executes a <c>ScriptableRenderPass</c> before rendering shadowmaps.
         /// Camera matrices and stereo rendering are not setup this point.
         /// </summary>
-        BeforeRenderingShadows = 50,
+        BeforeRenderingShadows = 20,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering shadowmaps.
         /// Camera matrices and stereo rendering are not setup this point.
         /// </summary>
-        AfterRenderingShadows = 100,
+        AfterRenderingShadows = 40,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering prepasses, f.ex, depth prepass.
         /// Camera matrices and stereo rendering are already setup at this point.
         /// </summary>
-        BeforeRenderingPrePasses = 150,
+        BeforeRenderingPrePasses = 60,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering prepasses, f.ex, depth prepass.
         /// Camera matrices and stereo rendering are already setup at this point.
         /// </summary>
-        AfterRenderingPrePasses = 200,
+        AfterRenderingPrePasses = 80,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering gbuffer pass.
         /// </summary>
-        BeforeRenderingGbuffer = 210,
+        BeforeRenderingGbuffer = 100,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering gbuffer pass.
         /// </summary>
-        AfterRenderingGbuffer = 220,
+        AfterRenderingGbuffer = 120,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering deferred shading pass.
         /// </summary>
-        BeforeRenderingDeferredLights = 230,
+        BeforeRenderingDeferredLights = 140,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering deferred shading pass.
         /// </summary>
-        AfterRenderingDeferredLights = 240,
+        AfterRenderingDeferredLights = 160,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering opaque objects.
         /// </summary>
-        BeforeRenderingOpaques = 250,
+        BeforeRenderingOpaques = 180,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering opaque objects.
         /// </summary>
-        AfterRenderingOpaques = 300,
+        AfterRenderingOpaques = 200,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering the sky.
         /// </summary>
-        BeforeRenderingSkybox = 350,
+        BeforeRenderingSkybox = 220,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering the sky.
         /// </summary>
-        AfterRenderingSkybox = 400,
+        AfterRenderingSkybox = 240,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering transparent objects.
         /// </summary>
-        BeforeRenderingTransparents = 450,
+        BeforeRenderingTransparents = 260,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering transparent objects.
         /// </summary>
-        AfterRenderingTransparents = 500,
+        AfterRenderingTransparents = 280,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering post-processing effects.
         /// </summary>
-        BeforeRenderingPostProcessing = 550,
+        BeforeRenderingPostProcessing = 300,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering post-processing effects but before final blit, post-processing AA effects and color grading.
         /// </summary>
-        AfterRenderingPostProcessing = 600,
+        AfterRenderingPostProcessing = 320,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering all effects.
         /// </summary>
-        AfterRendering = 1000,
+        AfterRendering = 340,
     }
 
     public abstract class RoXamiRenderPass

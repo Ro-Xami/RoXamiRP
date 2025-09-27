@@ -1,7 +1,8 @@
 #pragma kernel SSPRCompute
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraColorAttachment.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraDepthAttachment.hlsl"
 
 //#pragma kernel SSPRHole
 

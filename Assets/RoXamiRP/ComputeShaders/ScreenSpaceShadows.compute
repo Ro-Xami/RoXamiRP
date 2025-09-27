@@ -4,7 +4,7 @@
 RWTexture2D<float4> _ScreenSpaceShadowsTexture;
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Shadows.hlsl"
-#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraDepthAttachment.hlsl"
 
 TEXTURE2D(_GBuffer1);
 SAMPLER(sampler_GBuffer1);

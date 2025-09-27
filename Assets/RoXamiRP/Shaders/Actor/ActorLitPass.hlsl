@@ -1,6 +1,7 @@
-#ifndef ROXAMIRP_TOON_GBUFFER_PASS_INCLUDE
-#define ROXAMIRP_TOON_GBUFFER_PASS_INCLUDE
+#ifndef ROXAMIRP_ACTOR_LIT_PASS_INCLUDE
+#define ROXAMIRP_ACTOR_LIT_PASS_INCLUDE
 
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Surface.hlsl"
 
 #ifdef INSTANCING_ON
@@ -33,7 +34,7 @@ struct Varyings {
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
-Varyings ToonGBufferPassVertex(Attributes IN)
+Varyings ActorLitGBufferPassVertex(Attributes IN)
 {
     Varyings OUT = (Varyings)0;
     UNITY_SETUP_INSTANCE_ID(IN);
@@ -85,7 +86,7 @@ Surface GetSurfaceData(Varyings IN)
     return OUT;
 }
 
-void ToonGBufferPassFragment (Varyings IN,
+void ActorLitGBufferPassFragment (Varyings IN,
     out float4 GT0 : SV_Target0,
     out float4 GT1 : SV_Target1,
     out float4 GT2 : SV_Target2,

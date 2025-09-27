@@ -21,21 +21,16 @@ namespace RoXamiRenderPipeline
         {
             name = bloomName,
         };
-
-        static readonly int tempRtID = Shader.PropertyToID("_TempRT");
+        
         private static readonly int bloomFilterID = Shader.PropertyToID("_BloomFilter");
-        static int[] bloomDownSampleIDs;
-        static int[] bloomUpSampleIDs;
+        private int[] bloomDownSampleIDs;
+        private int[] bloomUpSampleIDs;
 
         RenderingData renderingData;
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
         {
             renderingData = renderData;
-            
-            postCmd.GetTemporaryRT(tempRtID,
-                renderingData.cameraData.cameraColorDescriptor,
-                renderingData.cameraData.cameraColorFilterMode);
 
             postCmd.BeginSample(postBufferName);
             ExecuteCommandBuffer(context, postCmd);
@@ -67,15 +62,6 @@ namespace RoXamiRenderPipeline
                 //==================================================
                 PostShaderPass.combine
             );
-            
-            if (bloomSettings.isActive)
-            {
-                for (int i = 0; i < bloomSettings.maxSampleCount; i++)
-                {
-                    bloomCmd.ReleaseTemporaryRT(bloomDownSampleIDs[i]);
-                    bloomCmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
-                }
-            }
 
             postCmd.EndSample(postBufferName);
             ExecuteCommandBuffer(context, postCmd);
@@ -83,7 +69,26 @@ namespace RoXamiRenderPipeline
         
         public override void CleanUp()
         {
-            postCmd.ReleaseTemporaryRT(tempRtID);
+            var bloomSettings = RoXamiVolume.Instance.bloom;
+            if (bloomSettings.isActive)
+            {
+                bloomCmd.ReleaseTemporaryRT(bloomFilterID);
+
+                foreach (var bloomDownSampleID in bloomDownSampleIDs)
+                {
+                    bloomCmd.ReleaseTemporaryRT(bloomDownSampleID);
+                }
+                foreach (var bloomUpSampleID in bloomUpSampleIDs)
+                {
+                    bloomCmd.ReleaseTemporaryRT(bloomUpSampleID);
+                }
+                
+                // for (int i = 0; i < bloomSettings.maxSampleCount; i++)
+                // {
+                //     bloomCmd.ReleaseTemporaryRT(bloomDownSampleIDs[i]);
+                //     bloomCmd.ReleaseTemporaryRT(bloomUpSampleIDs[i]);
+                // }
+            }
         }
         
         #region Bloom
@@ -138,7 +143,7 @@ namespace RoXamiRenderPipeline
                 height /= 2;
             }
         
-            bloomCmd.ReleaseTemporaryRT(bloomFilterID);
+            
         
             //UpSample
             for (int i = sampleCount - 1; i > 0; i--)

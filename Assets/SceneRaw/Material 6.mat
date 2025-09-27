@@ -35,6 +35,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MraMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -50,7 +54,11 @@ Material:
     - _ZWrite: 1
     - _alphaClip: 0
     - _ao: 1
+    - _cullMode: 0
     - _cutout: 0.5
+    - _enableEmissionMap: 0
+    - _enableMraMap: 0
+    - _enableNormalMap: 0
     - _metallic: 0.904
     - _normalStrength: 1
     - _roughness: 0.45

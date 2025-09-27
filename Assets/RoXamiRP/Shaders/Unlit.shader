@@ -33,7 +33,7 @@ Shader "RoXami RP/Unlit"
 			#pragma multi_compile_instancing
 			#pragma shader_feature_local _ALPHACLIP_ON
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-			#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
+			//#include "Assets/RoXamiRP/ShaderLibrary/CameraAttachment.hlsl"
 
 			TEXTURE2D(_MainTex);
 			SAMPLER(sampler_MainTex);
@@ -109,12 +109,14 @@ Shader "RoXami RP/Unlit"
 				#endif
 
 				float2 screenSpaceUV = IN.srcPos.xy / IN.srcPos.w;
-				float depth = SampleCameraDepth(screenSpaceUV);
-				float3 color = SampleCameraColor(screenSpaceUV);
+				// float depth = SampleCameraDepth(screenSpaceUV);
+				// float3 color = SampleCameraColor(screenSpaceUV);
 				//position = CalculateDepthToPositionWS(depth, screenSpaceUV);
 				float shadow = SampleScreenSpaceShadows(screenSpaceUV);
-				float4 lastColor = SampleSSPRTexture(screenSpaceUV);
-				lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
+				float4 lastColor = SampleSSPRTexture(screenSpaceUV) * IN.color;
+				//lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
+
+				return lastColor;
 
 				return albedo;
 				return float4(lastColor.rgb, 1);

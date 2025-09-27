@@ -7,15 +7,16 @@ namespace RoXamiRenderPipeline
 {
     [Serializable]
 
-    public class ScreenSpacePlanarReflection : RoXamiRenderFeature
+    public class ScreenSpacePlanarReflectionFeature : RoXamiRenderFeature
     {
         private class ScreenSpacePlanarReflectionPass : RoXamiRenderPass
         {
             private readonly ComputeShader compute;
             private readonly float planeHeight;
 
-            public ScreenSpacePlanarReflectionPass(ComputeShader cs, float height)
+            public ScreenSpacePlanarReflectionPass(RenderPassEvent evt, ComputeShader cs, float height)
             {
+                renderPassEvent = evt;
                 this.compute = cs;
                 this.planeHeight = height;
             }
@@ -42,8 +43,6 @@ namespace RoXamiRenderPipeline
             {
                 renderingData = renderData;
 
-                CleanUp();
-
                 var ssprDescriptor = renderingData.cameraData.cameraColorDescriptor;
                 ssprDescriptor.enableRandomWrite = true;
                 cmd.GetTemporaryRT(ssprTextureID,
@@ -53,6 +52,8 @@ namespace RoXamiRenderPipeline
 
                 cmd.SetRenderTarget(ssprTextureID,
                     RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+                //cmd.ClearRenderTarget(true, true, Color.clear);
+                
                 cmd.BeginSample(bufferName);
                 ExecuteBuffer(context);
                 SSPRCompute();
@@ -105,14 +106,16 @@ namespace RoXamiRenderPipeline
 
         public override void Create()
         {
-            pass = new ScreenSpacePlanarReflectionPass(ssprCompute, planeHeight);
-            pass.renderPassEvent = RenderPassEvent.AfterRenderingSkybox;
+            if (!ssprCompute)
+            {
+                return;
+            }
+            pass = new ScreenSpacePlanarReflectionPass(RenderPassEvent.AfterRenderingSkybox, ssprCompute, planeHeight);
         }
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (ssprCompute == null)// ||
-               // !RoXamiFeatureManager.Instance.isActive(RoXamiFeatureStack.ScreenSpacePlanarReflection))
+            if (!ssprCompute)
             {
                 return;
             }

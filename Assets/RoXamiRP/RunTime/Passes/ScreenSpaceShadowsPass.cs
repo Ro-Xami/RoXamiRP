@@ -37,13 +37,7 @@ namespace RoXamiRenderPipeline
 
             cs = renderingData.shaderAsset.screenSpaceShadowComputeShader;
 
-            if (!cs)
-            {
-                Debug.LogError("ScreenSpaceShadows asset is missing");
-                return;
-            }
-
-            if (renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows &&
+            if (cs && renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows &&
                 renderingData.runtimeData.isCastShadows)
             {
                 int width = renderingData.cameraData.width;

@@ -1,4 +1,5 @@
-﻿using UnityEngine.Rendering;
+﻿using System;
+using UnityEngine.Rendering;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
@@ -13,7 +14,7 @@ namespace RoXamiRenderPipeline
 
         const string bufferName = "RoXami Deferred";
 
-        private CommandBuffer cmd = new CommandBuffer()
+        private readonly CommandBuffer cmd = new CommandBuffer()
         {
             name = bufferName
         };
@@ -45,13 +46,12 @@ namespace RoXamiRenderPipeline
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
                 ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+            cmd.ClearRenderTarget(false, true, Color.clear);
 
             cmd.DrawProcedural(
                 Matrix4x4.identity, renderingData.shaderAsset.deferredMaterial, 0,
                 MeshTopology.Triangles, 3
             );
         }
-
-
     }
 }
