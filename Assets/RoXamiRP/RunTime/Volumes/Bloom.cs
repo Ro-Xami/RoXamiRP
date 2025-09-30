@@ -12,9 +12,9 @@ namespace RoXamiRenderPipeline
         [Range(0f, 1f)] public float scatter = 0.7f;
         [Range(0, 10)] public int maxSampleCount = 5;
 
-        private const string bloomKeyword = "_Bloom";
-        private static readonly int bloomParam = Shader.PropertyToID("_bloomParam");
-        private static readonly int bloomIntensity = Shader.PropertyToID("_bloomIntensity");
+        private const string bloomKeyword = "_Post_Bloom_ON";
+        private static readonly int bloomParam = Shader.PropertyToID("_PostBloomParams");
+        private static readonly int bloomIntensity = Shader.PropertyToID("_PostBloomIntensity");
         
         public override void UpdateVolumeSettings()
         {

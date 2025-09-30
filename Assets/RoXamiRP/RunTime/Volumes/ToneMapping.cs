@@ -18,9 +18,9 @@ namespace RoXamiRenderPipeline
         public ToneMappingMode toneMappingMode = ToneMappingMode.None;
         
         private const string 
-            acesFilmKeyword = "_ACES_Film_ToneMapping",
-            acesSimpleKeyword = "_ACES_Simple_ToneMapping",
-            gtKeyword = "_GT_ToneMapping";
+            acesFilmKeyword = "_Post_AcesFilm_ON",
+            acesSimpleKeyword = "_Post_AcesSimple_ON",
+            gtKeyword = "_Post_GT_ON";
 
         public override void UpdateVolumeSettings()
         {

@@ -148,10 +148,10 @@ namespace RoXamiRenderPipeline
             //UpSample
             for (int i = sampleCount - 1; i > 0; i--)
             {
-                bloomCmd.SetGlobalTexture(ShaderDataID.postSource1Id, bloomUpSampleIDs[i - 1]);
+                bloomCmd.SetGlobalTexture(ShaderDataID.TempRtSource1ID, bloomUpSampleIDs[i - 1]);
                 Draw(bloomCmd, bloomUpSampleIDs[i], bloomUpSampleIDs[i - 1], PostShaderPass.upSample);
             }
-            bloomCmd.SetGlobalTexture(ShaderDataID.postSource1Id, bloomUpSampleIDs[0]);
+            bloomCmd.SetGlobalTexture(ShaderDataID.TempRtSource1ID, bloomUpSampleIDs[0]);
             
         }
         #endregion
@@ -160,7 +160,7 @@ namespace RoXamiRenderPipeline
             RenderTargetIdentifier from, RenderTargetIdentifier to, PostShaderPass pass
         )
         {
-            cmd.SetGlobalTexture(ShaderDataID.postSource0Id, from);
+            cmd.SetGlobalTexture(ShaderDataID.TempRtSource0ID, from);
             cmd.SetRenderTarget(
                 to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
             );

@@ -2,16 +2,17 @@
 #define ROXAMIRP_FXAA_FRAGMENT_PASS_INCLUDE
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-#include "Assets/RoXamiRP/Shaders/RenderPipeline/SamplePostSource.hlsl"
+#include "Assets/RoXamiRP/Shaders/RenderPipeline/SampleTempRtSource.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
 float3 SampleCameraAttachment(float2 uv)
 {
-    return SAMPLE_TEXTURE2D_LOD(_PostSource0, sampler_linear_clamp, uv, 0).rgb;
+    return SAMPLE_TEXTURE2D_LOD(_TempRtSource0, sampler_linear_clamp, uv, 0).rgb;
 }
 
 float Luma(float2 uv)
 {
-    return GetLuma(SampleCameraAttachment(uv).rgb);
+    return Luminance(SampleCameraAttachment(uv).rgb);
 }
 
 //==============================================================================================
@@ -58,7 +59,7 @@ float Luma(float2 uv)
 float4 FxaaQualityPixelShader(float2 uv, float contrastThreshold, float relativeThreshold)
 {
     float3 mCol = SampleCameraAttachment(uv).rgb;
-    float M = GetLuma(mCol);
+    float M = Luminance(mCol);
     float N = Luma(uv + texelSize.xy * float2(0, 1));
     float S = Luma(uv + texelSize.xy * float2(0, -1));
     float W = Luma(uv + texelSize.xy * float2(-1, 0));
@@ -248,7 +249,7 @@ float4 FXAA_Quality(Varyings IN) : SV_Target
 float4 FxaaConsolePixelShader(float2 uv, float contrastThreshold, float relativeThreshold)
 {
     float3 mCol = SampleCameraAttachment(uv).rgb;
-    float M = GetLuma(mCol);
+    float M = Luminance(mCol);
     float NW = Luma(uv + float2(-0.5, 0.5) * texelSize);
     float NE = Luma(uv + float2(0.5, 0.5) * texelSize);
     float SW = Luma(uv + float2(-0.5, -0.5) * texelSize);
@@ -283,7 +284,7 @@ float4 FxaaConsolePixelShader(float2 uv, float contrastThreshold, float relative
     float4 positive2 = float4(SampleCameraAttachment(uv + dir2), 1);
     float4 result2 = result1 * 0.5f + (negative2 + positive2) * 0.25f;
     
-    float newLum = GetLuma(result2.rgb);
+    float newLum = Luminance(result2.rgb);
     
     float4 result =
         newLum >= minLuma && newLum <= maxLuma?

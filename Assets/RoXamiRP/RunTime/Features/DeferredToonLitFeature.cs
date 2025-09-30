@@ -14,8 +14,8 @@ namespace RoXamiRenderPipeline
         {
             public Material mat;
             public int passIndex;
-            public string stencilPropertyName;
-            public int stencil;
+            // public string stencilPropertyName;
+            // public int stencil;
         }
         
         m_DeferredToonPass deferredToonPass;
@@ -51,8 +51,8 @@ namespace RoXamiRenderPipeline
             {
                 public Material mat;
                 public int passIndex;
-                public int stencilPropertyID;
-                public int stencil;
+                // public int stencilPropertyID;
+                // public int stencil;
             }
             
             public m_DeferredToonPass(RenderPassEvent evt, DeferredLitSettings[] deferredLitSettings)
@@ -71,8 +71,8 @@ namespace RoXamiRenderPipeline
                     {
                         mat = deferredLitSettings[i].mat,
                         passIndex = deferredLitSettings[i].passIndex,
-                        stencilPropertyID = Shader.PropertyToID(deferredLitSettings[i].stencilPropertyName),
-                        stencil = deferredLitSettings[i].stencil,
+                        // stencilPropertyID = Shader.PropertyToID(deferredLitSettings[i].stencilPropertyName),
+                        // stencil = deferredLitSettings[i].stencil,
                     };
                 }
             }
@@ -87,7 +87,7 @@ namespace RoXamiRenderPipeline
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
             {
-                SetDeferredStencilData();
+                //SetDeferredStencilData();
             }
 
             public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderingData)
@@ -129,22 +129,22 @@ namespace RoXamiRenderPipeline
                 }
             }
 
-            void SetDeferredStencilData()
-            {
-                if (settings == null || settings.Length == 0)
-                {
-                    return;
-                }
-                
-                foreach (var setting in settings)
-                {
-                    if (setting == null)
-                    {
-                        continue;
-                    }
-                    cmd.SetGlobalInt(setting.stencilPropertyID, setting.stencil);
-                }
-            }
+            // void SetDeferredStencilData()
+            // {
+            //     if (settings == null || settings.Length == 0)
+            //     {
+            //         return;
+            //     }
+            //     
+            //     foreach (var setting in settings)
+            //     {
+            //         if (setting == null)
+            //         {
+            //             continue;
+            //         }
+            //         cmd.SetGlobalInt(setting.stencilPropertyID, setting.stencil);
+            //     }
+            // }
             
             // void SetClearRenderTarget()
             // {

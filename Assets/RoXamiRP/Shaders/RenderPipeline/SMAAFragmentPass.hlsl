@@ -2,21 +2,22 @@
 #define ROXAMIRP_SMAA_FRAGMENT_PASS_INCLUDE
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-#include "Assets/RoXamiRP/Shaders/RenderPipeline/SamplePostSource.hlsl"
+#include "Assets/RoXamiRP/Shaders/RenderPipeline/SampleTempRtSource.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
 float3 SampleCameraAttachment(float2 uv)
 {
-    return SAMPLE_TEXTURE2D_LOD(_PostSource0, sampler_linear_clamp, uv, 0).rgb;
+    return SAMPLE_TEXTURE2D_LOD(_TempRtSource0, sampler_linear_clamp, uv, 0).rgb;
 }
 
 float4 SampleCameraAttachmentRGBA(float2 uv)
 {
-    return SAMPLE_TEXTURE2D_LOD(_PostSource0, sampler_linear_clamp, uv, 0);
+    return SAMPLE_TEXTURE2D_LOD(_TempRtSource0, sampler_linear_clamp, uv, 0);
 }
 
 float Luma(float2 uv)
 {
-    return GetLuma(SampleCameraAttachment(uv).rgb);
+    return Luminance(SampleCameraAttachment(uv).rgb);
 }
 
 #if defined(_AA_HIGH)
@@ -309,7 +310,7 @@ float4 SMAA_Blend(Varyings IN) : SV_Target
 {
     float2 uv = IN.uv;
     //return float4(SampleCameraAttachment(uv), 1);
-    int2 pixelCoord = uv * _PostSource0_TexelSize.zw;
+    int2 pixelCoord = uv * _TempRtSource0_TexelSize.zw;
     float4 TL = _SmaaFactorRT.Load(int3(pixelCoord, 0));
     float R = _SmaaFactorRT.Load(int3(pixelCoord + int2(1, 0), 0)).a;
     float B = _SmaaFactorRT.Load(int3(pixelCoord + int2(0, 1), 0)).g;

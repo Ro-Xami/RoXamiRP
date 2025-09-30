@@ -146,7 +146,7 @@ namespace RoXamiRenderPipeline
             CommandBuffer cmd, RenderTargetIdentifier from, RenderTargetIdentifier to, 
             Material mat, int passIndex)
         {
-            cmd.SetGlobalTexture(ShaderDataID.postSource0Id, from);
+            cmd.SetGlobalTexture(ShaderDataID.TempRtSource0ID, from);
             cmd.SetRenderTarget(
                 to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare
             );

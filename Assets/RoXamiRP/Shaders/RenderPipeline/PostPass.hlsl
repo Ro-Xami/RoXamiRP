@@ -1,9 +1,10 @@
-﻿#ifndef ROXAMIRP_FULLSCREENTRIANGLE_INCLUDE
-#define ROXAMIRP_FULLSCREENTRIANGLE_INCLUDE
+﻿#ifndef ROXAMIRP_POST_PASS_INCLUDE
+#define ROXAMIRP_POST_PASS_INCLUDE
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-#include "Assets/RoXamiRP/Shaders/RenderPipeline/SamplePostSource.hlsl"
+#include "Assets/RoXamiRP/Shaders/RenderPipeline/SampleTempRtSource.hlsl"
 #include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
 float4 CopyPassFragment (Varyings IN) : SV_TARGET
 {
@@ -12,12 +13,12 @@ float4 CopyPassFragment (Varyings IN) : SV_TARGET
 
 //====================================================================================================
 //Bloom
-float4 _bloomParam;
-#define threshold _bloomParam.x
-#define thresholdKnee _bloomParam.y
-#define clampMax _bloomParam.z
-#define scatter _bloomParam.w
-float _bloomIntensity;
+float4 _PostBloomParams;
+#define threshold _PostBloomParams.x
+#define thresholdKnee _PostBloomParams.y
+#define clampMax _PostBloomParams.z
+#define scatter _PostBloomParams.w
+float _PostBloomIntensity;
 
 float3 ApplyBloomThreshold (float3 color)
 {
@@ -82,48 +83,61 @@ float4 BloomUpSamplePassFragment (Varyings IN) : SV_TARGET
     float4 low = GetSourceBicubic(IN.uv);
     float4 high = GetSource1(IN.uv);
 
-    return  high + low;// * scatter;
+    //return  high + low;// * scatter;
     return lerp(high , low , scatter);
 }
 
 //====================================================================================================
-//Color Grading
-float3 HSV2RGB( float3 c )
-{
-    float3 rgb = clamp( abs(fmod(c.x*6.0+float3(0.0,4.0,2.0),6)-3.0)-1.0, 0, 1);
-    rgb = rgb*rgb*(3.0-2.0*rgb);
-    return c.z * lerp( float3(1,1,1), rgb, c.y);
-}
+//Color Adjustments
+#define ACEScc_MID_GRAY 0.4135884
+float3 _PostColorFilter;
+float4 _PostColorAdjustmentsParams;
+#define _hue _PostColorAdjustmentsParams.x
+#define _saturation _PostColorAdjustmentsParams.y
+#define _exposure _PostColorAdjustmentsParams.z
+#define _contrast _PostColorAdjustmentsParams.w
 
-float3 RGB2HSV(float3 c)
-{
-    float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
-    float4 q = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r));
-
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-}
-
-float4 _colorAdjustmentFactor;
-#define _hue _colorAdjustmentFactor.x
-#define _saturation _colorAdjustmentFactor.y
-#define _exposure _colorAdjustmentFactor.z
-#define _contrast _colorAdjustmentFactor.w
 float3 ColorAdjustments(float3 color)
 {
-    float3 hsv = RGB2HSV(color);
+    //Exposure
+    color *= max(1, _exposure + 1);
+    //Contrast
+    color = LinearToLogC(color);
+    color = (color - ACEScc_MID_GRAY) * (_contrast + 1) + ACEScc_MID_GRAY;
+    color = LogCToLinear(color);
+    //ColorFilter
+    color *= _PostColorFilter;
 
+    color = max(color, 0.0);
+    
+    //Hue
+    float3 hsv = RgbToHsv(color);
     float h = hsv.x + _hue;
     h = h < 0? h + 1: h > 1? h - 1 : h;
     hsv.x = h;
-    hsv.y = saturate(hsv.y + _saturation);
-    hsv.z = max(0, hsv.z * max(1, _exposure + 1));
+    color = HsvToRgb(hsv);
+    //Saturation
+    float luma = Luminance(color);
+    color = (color - luma) * (_saturation + 1) + luma;
+
+    color = max(0.0, color);
     
-    return HSV2RGB(hsv);
+    return color;
 }
 
+//====================================================================================================
+//White Balance
+float4 _Post_WhiteBalanceParams;
+
+float3 WhiteBalance(float3 color)
+{
+    color = LinearToLMS(color);
+    color *= _Post_WhiteBalanceParams.rgb;
+    return LMSToLinear(color);
+}
+
+//====================================================================================================
+//Tone Mapping
 //https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 float3 ACESFilm(float3 x)
 {
@@ -168,6 +182,8 @@ float H_f(float x, float e0, float e1)
 
 float3 GT_ToneMapping(float3 x)
 {
+    return x;
+    /*
     float P = 1; // Maximum brightness
     float a = 1; // Contrast
     float m = 0.22; // Linear section start
@@ -189,6 +205,7 @@ float3 GT_ToneMapping(float3 x)
     float3 f_x = T_x * w0_x + L_x * w1_x + S_x * w2_x;
     
     return f_x;
+    */
 }
 
 //====================================================================================================
@@ -199,24 +216,28 @@ float4 CombineFragment(Varyings IN) : SV_TARGET
     
     float4 col = colorAttachment;
 
-#if defined(_Bloom)
+#if defined(_Post_Bloom_ON)
     float4 bloom = GetSource1(IN.uv);
-    col.rgb += bloom.rgb * _bloomIntensity;
+    col.rgb += bloom.rgb * _PostBloomIntensity;
 #endif
 
-#if defined(_ColorAdjustments)
-    col.rgb = ColorAdjustments(col);
+#if defined(_Post_ColorAdjustments_ON)
+    col.rgb = ColorAdjustments(col.rgb);
 #endif
 
-#if defined(_ACES_Film_ToneMapping)
+#if defined(_Post_WhiteBalance_ON)
+    col.rgb = WhiteBalance(col.rgb);
+#endif
+
+#if defined(_Post_AcesFilm_ON)
     col.rgb = ACES_ToneMapping(col.rgb);
 #endif
 
-#if defined(_ACES_Simple_ToneMapping)
+#if defined(_Post_AcesSimple_ON)
     col.rgb = ACES_ToneMapping(col.rgb);
 #endif
 
-#if defined(_GT_ToneMapping)
+#if defined(_Post_GT_ON)
     col.rgb = GT_ToneMapping(col.rgb);
 #endif
 

@@ -104,9 +104,5 @@ float4 ComputeScreenPos(float4 positionCS)
 }
 
 //======================================================================
-float GetLuma(float3 col)
-{
-	return 0.213 * col.r + 0.715 * col.g + 0.072 * col.b;
-}
 
 #endif

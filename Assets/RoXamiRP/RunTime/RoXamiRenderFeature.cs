@@ -5,7 +5,6 @@ using UnityEngine.Rendering;
 namespace RoXamiRenderPipeline
 {
     [ExcludeFromPreset]
-
     public abstract class RoXamiRenderFeature : ScriptableObject, IDisposable
     {
         public abstract void Create();

@@ -56,8 +56,8 @@ namespace RoXamiRenderPipeline
         public static readonly int cameraDepthCopyTextureID = Shader.PropertyToID("_CameraDepthTexture");
         public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_CameraColorTexture");
         
-        public static readonly int postSource0Id = Shader.PropertyToID("_PostSource0");
-        public static readonly int postSource1Id = Shader.PropertyToID("_PostSource1");
+        public static readonly int TempRtSource0ID = Shader.PropertyToID("_TempRtSource0");
+        public static readonly int TempRtSource1ID = Shader.PropertyToID("_TempRtSource1");
         
         public static readonly int matrixInvVP_ID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
 

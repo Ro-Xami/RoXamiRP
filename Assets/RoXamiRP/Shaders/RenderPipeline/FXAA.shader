@@ -50,13 +50,14 @@
 			#pragma fragment FXAA_LUMA
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
-			TEXTURE2D(_PostSource0);
-			SAMPLER(sampler_PostSource0);
+			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+			TEXTURE2D(_TempRtSource0);
+			SAMPLER(sampler_TempRtSource0);
 
 			float4 FXAA_LUMA(Varyings IN) : SV_Target
 			{
-				float4 color = SAMPLE_TEXTURE2D(_PostSource0, sampler_PostSource0, IN.uv);
-				float luma = GetLuma(color.rgb);
+				float4 color = SAMPLE_TEXTURE2D(_TempRtSource0, sampler_TempRtSource0, IN.uv);
+				float luma = Luminance(color.rgb);
 				return float4(color.rgb, luma);
 			}
 			ENDHLSL
@@ -90,8 +91,8 @@
 				#define _relativeThreshold_Quality 0.250
 			#endif
 			
-			sampler2D _PostSource0;
-			float4 _PostSource0_TexelSize;
+			sampler2D _TempRtSource0;
+			float4 _TempRtSource0_TexelSize;
 			
 			float4 FXAA_Quality_NVIDIA(Varyings IN) : SV_Target
 			{
@@ -99,10 +100,10 @@
 				(
 				    IN.uv,
 				    0,
-				    _PostSource0,
-				    _PostSource0,
-				    _PostSource0,
-				    _PostSource0_TexelSize.xy,
+				    _TempRtSource0,
+				    _TempRtSource0,
+				    _TempRtSource0,
+				    _TempRtSource0_TexelSize.xy,
 				    0,
 				    0,
 				    0,
@@ -147,14 +148,14 @@
 				#define _relativeThreshold_Console 0.25
 			#endif
 
-			sampler2D _PostSource0;
-			float4 _PostSource0_TexelSize;
+			sampler2D _TempRtSource0;
+			float4 _TempRtSource0_TexelSize;
 
 			float4 FXAA_Console_NVIDIA(Varyings IN) : SV_Target
 			{
 				float2 uv = IN.uv;
-				float4 pos = float4(uv, uv) + float4(-_PostSource0_TexelSize.x, -_PostSource0_TexelSize.y, _PostSource0_TexelSize.x, _PostSource0_TexelSize.y) * 0.5f;
-				float4 RcpFrame = float4(-_PostSource0_TexelSize.x, -_PostSource0_TexelSize.y, _PostSource0_TexelSize.x, _PostSource0_TexelSize.y);
+				float4 pos = float4(uv, uv) + float4(-_TempRtSource0_TexelSize.x, -_TempRtSource0_TexelSize.y, _TempRtSource0_TexelSize.x, _TempRtSource0_TexelSize.y) * 0.5f;
+				float4 RcpFrame = float4(-_TempRtSource0_TexelSize.x, -_TempRtSource0_TexelSize.y, _TempRtSource0_TexelSize.x, _TempRtSource0_TexelSize.y);
 				float4 RcpFrameOpt = RcpFrame * 0.5f;
 				float4 RcpFrameOpt2 = RcpFrame * 2.0f;
 				
@@ -162,10 +163,10 @@
 				(
 					uv,
 				    pos,
-				    _PostSource0,
-				    _PostSource0,
-				    _PostSource0,
-				    _PostSource0_TexelSize.xy,
+				    _TempRtSource0,
+				    _TempRtSource0,
+				    _TempRtSource0,
+				    _TempRtSource0_TexelSize.xy,
 				    RcpFrameOpt,
 				    RcpFrameOpt2,
 				    0,

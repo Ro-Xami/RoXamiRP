@@ -71,10 +71,11 @@
 			Name "Combine"
 			
 			HLSLPROGRAM
-				#pragma multi_compile _Bloom
-				#pragma multi_compile _ _ACES_Film_ToneMapping _ACES_Simple_ToneMapping _GT_ToneMapping
-				#pragma multi_compile _ColorAdjustments
-				#pragma multi_compile _DepthOfFeild
+				#pragma multi_compile _ _Post_Bloom_ON
+				#pragma multi_compile _ _Post_ColorAdjustments_ON
+				#pragma multi_compile _ _Post_WhiteBalance_ON
+				#pragma multi_compile _ _Post_AcesFilm_ON _Post_AcesSimple_ON _Post_GT_ON
+				#pragma multi_compile _ _Post_DepthOfFeild_ON
 				
 				#pragma target 3.5
 				#pragma vertex FullScreenTriangle

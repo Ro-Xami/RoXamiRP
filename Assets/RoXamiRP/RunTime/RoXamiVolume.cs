@@ -24,6 +24,7 @@ namespace RoXamiRenderPipeline
         [SerializeField] public Bloom bloom;
         [SerializeField] public ToneMapping toneMapping;
         [SerializeField] public ColorAdjustment colorAdjustment;
+        [SerializeField] public WhiteBalance whiteBalance;
 
         private void OnEnable()
         {
@@ -37,23 +38,23 @@ namespace RoXamiRenderPipeline
             UpdateVolumesSettings();
         }
 
-// #if UNITY_EDITOR
-//         private void Update()
-//         {
-//             if (!Application.isPlaying)
-//             {
-//                 m_Instance = this;
-//                 UpdateVolumesSettings();
-//             }
-//         }
-// #endif
-
         public void UpdateVolumesSettings()
         {
             bloom?.UpdateVolumeSettings();
             toneMapping?.UpdateVolumeSettings();
             colorAdjustment?.UpdateVolumeSettings();
-
+            whiteBalance?.UpdateVolumeSettings();
         }
+
+        #region Update
+        // private void Update()
+        // {
+        //     if (!Application.isPlaying)
+        //     {
+        //         m_Instance = this;
+        //         UpdateVolumesSettings();
+        //     }
+        // }
+        #endregion
     }
 }

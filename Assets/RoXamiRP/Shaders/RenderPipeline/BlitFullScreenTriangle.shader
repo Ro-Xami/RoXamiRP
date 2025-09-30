@@ -22,12 +22,12 @@
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
 
-			TEXTURE2D(_PostSource0);
+			TEXTURE2D(_TempRtSource0);
 			SAMPLER(sampler_linear_clamp);
 
 			float4 BlitFullScreenTriangleFragment(Varyings IN) : SV_Target
 			{
-				return float4(SAMPLE_TEXTURE2D(_PostSource0, sampler_linear_clamp, IN.uv).rgb, 1);
+				return float4(SAMPLE_TEXTURE2D(_TempRtSource0, sampler_linear_clamp, IN.uv).rgb, 1);
 			}
 			ENDHLSL
 		}
