@@ -30,9 +30,16 @@ namespace RoXamiRenderPipeline
 
         private static BlurPass pass;
         
-        public static void BeganBlur()
+        static bool isBlur = false;
+        
+        public static void BeginBlur()
         {
-            
+            isBlur = true;
+        }
+
+        public static void EndBlur()
+        {
+            pass?.ReleaseScreenShotBlurRT();
         }
         
         public override void Create()
@@ -43,7 +50,11 @@ namespace RoXamiRenderPipeline
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            renderer.EnqueuePass(pass);
+            if (isBlur)
+            {
+                renderer.EnqueuePass(pass);
+                isBlur = false;
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -70,9 +81,13 @@ namespace RoXamiRenderPipeline
                 name = bufferName
             };
 
+            private RenderTexture screenShotBlurRT;
+
             private readonly int gaussianUpSample = Shader.PropertyToID("_GaussianUpSample");
             private readonly int gaussianDownSample = Shader.PropertyToID("_GaussianDownSample");
             private readonly int offsetID = Shader.PropertyToID("_Post_GaussianBlurOffset");
+            
+            private readonly int screenShotBlurTextureID = Shader.PropertyToID("_ScreenShotBlurTexture");
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
             {
@@ -81,32 +96,70 @@ namespace RoXamiRenderPipeline
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                var cameraData = renderingData.cameraData;
-
-                var descriptor = cameraData.cameraColorDescriptor;
-                descriptor.width = Mathf.Max(2, (int) cameraData.cameraColorDescriptor.width / settings.rtDownScale);
-                descriptor.height = Mathf.Max(2, (int) cameraData.cameraColorDescriptor.height / settings.rtDownScale);
-                
-                cmd.GetTemporaryRT(gaussianUpSample, descriptor, FilterMode.Bilinear);
-                cmd.GetTemporaryRT(gaussianDownSample, descriptor, FilterMode.Bilinear);
-
-                // for (var i = 0; i < settings.blurIterations; i++)
-                // {
-                //     cmd.SetGlobalVector(offsetID, );
-                //     DrawDontCareDontCare(
-                //         cmd, i == 0 ? ShaderDataID.cameraColorAttachmentId: gaussianDownSample, 
-                //         gaussianUpSample, blurMaterial, 0);
-                //     cmd.SetGlobalVector(offsetID, );
-                //     DrawDontCareDontCare(
-                //         cmd, gaussianUpSample, 
-                //         gaussianDownSample, blurMaterial, 0);
-                // }
+                Blur(context, renderingData);
             }
 
             public override void CleanUp()
             {
                 cmd.ReleaseTemporaryRT(gaussianUpSample);
                 cmd.ReleaseTemporaryRT(gaussianDownSample);
+            }
+
+            public void ReleaseScreenShotBlurRT()
+            {
+                screenShotBlurRT?.Release();
+            }
+            
+            private void Blur(ScriptableRenderContext context, RenderingData renderingData)
+            {
+                if (settings == null)
+                {
+                    return;
+                }
+                
+                var cameraData = renderingData.cameraData;
+                int width = Mathf.Max(2, cameraData.cameraColorDescriptor.width / settings.rtDownScale);
+                int height = Mathf.Max(2, cameraData.cameraColorDescriptor.height / settings.rtDownScale);
+
+                var descriptor = cameraData.cameraColorDescriptor;
+                descriptor.width = width;
+                descriptor.height = height;
+                
+                cmd.GetTemporaryRT(gaussianUpSample, descriptor, FilterMode.Bilinear);
+                cmd.GetTemporaryRT(gaussianDownSample, descriptor, FilterMode.Bilinear);
+                screenShotBlurRT = RenderTexture.GetTemporary(descriptor);
+
+                float offsetX = 1f / width * settings.blurSize;
+                float offsetY = 1f / height * settings.blurSize;
+
+                cmd.BeginSample(bufferName);
+                ExecuteCommandBuffer(context, cmd);
+                
+                for (var i = 0; i < settings.blurIterations; i++)
+                {
+                    cmd.SetGlobalVector(offsetID, new Vector4(offsetX, 0f, 0f, 0f));
+                    DrawDontCareDontCare
+                    (
+                        cmd, 
+                        i == 0 ? ShaderDataID.cameraColorAttachmentId: gaussianDownSample, 
+                        gaussianUpSample, 
+                        blurMaterial, 0
+                    );
+                    
+                    cmd.SetGlobalVector(offsetID, new Vector4(0f, offsetY, 0f, 0f));
+                    DrawDontCareDontCare
+                    (
+                        cmd, 
+                        gaussianUpSample, 
+                        i == settings.blurIterations - 1? screenShotBlurRT: gaussianDownSample,
+                        blurMaterial, 0
+                    );
+                }
+                
+                cmd.SetGlobalTexture(screenShotBlurTextureID, screenShotBlurRT);
+                
+                cmd.EndSample(bufferName);
+                ExecuteCommandBuffer(context, cmd);
             }
         }
     }

@@ -98,6 +98,9 @@ Shader "RoXami RP/Unlit"
 				return SAMPLE_TEXTURE2D(_SSPRTexture, sampler_SSPRTexture, screenSpaceUV);
 			}
 
+			TEXTURE2D(_ScreenShotBlurTexture);
+			SAMPLER(sampler_ScreenShotBlurTexture);
+
 			float4 UnlitPassFragment (Varyings IN) : SV_TARGET
 			{
 				UNITY_SETUP_INSTANCE_ID(IN);
@@ -116,7 +119,9 @@ Shader "RoXami RP/Unlit"
 				float4 lastColor = SampleSSPRTexture(screenSpaceUV) * IN.color;
 				//lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
 
-				return lastColor;
+				float4 blur = SAMPLE_TEXTURE2D(_ScreenShotBlurTexture, sampler_ScreenShotBlurTexture, IN.uv);
+
+				return blur;
 
 				return albedo;
 				return float4(lastColor.rgb, 1);

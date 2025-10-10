@@ -14,7 +14,7 @@ float4 GaussianBlurPass(Varyings IN) : SV_Target
     col += GetSource0(IN.uv3.xy) * 0.05;
     col += GetSource0(IN.uv3.zw) * 0.05;
     
-    return 1;
+    return col;
 }
 
 #endif
