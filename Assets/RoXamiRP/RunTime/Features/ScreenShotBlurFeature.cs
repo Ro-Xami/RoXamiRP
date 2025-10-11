@@ -30,11 +30,14 @@ namespace RoXamiRenderPipeline
 
         private static BlurPass pass;
         
-        static bool isBlur = false;
-        
         public static void BeginBlur()
         {
-            isBlur = true;
+            if (pass == null)
+            {
+                return;
+            }
+            
+            RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, true);
         }
 
         public static void EndBlur()
@@ -50,10 +53,12 @@ namespace RoXamiRenderPipeline
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (isBlur)
+            Debug.Log(RoXamiFeatureManager.Instance.isActive(RoXamiFeatureStack.ScreenShotBlurUI));
+            
+            if (RoXamiFeatureManager.Instance.isActive(RoXamiFeatureStack.ScreenShotBlurUI))
             {
                 renderer.EnqueuePass(pass);
-                isBlur = false;
+                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
             }
         }
 

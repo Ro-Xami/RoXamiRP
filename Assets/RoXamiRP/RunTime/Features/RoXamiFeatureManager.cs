@@ -5,6 +5,7 @@ namespace RoXamiRenderPipeline
     public enum RoXamiFeatureStack
     {
         ScreenSpacePlanarReflection,
+        ScreenShotBlurUI,
     }
     
     public class RoXamiFeatureManager
@@ -26,7 +27,13 @@ namespace RoXamiRenderPipeline
 
         public void SetActive(RoXamiFeatureStack stack, bool active)
         {
-            m_Features.Add((int)stack, active);
+            if (!m_Features.TryGetValue((int)stack, out var m_Active))
+            {
+                m_Active = active;
+                m_Features.Add((int)stack, m_Active);
+            }
+            
+            m_Active = active;
         }
 
         public bool isActive(RoXamiFeatureStack stack)
