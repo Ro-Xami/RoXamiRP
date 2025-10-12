@@ -2,7 +2,7 @@ Shader "RoXami RP/UI/UIScreenBlur"
 {
 	Properties
 	{
-		_BaseColor ("Base Color" , color) = (1,1,1,1)
+		//_BaseColor ("Base Color" , color) = (1,1,1,1)
 		[HiedInInspector] _MainTex ("Base Map" , 2D) = "white" {}
 	}
 	
@@ -36,7 +36,7 @@ Shader "RoXami RP/UI/UIScreenBlur"
 			SAMPLER(sampler_ScreenShotBlurTexture);
 
 			CBUFFER_START(UnityPerMaterial)
-				float4 _BaseColor;
+				//float4 _BaseColor;
 			CBUFFER_END
 
 			#ifdef INSTANCING_ON
@@ -72,7 +72,7 @@ Shader "RoXami RP/UI/UIScreenBlur"
 
 				half3 positionWS = TransformObjectToWorld(IN.positionOS.xyz);
 				OUT.positionCS = TransformWorldToHClip(positionWS);
-				OUT.color = IN.color * _BaseColor;
+				OUT.color = IN.color;// * _BaseColor;
 				OUT.uv = IN.uv;
 				//OUT.srcPos = ComputeScreenPos(OUT.positionCS);
 

@@ -27,16 +27,10 @@ namespace RoXamiRenderPipeline
 
         public void SetActive(RoXamiFeatureStack stack, bool active)
         {
-            if (!m_Features.TryGetValue((int)stack, out var m_Active))
-            {
-                m_Active = active;
-                m_Features.Add((int)stack, m_Active);
-            }
-            
-            m_Active = active;
+            m_Features[(int)stack] = active;
         }
 
-        public bool isActive(RoXamiFeatureStack stack)
+        public bool IsActive(RoXamiFeatureStack stack)
         {
             if (!m_Features.TryGetValue((int)stack, out var active))
             {

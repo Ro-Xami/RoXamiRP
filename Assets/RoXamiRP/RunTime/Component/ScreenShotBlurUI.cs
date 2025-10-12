@@ -26,11 +26,18 @@ namespace RoXamiRenderPipeline
         public void BeginBlur()
         {
             ScreenShotBlurFeature.BeginBlur();
+            SetBlurImageActive(true);
         }
 
         public void EndBlur()
         {
             ScreenShotBlurFeature.EndBlur();
+            SetBlurImageActive(false);
+        }
+
+        public void SetBlurImageActive(bool active)
+        {
+            imageComponent.enabled = active;
         }
 
         void UpdateSettings()
@@ -46,6 +53,7 @@ namespace RoXamiRenderPipeline
         private void OnEnable()
         {
             UpdateSettings();
+            SetBlurImageActive(false);
         }
 
         private void OnValidate()
@@ -56,6 +64,7 @@ namespace RoXamiRenderPipeline
         private void OnDisable()
         {
             CoreUtils.Destroy(material);
+            SetBlurImageActive(false);
         }
     }
 }

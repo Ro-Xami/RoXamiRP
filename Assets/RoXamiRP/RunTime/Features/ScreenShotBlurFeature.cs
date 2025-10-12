@@ -53,9 +53,7 @@ namespace RoXamiRenderPipeline
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            Debug.Log(RoXamiFeatureManager.Instance.isActive(RoXamiFeatureStack.ScreenShotBlurUI));
-            
-            if (RoXamiFeatureManager.Instance.isActive(RoXamiFeatureStack.ScreenShotBlurUI))
+            if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenShotBlurUI))
             {
                 renderer.EnqueuePass(pass);
                 RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
@@ -161,7 +159,7 @@ namespace RoXamiRenderPipeline
                     );
                 }
                 
-                cmd.SetGlobalTexture(screenShotBlurTextureID, screenShotBlurRT);
+                Shader.SetGlobalTexture(screenShotBlurTextureID, screenShotBlurRT);
                 
                 cmd.EndSample(bufferName);
                 ExecuteCommandBuffer(context, cmd);
