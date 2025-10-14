@@ -122,6 +122,7 @@ namespace RoXamiRenderPipeline
                     {
                         continue;
                     }
+                    
                     cmd.DrawProcedural(
                         Matrix4x4.identity, setting.mat, setting.passIndex,
                         MeshTopology.Triangles, 3

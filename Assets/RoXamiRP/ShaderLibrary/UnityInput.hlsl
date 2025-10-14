@@ -8,15 +8,13 @@ CBUFFER_START(UnityPerDraw)
 	real4 unity_WorldTransformParams;
 
 	//GI
-	float4 unity_SHAr;
-	float4 unity_SHAg;
-	float4 unity_SHAb;
-	float4 unity_SHBr;
-	float4 unity_SHBg;
-	float4 unity_SHBb;
-	float4 unity_SHC;
-
-	float4 unity_SpecCube0_HDR;
+	// float4 _RoXamiRP_SHAr;
+	// float4 _RoXamiRP_SHAg;
+	// float4 _RoXamiRP_SHAb;
+	// float4 _RoXamiRP_SHBr;
+	// float4 _RoXamiRP_SHBg;
+	// float4 _RoXamiRP_SHBb;
+	// float4 _RoXamiRP_SHC;
 CBUFFER_END
 
 float4x4 unity_MatrixVP;

@@ -96,8 +96,7 @@ namespace RoXamiRenderPipeline
             //Forward
             activePasses.Add(forwardOpaquePass);
             
-            if (renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base &&
-                renderingData.cameraData.additionalCameraData.backgroundType == BackgroundType.Skybox)
+            if (renderingData.cameraData.additionalCameraData.backgroundType == BackgroundType.Skybox)
             {
                  activePasses.Add(drawSkyboxPass);
             }

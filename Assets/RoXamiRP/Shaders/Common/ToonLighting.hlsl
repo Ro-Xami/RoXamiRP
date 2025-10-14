@@ -138,6 +138,8 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
     NoL *= light.shadowAttenuation;
     float3 F0 = lerp(linear_F0, albedo, metallic);
 
+    //return float4(gi.diffuse, 1);
+    
     float4 finalColor = float4(0, 0, 0, 0);
     finalColor.rgb =
         DirectionalLight(HoL, NoL, NoV, NoH, albedo, roughness, metallic, F0 , lightColor, inputData.viewWS) +

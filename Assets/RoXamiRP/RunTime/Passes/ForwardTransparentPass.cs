@@ -68,11 +68,15 @@ namespace RoXamiRenderPipeline
                     renderingData.commonSettings.enableDynamicBatching,
                 enableInstancing =
                     renderingData.commonSettings.enableGpuInstancing,
-                perObjectData =
-                    PerObjectData.ReflectionProbes | PerObjectData.LightProbe
+                // perObjectData =
+                //     PerObjectData.ReflectionProbes | PerObjectData.LightProbe
             };
             drawingSettings.SetShaderPassName(1, ShaderDataID.toonLitShaderTagId);
             FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
+#if UNITY_EDITOR
+            drawingSettings.SetShaderPassName(2, ShaderDataID.unityLitShaderTagId);
+            drawingSettings.SetShaderPassName(3, ShaderDataID.unityUnlitShaderTagId);
+#endif
 
             context.DrawRenderers(
                 renderingData.cullingResults, ref drawingSettings, ref filteringSettings);

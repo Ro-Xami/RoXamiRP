@@ -121,7 +121,7 @@ Shader "RoXami RP/Unlit"
 
 				float4 blur = SAMPLE_TEXTURE2D(_ScreenShotBlurTexture, sampler_ScreenShotBlurTexture, IN.uv);
 
-				return blur;
+				//return blur;
 
 				return albedo;
 				return float4(lastColor.rgb, 1);

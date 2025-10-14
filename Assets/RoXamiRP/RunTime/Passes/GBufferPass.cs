@@ -103,9 +103,9 @@ namespace RoXamiRenderPipeline
             {
                 enableDynamicBatching = renderingData.commonSettings.enableDynamicBatching,
                 enableInstancing = renderingData.commonSettings.enableGpuInstancing,
-                perObjectData =
-                    PerObjectData.ReflectionProbes |
-                    PerObjectData.LightProbe
+                // perObjectData =
+                //     PerObjectData.ReflectionProbes |
+                //     PerObjectData.LightProbe
             };
 
             filteringSettings = new FilteringSettings(RenderQueueRange.opaque);

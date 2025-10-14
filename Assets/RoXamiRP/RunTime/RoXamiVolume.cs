@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
@@ -21,6 +22,16 @@ namespace RoXamiRenderPipeline
         }
 
         public bool isActive;
+
+        [SerializeField] public RoXamiGiData giData;
+
+        [Serializable]
+        public struct RoXamiGiData
+        {
+            public Texture reflectionProbe;
+            public Texture giTexture;
+        }
+        
         [SerializeField] public Bloom bloom;
         [SerializeField] public ToneMapping toneMapping;
         [SerializeField] public ColorAdjustment colorAdjustment;
@@ -40,21 +51,25 @@ namespace RoXamiRenderPipeline
 
         public void UpdateVolumesSettings()
         {
+            UpdateGiData();
+            
             bloom?.UpdateVolumeSettings();
             toneMapping?.UpdateVolumeSettings();
             colorAdjustment?.UpdateVolumeSettings();
             whiteBalance?.UpdateVolumeSettings();
         }
 
-        #region Update
-        // private void Update()
-        // {
-        //     if (!Application.isPlaying)
-        //     {
-        //         m_Instance = this;
-        //         UpdateVolumesSettings();
-        //     }
-        // }
-        #endregion
+        void UpdateGiData()
+        {
+            CoreRpToRoXamiRP.SHUtility.UploadToShader();
+            Shader.SetGlobalTexture(ShaderDataID.reflectionTexture, giData.reflectionProbe);
+        }
+        
+#if UNITY_EDITOR
+        private void Update()
+        {
+            UpdateVolumesSettings();
+        }
+#endif
     }
 }

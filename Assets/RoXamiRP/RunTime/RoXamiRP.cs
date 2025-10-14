@@ -51,11 +51,6 @@ namespace RoXamiRenderPipeline
                     continue;
                 }
                 
-                // if (camera.name != "Debug Camera")
-                // {
-                //     continue;
-                // }
-                
                 RenderBaseCamera(context, additionalCameraData, camera, out var isSingleBaseCamera);
 
                 //Overlay Camera

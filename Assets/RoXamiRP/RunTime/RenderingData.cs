@@ -44,6 +44,8 @@ namespace RoXamiRenderPipeline
     {
         public static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("ToonUnlit");
         public static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
+        public static readonly ShaderTagId unityLitShaderTagId = new ShaderTagId("UniversalForward");
+        public static readonly ShaderTagId unityUnlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 
         public static int cameraDepthAttachmentId;
         public static int cameraColorAttachmentId;
@@ -60,6 +62,7 @@ namespace RoXamiRenderPipeline
         public static readonly int TempRtSource1ID = Shader.PropertyToID("_TempRtSource1");
         
         public static readonly int matrixInvVP_ID = Shader.PropertyToID("_RoXamiRP_MatrixInvVP");
+        public static readonly int reflectionTexture = Shader.PropertyToID("_RoXamiRpReflectionTexture");
 
         public static readonly int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
         public const string enableScreenSpaceShadowsID = "SCREENSPACE_SHADOWS";

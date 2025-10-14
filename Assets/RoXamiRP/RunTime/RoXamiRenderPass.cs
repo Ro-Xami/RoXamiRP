@@ -155,6 +155,11 @@ namespace RoXamiRenderPipeline
                 MeshTopology.Triangles, 3
             );
         }
+        
+        protected void UpdateGlobalSHColor()
+        {
+            CoreRpToRoXamiRP.SHUtility.UploadToShader();
+        }
 
         public static bool operator <(RoXamiRenderPass lhs, RoXamiRenderPass rhs)
         {

@@ -47,7 +47,7 @@ namespace RoXamiRenderPipeline
                 ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             cmd.ClearRenderTarget(false, true, Color.clear);
-
+            
             cmd.DrawProcedural(
                 Matrix4x4.identity, renderingData.shaderAsset.deferredMaterial, 0,
                 MeshTopology.Triangles, 3

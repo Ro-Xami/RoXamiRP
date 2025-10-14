@@ -6,20 +6,20 @@
 #include "Surface.hlsl"
 #include "UnityInput.hlsl"
 
-TEXTURECUBE(unity_SpecCube0);
-SAMPLER(samplerunity_SpecCube0);
+// TEXTURECUBE(unity_SpecCube0);
+// SAMPLER(samplerunity_SpecCube0);
 
-// CBUFFER_START(GI)
-// 	float4 unity_SHAr;
-// 	float4 unity_SHAg;
-// 	float4 unity_SHAb;
-// 	float4 unity_SHBr;
-// 	float4 unity_SHBg;
-// 	float4 unity_SHBb;
-// 	float4 unity_SHC;
-//
-// 	float4 unity_SpecCube0_HDR;
-// CBUFFER_END
+TEXTURECUBE(_RoXamiRpReflectionTexture);
+SAMPLER(sampler_RoXamiRpReflectionTexture);
+float4 _RoXamiRpReflectionTexture_HDR;
+
+float4 _RoXamiRP_SHAr;
+float4 _RoXamiRP_SHAg;
+float4 _RoXamiRP_SHAb;
+float4 _RoXamiRP_SHBr;
+float4 _RoXamiRP_SHBg;
+float4 _RoXamiRP_SHBb;
+float4 _RoXamiRP_SHC;
 
 struct GI
 {
@@ -30,13 +30,13 @@ struct GI
 float3 SampleLightProbe (float3 normal) 
 {
 	float4 coefficients[7];
-	coefficients[0] = unity_SHAr;
-	coefficients[1] = unity_SHAg;
-	coefficients[2] = unity_SHAb;
-	coefficients[3] = unity_SHBr;
-	coefficients[4] = unity_SHBg;
-	coefficients[5] = unity_SHBb;
-	coefficients[6] = unity_SHC;
+	coefficients[0] = _RoXamiRP_SHAr;
+	coefficients[1] = _RoXamiRP_SHAg;
+	coefficients[2] = _RoXamiRP_SHAb;
+	coefficients[3] = _RoXamiRP_SHBr;
+	coefficients[4] = _RoXamiRP_SHBg;
+	coefficients[5] = _RoXamiRP_SHBb;
+	coefficients[6] = _RoXamiRP_SHC;
 	return max(0.0, SampleSH9(coefficients, normal));
 }
 
@@ -44,18 +44,16 @@ float3 SampleEnvironment (float3 normalWS , float3 viewWS , float roughness) {
 	float3 uvw = reflect(-viewWS, normalWS);
 	float mip = PerceptualRoughnessToMipmapLevel(roughness);
 	float4 environment = SAMPLE_TEXTURECUBE_LOD(
-		unity_SpecCube0, samplerunity_SpecCube0, uvw, mip
+		_RoXamiRpReflectionTexture, sampler_RoXamiRpReflectionTexture, uvw, mip
 	);
-	return DecodeHDREnvironment(environment, unity_SpecCube0_HDR);
+	return DecodeHDREnvironment(environment, _RoXamiRpReflectionTexture_HDR);
 }
 
 GI GetGI(Input inputData , Surface surfaceData)
 {
 	GI OUT = (GI)0;
-	float mip = PerceptualRoughnessToMipmapLevel(surfaceData.roughness);
-	float3 reflectionDir = reflect(-inputData.viewWS , inputData.normalWS);
 	OUT.diffuse = SampleLightProbe(inputData.normalWS);
-	OUT.specular = SampleEnvironment(inputData.normalWS , inputData.viewWS , mip);
+	OUT.specular = SampleEnvironment(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
 
 	return OUT;
 }
