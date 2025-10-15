@@ -59,9 +59,9 @@ Material:
     - _enableEmissionMap: 0
     - _enableMraMap: 0
     - _enableNormalMap: 0
-    - _metallic: 0.114
+    - _metallic: 1
     - _normalStrength: 1
-    - _roughness: 0.307
+    - _roughness: 0
     m_Colors:
     - _BaseColor: {r: 0.24586153, g: 0.8018868, b: 0.5341925, a: 1}
     - _Color: {r: 1, g: 0, b: 0, a: 1}

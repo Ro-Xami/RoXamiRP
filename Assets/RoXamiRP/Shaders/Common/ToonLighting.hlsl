@@ -152,4 +152,74 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
     return finalColor;
 }
 
+float4 CalculateDeferredToonLitDiffuseEmission(Input inputData , Surface surfaceData)
+{
+    float3 albedo = surfaceData.albedo;
+    float3 normalDir = surfaceData.normal;
+    //float occlusion = surfaceData.ao;
+    float roughness = LinearStep( 0.003 , 1 , surfaceData.roughness);
+    float metallic = surfaceData.metallic;
+    float3 emission = surfaceData.emissive;
+    
+    Light light = GetMainLight(inputData);
+    //GI gi = GetGI(inputData , surfaceData);
+
+    float3 additionalLightColor = float3(0 , 0 , 0);
+    int additionalLightCount = GetAdditionalLightCount();
+	
+    UNITY_LOOP
+    for (int additionLightIndex = 0 ; additionLightIndex < additionalLightCount ; additionLightIndex++)
+    {
+        Light additionalLight = GetAdditionalLight(additionLightIndex , inputData);
+        float NoL = saturate(dot(additionalLight.direction , normalDir));
+        additionalLightColor += additionalLight.color * NoL * additionalLight.shadowAttenuation;
+    }
+    additionalLightColor *= albedo;
+
+    float3 lightColor = light.color;
+    float3 lightDir = normalize(light.direction);
+    float3 halfDir = SafeNormalize(inputData.viewWS + lightDir);
+    float NoH = max(saturate(dot(normalDir, halfDir)), 0.0001);
+    float NoL = max(saturate(dot(normalDir, lightDir)) , 0.0001);
+    float NoV = max(saturate(dot(normalDir, inputData.viewWS)), 0.01);
+    //float HoV = max(saturate(dot(inputData.viewWS, lightDir)), 0.0001);
+    float HoL = max(saturate(dot(halfDir, lightDir)), 0.0001);
+
+    NoL *= light.shadowAttenuation;
+    float3 F0 = lerp(linear_F0, albedo, metallic);
+
+    //return float4(gi.diffuse, 1);
+    
+    float4 finalColor = float4(0, 0, 0, 0);
+    finalColor.rgb =
+        DirectionalLight(HoL, NoL, NoV, NoH, albedo, roughness, metallic, F0 , lightColor, inputData.viewWS) +
+        //InDirectionalLight(NoV, normalDir, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi) +
+        emission +
+        additionalLightColor;
+    finalColor.a = 1;
+
+    return finalColor;
+}
+
+float4 CalculateDeferredToonLitGI(Input inputData , Surface surfaceData)
+{
+    float3 albedo = surfaceData.albedo;
+    float3 normalDir = surfaceData.normal;
+    float occlusion = surfaceData.ao;
+    float roughness = LinearStep( 0.003 , 1 , surfaceData.roughness);
+    float metallic = surfaceData.metallic;
+    
+    GI gi = GetGI(inputData , surfaceData);
+
+    float NoV = max(saturate(dot(normalDir, inputData.viewWS)), 0.01);
+
+    float3 F0 = lerp(linear_F0, albedo, metallic);
+    
+    float4 finalColor = float4(0, 0, 0, 0);
+    finalColor.rgb = InDirectionalLight(NoV, normalDir, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi);
+    finalColor.a = 1;
+
+    return finalColor;
+}
+
 #endif

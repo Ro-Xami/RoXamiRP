@@ -52,57 +52,60 @@ namespace RoXamiRenderPipeline
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering deferred shading pass.
         /// </summary>
-        BeforeRenderingDeferredLights = 140,
+        BeforeRenderingDeferredDiffuse = 140,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering deferred shading pass.
         /// </summary>
-        AfterRenderingDeferredLights = 160,
+        AfterRenderingDeferredDiffuse = 160,
+        
+        BeforeRenderingDeferredGI = 180,
+        AfterRenderingDeferredGI = 200,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering opaque objects.
         /// </summary>
-        BeforeRenderingOpaques = 180,
+        BeforeRenderingOpaques = 220,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering opaque objects.
         /// </summary>
-        AfterRenderingOpaques = 200,
+        AfterRenderingOpaques = 240,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering the sky.
         /// </summary>
-        BeforeRenderingSkybox = 220,
+        BeforeRenderingSkybox = 260,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering the sky.
         /// </summary>
-        AfterRenderingSkybox = 240,
+        AfterRenderingSkybox = 280,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering transparent objects.
         /// </summary>
-        BeforeRenderingTransparents = 260,
+        BeforeRenderingTransparents = 300,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering transparent objects.
         /// </summary>
-        AfterRenderingTransparents = 280,
+        AfterRenderingTransparents = 320,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> before rendering post-processing effects.
         /// </summary>
-        BeforeRenderingPostProcessing = 300,
+        BeforeRenderingPostProcessing = 340,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering post-processing effects but before final blit, post-processing AA effects and color grading.
         /// </summary>
-        AfterRenderingPostProcessing = 320,
+        AfterRenderingPostProcessing = 360,
 
         /// <summary>
         /// Executes a <c>ScriptableRenderPass</c> after rendering all effects.
         /// </summary>
-        AfterRendering = 340,
+        AfterRendering = 380,
     }
 
     public abstract class RoXamiRenderPass

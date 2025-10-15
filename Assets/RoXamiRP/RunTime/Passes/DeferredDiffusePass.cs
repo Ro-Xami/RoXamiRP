@@ -5,9 +5,9 @@ using UnityEngine.Experimental.Rendering;
 
 namespace RoXamiRenderPipeline
 {
-    public class DeferredPass : RoXamiRenderPass
+    public class DeferredDiffusePass : RoXamiRenderPass
     {
-        public DeferredPass(RenderPassEvent evt)
+        public DeferredDiffusePass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
         }
@@ -43,8 +43,6 @@ namespace RoXamiRenderPipeline
         {
             cmd.SetRenderTarget(
                 ShaderDataID.cameraColorAttachmentId,
-                RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             cmd.ClearRenderTarget(false, true, Color.clear);
             

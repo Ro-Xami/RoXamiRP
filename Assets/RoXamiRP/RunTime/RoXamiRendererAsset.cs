@@ -15,7 +15,7 @@ namespace RoXamiRenderPipeline
         [System.Serializable]
         public class RendererSettings
         {
-            public bool enableDeferredRendering;
+            //public bool enableDeferredRendering;
             public bool enableLighting;
         }
         

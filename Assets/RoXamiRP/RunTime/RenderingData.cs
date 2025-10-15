@@ -24,8 +24,6 @@ namespace RoXamiRenderPipeline
         public AdditionalCameraData additionalCameraData;
         public int width;
         public int height;
-        // public int cameraDepthAttachmentId;
-        // public int cameraColorAttachmentId;
         public RenderTextureDescriptor cameraColorDescriptor;
         public RenderTextureDescriptor cameraDepthDescriptor;
         public FilterMode cameraColorFilterMode;
@@ -34,6 +32,7 @@ namespace RoXamiRenderPipeline
 
     public struct RuntimeData
     {
+        public bool isDeferred;
         public bool isFinalBlit;
         public bool isCastShadows;
         public bool isPost;
@@ -81,7 +80,8 @@ namespace RoXamiRenderPipeline
         public static readonly int reflectionTexture = Shader.PropertyToID("_RoXamiRpReflectionTexture");
 
         public static readonly int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
-        public const string enableScreenSpaceShadowsID = "SCREENSPACE_SHADOWS";
+        public static GlobalKeyword enableScreenSpaceShadowsID = new GlobalKeyword("SCREENSPACE_SHADOWS");
+        public static string enableScreenSpaceReflectionID = "SCREENSPACE_REFLECTION";//new GlobalKeyword("SCREENSPACE_REFLECTION");
     }
     
     public enum PostShaderPass

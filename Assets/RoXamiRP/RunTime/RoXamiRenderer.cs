@@ -15,14 +15,14 @@ namespace RoXamiRenderPipeline
         private readonly RenderingPrePasses prePasses = 
             new RenderingPrePasses(RenderPassEvent.BeforeRenderingPrePasses + 10);
 
-        private readonly GBufferPass gBufferPass = 
-            new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer + 10);
-
-        private readonly ScreenSpaceShadowsPass ssShadowsPass =
-            new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredLights + 9);
-
-        private readonly DeferredPass deferredPass = 
-            new DeferredPass(RenderPassEvent.BeforeRenderingDeferredLights + 10);
+        // private readonly GBufferPass gBufferPass = 
+        //     new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer + 10);
+        //
+        // private readonly ScreenSpaceShadowsPass ssShadowsPass =
+        //     new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 9);
+        //
+        // private readonly DeferredDiffusePass _deferredDiffusePass = 
+        //     new DeferredDiffusePass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 10);
 
         private readonly ForwardOpaquePass forwardOpaquePass =
             new ForwardOpaquePass(RenderPassEvent.BeforeRenderingOpaques + 10);
@@ -88,13 +88,13 @@ namespace RoXamiRenderPipeline
             
             //=========================================================================
             //Deferred
-            if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering && 
-                renderingData.rendererAsset.rendererSettings.enableLighting)
-            {
-                activePasses.Add(gBufferPass);
-                activePasses.Add(deferredPass);
-                activePasses.Add(ssShadowsPass);
-            }
+            // if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering && 
+            //     renderingData.rendererAsset.rendererSettings.enableLighting)
+            // {
+            //     activePasses.Add(gBufferPass);
+            //     activePasses.Add(deferredPass);
+            //     activePasses.Add(ssShadowsPass);
+            // }
 
             //=========================================================================
             //Forward

@@ -2,9 +2,9 @@
 #define ROXAMIRP_GI_INCLUDE
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/ImageBasedLighting.hlsl"
-#include "Input.hlsl"
-#include "Surface.hlsl"
-#include "UnityInput.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Input.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Surface.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/ScreenSpaceReflection.hlsl"
 
 // TEXTURECUBE(unity_SpecCube0);
 // SAMPLER(samplerunity_SpecCube0);
@@ -40,12 +40,13 @@ float3 SampleLightProbe (float3 normal)
 	return max(0.0, SampleSH9(coefficients, normal));
 }
 
-float3 SampleEnvironment (float3 normalWS , float3 viewWS , float roughness) {
+float3 SampleEnvironmentCube(float3 normalWS , float3 viewWS , float roughness) {
 	float3 uvw = reflect(-viewWS, normalWS);
 	float mip = PerceptualRoughnessToMipmapLevel(roughness);
 	float4 environment = SAMPLE_TEXTURECUBE_LOD(
 		_RoXamiRpReflectionTexture, sampler_RoXamiRpReflectionTexture, uvw, mip
 	);
+	
 	return DecodeHDREnvironment(environment, _RoXamiRpReflectionTexture_HDR);
 }
 
@@ -53,7 +54,13 @@ GI GetGI(Input inputData , Surface surfaceData)
 {
 	GI OUT = (GI)0;
 	OUT.diffuse = SampleLightProbe(inputData.normalWS);
-	OUT.specular = SampleEnvironment(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
+	#ifdef SCREENSPACE_REFLECTION
+		float4 ssr = SampleSSRTexture(inputData.screenSpaceUV);
+		float3 cube = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
+		OUT.specular = lerp(cube, ssr.rgb, ssr.a);
+	#else
+		OUT.specular = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
+	#endif
 
 	return OUT;
 }

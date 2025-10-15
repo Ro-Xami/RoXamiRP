@@ -49,7 +49,7 @@ namespace RoXamiRenderPipeline
                 ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 
-            if (!renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
+            if (!renderingData.runtimeData.isDeferred)
             {
                 cmd.ClearRenderTarget(
                     true,

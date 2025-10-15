@@ -35,6 +35,8 @@ namespace RoXamiRenderPipeline
             #endregion
             
             SetCommonData();
+            InitializedGlobalKeyword();
+            
             SetUpRenderingData(
                 commonSettings, shadowSettings, rendererAsset, 
                 shaderAsset, additionalCameraData, antialiasingSettings, 
@@ -152,7 +154,9 @@ namespace RoXamiRenderPipeline
             renderingData.cameraData.width = camera.pixelWidth;
             renderingData.cameraData.height = camera.pixelHeight;
             renderingData.cameraData.additionalCameraData = additionalCameraData;
-            
+
+            renderingData.runtimeData.isCastShadows = false;
+            renderingData.runtimeData.isDeferred = false;
             renderingData.runtimeData.isFinalBlit = isFinalBlit;
             renderingData.runtimeData.isPost = 
                 RoXamiVolume.Instance.isActive && 
@@ -171,6 +175,12 @@ namespace RoXamiRenderPipeline
             Matrix4x4 invVP = vpMatrix.inverse;
 
             cmd.SetGlobalMatrix(ShaderDataID.matrixInvVP_ID, invVP);
+        }
+
+        void InitializedGlobalKeyword()
+        {
+            cmd.DisableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+            cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
         }
         
         void ExecuteBuffer()

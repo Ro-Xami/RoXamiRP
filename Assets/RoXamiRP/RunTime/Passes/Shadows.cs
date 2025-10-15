@@ -31,6 +31,8 @@ namespace RoXamiRenderPipeline
         private readonly Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
         Vector4 shadowDistanceFade;
 
+        bool isCastShadows = false;
+
         public void Setup(ScriptableRenderContext scriptableRenderContext, RenderingData renderingData)
         {
             this.cullingResults = renderingData.cullingResults;
@@ -40,24 +42,17 @@ namespace RoXamiRenderPipeline
 
         public void Render(Light light, int lightIndex, ref RenderingData renderingData)
         {
-            bool isCastShadows =
+            isCastShadows =
                 light && light.shadows != LightShadows.None && light.shadowStrength > 0f &&
-                cullingResults.GetShadowCasterBounds(0, out Bounds b);
+                cullingResults.GetShadowCasterBounds(0, out Bounds b) &&
+                renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows &&
+                renderingData.shadowSettings.enableDirectionalShadows;
 
             renderingData.runtimeData.isCastShadows = isCastShadows;
             
-            if (renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows && isCastShadows)
+            if (isCastShadows)
             {
-                cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 RenderDirectionalShadows(light, lightIndex);
-            }
-            else
-            {
-                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
-                directionalLightShadowData = Vector4.zero;
-                cmd.GetTemporaryRT(
-                    ShaderDataID.directionalShadowAtlasID, 1, 1,
-                    32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
             }
         }
 
@@ -163,8 +158,10 @@ namespace RoXamiRenderPipeline
 
         public void CleanUp()
         {
-            cmd.ReleaseTemporaryRT(ShaderDataID.directionalShadowAtlasID);
-            ExecuteBuffer();
+            if (isCastShadows)
+            {
+                cmd.ReleaseTemporaryRT(ShaderDataID.directionalShadowAtlasID);
+            }
         }
 
         void ExecuteBuffer()

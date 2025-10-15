@@ -24,16 +24,21 @@ namespace RoXamiRenderPipeline
         RenderingData renderingData;
 
         ComputeShader cs;
+        private bool needToDraw = false;
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
         {
             renderingData = renderData;
 
             cs = renderingData.shaderAsset.screenSpaceShadowComputeShader;
-
-            if (cs && renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows &&
-                renderingData.runtimeData.isCastShadows)
+            
+            needToDraw = cs &&
+                 renderingData.runtimeData.isCastShadows;
+            
+            if (needToDraw)
             {
+                cmd.EnableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                
                 int width = renderingData.cameraData.width;
                 int height = renderingData.cameraData.height;
                 cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
@@ -51,15 +56,13 @@ namespace RoXamiRenderPipeline
             }
             else
             {
-                cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
-                    1, 1, 0, FilterMode.Point, RenderTextureFormat.R8);
-                ExecuteCommandBuffer(context, cmd);
+                cmd.DisableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
             }
         }
 
         public override void CleanUp()
         {
-            if (cs)
+            if (needToDraw)
             {
                 cmd.ReleaseTemporaryRT(screenSpaceShadowsTextureID);
             }
@@ -67,21 +70,7 @@ namespace RoXamiRenderPipeline
 
         private void ComputeScreenSpaceShadows(int width, int height)
         {
-            int kernel = -1;
-            try
-            {
-                kernel = cs.FindKernel("ScreenSpaceShadows");
-            }
-            catch(Exception e)
-            {
-                Debug.LogError($"[RoXami] FindKernel exception: {e}");
-                return;
-            }
-
-            if (kernel < 0)
-            {
-                return;
-            }
+            int kernel = cs.FindKernel(kernelName);
 
             cmd.SetComputeVectorParam(cs,
                 textureSizeID, new Vector4(width, height, 1f / width, 1f / height));

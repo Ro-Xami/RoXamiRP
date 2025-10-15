@@ -11,10 +11,11 @@ namespace RoXamiRenderPipeline
         [Serializable]
         public class SsrSettings
         {
-            public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingDeferredLights;
-            public ComputeShader ComputeShader;
+            public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingDeferredDiffuse;
+            public ComputeShader computeShader;
             public int maxStep = 20;
-            public float stepSize = 0.1f;
+            public float stepSize = 1f;
+            public float thickness = 1f;
         }
 
         private SsrPass ssr;
@@ -45,14 +46,14 @@ namespace RoXamiRenderPipeline
             private const string bufferName = "ScreenSpaceReflection";
             public SsrPass(SsrSettings settings)
             {
-                if (settings == null || settings.ComputeShader == null)
+                if (settings == null || settings.computeShader == null)
                 {
                     return;
                 }
                 
                 this.renderPassEvent = settings.renderPassEvent;
                 this.settings = settings;
-                kernel = settings.ComputeShader.FindKernel(bufferName);
+                kernel = settings.computeShader.FindKernel(bufferName);
             }
 
             private readonly CommandBuffer cmd = new CommandBuffer()
@@ -62,8 +63,7 @@ namespace RoXamiRenderPipeline
             
             private readonly int 
                 ssrTextureID = Shader.PropertyToID("_ScreenSpaceReflectionTexture"),
-                maxStepID = Shader.PropertyToID("_maxStep"),
-                stepSizeID = Shader.PropertyToID("_stepSize"),
+                ssrParamsID = Shader.PropertyToID("_ssrParams"),
                 texelSizeID = Shader.PropertyToID("_texelSize");
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
@@ -73,11 +73,14 @@ namespace RoXamiRenderPipeline
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                if (settings == null || settings.ComputeShader == null || kernel < 0 || 
-                    !renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
+                if (settings == null || !settings.computeShader || kernel < 0)
+                   // !renderingData.rendererAsset.rendererSettings.enableDeferredRendering
                 {
+                    cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
                     return;
                 }
+                
+                cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
                 
                 cmd.BeginSample(bufferName);
                 ExecuteCommandBuffer(context, cmd);
@@ -92,14 +95,14 @@ namespace RoXamiRenderPipeline
 
             private void Draw(int width, int height)
             {
-                var cs = settings.ComputeShader;
-                cmd.SetComputeIntParam(cs, maxStepID, settings.maxStep);
-                cmd.SetComputeFloatParam(cs, stepSizeID, settings.stepSize);
+                var cs = settings.computeShader;
+                cmd.SetComputeVectorParam(cs, ssrParamsID, 
+                    new Vector4(settings.maxStep, settings.stepSize, settings.thickness));
                 cmd.SetComputeVectorParam(cs, texelSizeID,
                     new Vector4(width, height, 1 / (float)width, 1 / (float)height));
                 
-                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorAttachmentId);
-                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthAttachmentId);
+                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraColorCopyTextureID, ShaderDataID.cameraColorAttachmentId);
+                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthCopyTextureID, ShaderDataID.cameraDepthAttachmentId);
                 cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal]);
                 cmd.SetComputeTextureParam(cs, kernel, ssrTextureID, ssrTextureID);
                 
