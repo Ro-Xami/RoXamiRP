@@ -111,16 +111,14 @@ namespace RoXamiRenderPipeline
             private void GetSetClearRtTarget(RenderingData renderingData,  out int width, out int height)
             {
                 var descriptor = renderingData.cameraData.cameraColorDescriptor;
+                descriptor.enableRandomWrite = true;
                 width = descriptor.width;
                 height =descriptor.height;
                 
-                cmd.GetTemporaryRT(ssrTextureID, 
-                    width, height, descriptor.depthBufferBits,
-                    FilterMode.Bilinear, descriptor.colorFormat, RenderTextureReadWrite.Linear, 
-                    0, true);
+                cmd.GetTemporaryRT(ssrTextureID,descriptor, FilterMode.Bilinear);
                 
                 cmd.SetRenderTarget(ssrTextureID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
-                cmd.ClearRenderTarget(true, true, Color.clear);
+                //cmd.ClearRenderTarget(true, true, Color.clear);
             }
 
             public override void CleanUp()

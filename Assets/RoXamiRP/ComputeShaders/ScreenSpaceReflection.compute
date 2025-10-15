@@ -2,14 +2,48 @@
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/Shaders/Common/CameraDepthAttachment.hlsl"
-#include "Assets/RoXamiRP/ShaderLibrary/Light.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraColorAttachment.hlsl"
 
 RWTexture2D<float4> _ScreenSpaceReflectionTexture;
 float4 _ScreenSpaceReflectionTexture_TexelSize;
 TEXTURE2D(_GBuffer1);
 SAMPLER(sampler_GBuffer1);
 
-#define _rayMarchStep 0.1f
+int _maxStep;
+float _rayMarchStep;
+
+// float3 ComputeNormalizedDeviceCoordinatesWithZNoUvStart(float3 position, float4x4 clipSpaceTransform)
+// {
+//     float4 positionCS = ComputeClipSpacePosition(position, clipSpaceTransform);
+//
+//     #if UNITY_UV_STARTS_AT_TOP
+//     // Our world space, view space, screen space and NDC space are Y-up.
+//     // Our clip space is flipped upside-down due to poor legacy Unity design.
+//     // The flip is baked into the projection matrix, so we only have to flip
+//     // manually when going from CS to NDC and back.
+//     positionCS.y = -positionCS.y;
+//     #endif
+//
+//     positionCS *= rcp(positionCS.w);
+//     positionCS.xy = positionCS.xy * 0.5 + 0.5;
+//
+//     return positionCS.xyz;
+// }
+
+float SampleDepth(float2 uv)
+{
+    return _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, uv, 0).r;
+}
+
+float3 SampleNormal(float2 uv)
+{
+    return normalize(_GBuffer1.SampleLevel(sampler_GBuffer1, uv, 0).rgb);
+}
+
+float3 SampleColor(float2 uv)
+{
+    return _CameraColorTexture.SampleLevel(sampler_CameraColorTexture, uv, 0).rgb;
+}
 
 [numthreads(8,8,1)]
 void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
@@ -21,7 +55,7 @@ void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
     }
     float2 screenSpaceUV = float2(id.xy) * _ScreenSpaceReflectionTexture_TexelSize.zw;
 
-    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 0).r;
+    float depth = SampleDepth(screenSpaceUV);
 
     //withoutSkybox
     #if defined(UNITY_REVERSED_Z)
@@ -37,15 +71,33 @@ void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
         }
     #endif
     
-    float3 rayMarchStart = CalculateDepthToPositionWS(depth, screenSpaceUV);
-    float3 rayMarchDir = normalize(_GBuffer1.SampleLevel(sampler_GBuffer1, screenSpaceUV, 0));
-    Light mainLight = GetMainLight();
+    float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
+    float3 viewDir = GetViewDirWS(positionWS);
+    float3 normalDir = SampleNormal(screenSpaceUV);
+    float3 reflectionDir = normalize(reflect(-viewDir, normalDir));
 
-    float3 currentPositionWS = rayMarchStart;
-    float step = rayMarchDir * _rayMarchStep;
-    for (int i = 0; i < 20; i++)
+    float3 rayPositionWS = positionWS;
+    float3 rayMarchStep = reflectionDir * _rayMarchStep;
+
+    for (int i = 0; i < _maxStep; i++)
     {
-        currentPositionWS += step;
+        rayPositionWS += rayMarchStep;
+        float3 rayCS = ComputeNormalizedDeviceCoordinatesWithZ(rayPositionWS, MATRIX_I_VP);
+        float rayZ = rayCS.z;
+        float2 rayScreenSpaceUV = rayCS.xy * _ScreenSpaceReflectionTexture_TexelSize.zw;
+        float depthZ = SampleDepth(rayScreenSpaceUV);
+        depthZ = GetReverseDepth(depthZ);
+
+        if (rayZ >= depthZ)
+        {
+            float3 rayNormalWS = SampleNormal(rayScreenSpaceUV);
+            if (dot(reflectionDir, rayNormalWS) > 0)
+            {
+                break;
+            }
+
+            _ScreenSpaceReflectionTexture[screenSpaceUV] = float4(SampleColor(rayScreenSpaceUV), 1);
+            break;
+        }
     }
-    //_ScreenSpaceReflectionTexture[] = 1;
 }
