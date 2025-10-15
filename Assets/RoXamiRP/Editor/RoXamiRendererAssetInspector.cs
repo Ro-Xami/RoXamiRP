@@ -16,6 +16,20 @@ namespace RoXamiRenderPipeline
 
         private List<Type> renderFeatureTypes;
         private GenericMenu featureMenu;
+        
+        private static GUIStyle featureStyle = new GUIStyle();
+        private static Texture2D m_FeatureBackgroundTexture;
+        private static Texture2D featureBackgroundTexture
+        {
+            get
+            {
+                if (m_FeatureBackgroundTexture == null)
+                {
+                    m_FeatureBackgroundTexture = GetBackGroundTexture(new Color(0.17f, 0.17f, 0.2f, 1f));
+                }
+                return m_FeatureBackgroundTexture;
+            }
+        }
 
         void OnEnable()
         {
@@ -24,24 +38,27 @@ namespace RoXamiRenderPipeline
             roXamiRenderFeatures = serializedObject.FindProperty("roXamiRenderFeatures");
 
             CollectRenderFeatureTypes();
-        }
-
-        void CollectRenderFeatureTypes()
-        {
-            renderFeatureTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => t.IsSubclassOf(typeof(RoXamiRenderFeature)) && !t.IsAbstract)
-                .ToList();
+            featureStyle.normal.background = featureBackgroundTexture;
         }
 
         public override void OnInspectorGUI()
         {
-            Undo.RecordObject(asset, "Change RoXami Renderer Asset");
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(rendererSettings);
 
             EditorGUILayout.Space(20);
+
+            EditorGUILayout.BeginVertical(featureStyle);
+            FeaturesWindow();
+            EditorGUILayout.EndVertical();
+
+            Undo.RecordObject(asset, "Change RoXami Renderer Asset");
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void FeaturesWindow()
+        {
             EditorGUILayout.LabelField("Render Features", EditorStyles.boldLabel);
 
             for (int i = 0; i < asset.roXamiRenderFeatures.Count; i++)
@@ -50,8 +67,13 @@ namespace RoXamiRenderPipeline
                 if (renderFeature == null) continue;
 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                
                 Editor featureEditor = CreateEditor(renderFeature);
+                
+                EditorGUILayout.LabelField(renderFeature.GetType().Name, EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
                 featureEditor.OnInspectorGUI();
+                EditorGUI.indentLevel--;
 
                 EditorGUILayout.Space();
                 EditorGUILayout.BeginHorizontal();
@@ -74,7 +96,6 @@ namespace RoXamiRenderPipeline
                 EditorGUILayout.EndVertical();
             }
 
-
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Add RenderFeature"))
             {
@@ -87,8 +108,6 @@ namespace RoXamiRenderPipeline
             }
 
             EditorGUILayout.EndHorizontal();
-
-            serializedObject.ApplyModifiedProperties();
         }
 
         void ShowAddFeatureMenu()
@@ -147,6 +166,27 @@ namespace RoXamiRenderPipeline
             AssetDatabase.ImportAsset(path);
             AssetDatabase.Refresh();
         }
+        
+        void CollectRenderFeatureTypes()
+        {
+            renderFeatureTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.IsSubclassOf(typeof(RoXamiRenderFeature)) && !t.IsAbstract)
+                .ToList();
+        }
 
+        private static Texture2D GetBackGroundTexture(Color color)
+        {
+            var texture = new Texture2D(1, 1);
+            for (int i = 0; i < texture.width; i++)
+            {
+                for (int j = 0; j < texture.height; j++)
+                {
+                    texture.SetPixel(i, j, color);
+                }
+            }
+            texture.Apply();
+            return texture;
+        }
     }
 }

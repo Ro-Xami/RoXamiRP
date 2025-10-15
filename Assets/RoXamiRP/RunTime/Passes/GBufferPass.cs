@@ -18,22 +18,12 @@ namespace RoXamiRenderPipeline
             name = bufferName
         };
 
-        static readonly ShaderTagId toonGBufferShaderTagId = new ShaderTagId("ToonGBuffer");
-
-        static readonly int[] gBufferNameIDs = new int[]
-        {
-            Shader.PropertyToID("_GBuffer0"),
-            Shader.PropertyToID("_GBuffer1"),
-            Shader.PropertyToID("_GBuffer2"),
-            Shader.PropertyToID("_GBuffer3"),
-        };
-
         private static readonly RenderTargetIdentifier[] gBufferTargets = new RenderTargetIdentifier[]
         {
-            new RenderTargetIdentifier(gBufferNameIDs[0]),
-            new RenderTargetIdentifier(gBufferNameIDs[1]),
-            new RenderTargetIdentifier(gBufferNameIDs[2]),
-            new RenderTargetIdentifier(gBufferNameIDs[3]),
+            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Albedo]),
+            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal]),
+            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.MRA]),
+            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Emission]),
         };
 
         RenderingData renderingData;
@@ -59,7 +49,7 @@ namespace RoXamiRenderPipeline
 
         public override void CleanUp()
         {
-            foreach (var gBufferID in gBufferNameIDs)
+            foreach (var gBufferID in ShaderDataID.gBufferNameIDs)
             {
                 cmd.ReleaseTemporaryRT(gBufferID);
             }
@@ -75,14 +65,17 @@ namespace RoXamiRenderPipeline
             int width = renderingData.cameraData.width;
             int height = renderingData.cameraData.height;
 
-            cmd.GetTemporaryRT(gBufferNameIDs[0], renderingData.cameraData.cameraColorDescriptor,
-                renderingData.cameraData.cameraColorFilterMode); //Albedo
-            cmd.GetTemporaryRT(gBufferNameIDs[1], width, height, 0, FilterMode.Point,
-                RenderTextureFormat.ARGBFloat); //normal
-            cmd.GetTemporaryRT(gBufferNameIDs[2], width, height, 0, FilterMode.Point,
-                RenderTextureFormat.ARGB32); //Metallic/Roughness/Ao
-            cmd.GetTemporaryRT(gBufferNameIDs[3], renderingData.cameraData.cameraColorDescriptor,
-                FilterMode.Point); //Emission
+            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Albedo], 
+                renderingData.cameraData.cameraColorDescriptor, renderingData.cameraData.cameraColorFilterMode);
+            
+            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], 
+                width, height, 0, FilterMode.Point, RenderTextureFormat.ARGBFloat);
+
+            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.MRA],
+                width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
+
+            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Emission],
+                renderingData.cameraData.cameraColorDescriptor, FilterMode.Point);
         }
 
         void ClearCmdRenderTarget()
@@ -99,7 +92,7 @@ namespace RoXamiRenderPipeline
                 criteria = SortingCriteria.CommonOpaque
             };
 
-            drawingSettings = new DrawingSettings(toonGBufferShaderTagId, sortingSettings)
+            drawingSettings = new DrawingSettings(ShaderDataID.toonGBufferShaderTagId, sortingSettings)
             {
                 enableDynamicBatching = renderingData.commonSettings.enableDynamicBatching,
                 enableInstancing = renderingData.commonSettings.enableGpuInstancing,

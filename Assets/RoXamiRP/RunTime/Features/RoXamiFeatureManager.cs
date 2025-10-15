@@ -6,6 +6,7 @@ namespace RoXamiRenderPipeline
     {
         ScreenSpacePlanarReflection,
         ScreenShotBlurUI,
+        ScreenSpaceReflectionFeature,
     }
     
     public class RoXamiFeatureManager

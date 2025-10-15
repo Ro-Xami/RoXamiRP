@@ -80,12 +80,16 @@ namespace RoXamiRenderPipeline
 
         private void AddBaseRenderPasses(RenderingData renderingData)
         {
-            activePasses.Add(lightPass);
+            if (renderingData.rendererAsset.rendererSettings.enableLighting)
+            {
+                activePasses.Add(lightPass);
+            }
             activePasses.Add(prePasses);
             
             //=========================================================================
             //Deferred
-            if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering)
+            if (renderingData.rendererAsset.rendererSettings.enableDeferredRendering && 
+                renderingData.rendererAsset.rendererSettings.enableLighting)
             {
                 activePasses.Add(gBufferPass);
                 activePasses.Add(deferredPass);
@@ -128,7 +132,7 @@ namespace RoXamiRenderPipeline
         {
             foreach (var feature in asset.roXamiRenderFeatures)
             {
-                if (feature == null)
+                if (feature == null || !feature.isActive)
                 {
                     continue;
                 }

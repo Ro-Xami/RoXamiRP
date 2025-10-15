@@ -1,0 +1,51 @@
+#pragma kernel ScreenSpaceReflection
+
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraDepthAttachment.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Light.hlsl"
+
+RWTexture2D<float4> _ScreenSpaceReflectionTexture;
+float4 _ScreenSpaceReflectionTexture_TexelSize;
+TEXTURE2D(_GBuffer1);
+SAMPLER(sampler_GBuffer1);
+
+#define _rayMarchStep 0.1f
+
+[numthreads(8,8,1)]
+void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
+{
+    _ScreenSpaceReflectionTexture[id.xy] = float4(0, 0, 0, 0);
+    if (id.x > (uint)_ScreenSpaceReflectionTexture_TexelSize.x || id.y > (uint)_ScreenSpaceReflectionTexture_TexelSize.y)
+    {
+        return;
+    }
+    float2 screenSpaceUV = float2(id.xy) * _ScreenSpaceReflectionTexture_TexelSize.zw;
+
+    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 0).r;
+
+    //withoutSkybox
+    #if defined(UNITY_REVERSED_Z)
+        if (depth <= FLT_MIN)
+        {
+            return;
+        }
+    #else
+        depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
+        if (depth >= 1)
+        {
+            return;
+        }
+    #endif
+    
+    float3 rayMarchStart = CalculateDepthToPositionWS(depth, screenSpaceUV);
+    float3 rayMarchDir = normalize(_GBuffer1.SampleLevel(sampler_GBuffer1, screenSpaceUV, 0));
+    Light mainLight = GetMainLight();
+
+    float3 currentPositionWS = rayMarchStart;
+    float step = rayMarchDir * _rayMarchStep;
+    for (int i = 0; i < 20; i++)
+    {
+        currentPositionWS += step;
+    }
+    //_ScreenSpaceReflectionTexture[] = 1;
+}

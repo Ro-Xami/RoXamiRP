@@ -39,21 +39,37 @@ namespace RoXamiRenderPipeline
         public bool isPost;
         public bool isAntialiasing;
     }
+    
+    public enum GBufferTye
+    {
+        Albedo,
+        Normal,
+        MRA,
+        Emission
+    }
 
     public static class ShaderDataID
     {
         public static readonly ShaderTagId unlitShaderTagId = new ShaderTagId("ToonUnlit");
         public static readonly ShaderTagId toonLitShaderTagId = new ShaderTagId("ToonLit");
+        public static readonly ShaderTagId toonGBufferShaderTagId = new ShaderTagId("ToonGBuffer");
+        
         public static readonly ShaderTagId unityLitShaderTagId = new ShaderTagId("UniversalForward");
         public static readonly ShaderTagId unityUnlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 
-        public static int cameraDepthAttachmentId;
+        public static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
         public static int cameraColorAttachmentId;
         
-        public static readonly int cameraDepthAttachmentAId = Shader.PropertyToID("_CameraDepthAttachmentA");
         public static readonly int cameraColorAttachmentAId = Shader.PropertyToID("_CameraColorAttachmentA");
-        public static readonly int cameraDepthAttachmentBId = Shader.PropertyToID("_CameraDepthAttachmentB");
         public static readonly int cameraColorAttachmentBId = Shader.PropertyToID("_CameraColorAttachmentB");
+        
+        public static readonly int[] gBufferNameIDs = new int[]
+        {
+            Shader.PropertyToID("_GBuffer0"),
+            Shader.PropertyToID("_GBuffer1"),
+            Shader.PropertyToID("_GBuffer2"),
+            Shader.PropertyToID("_GBuffer3"),
+        };
         
         public static readonly int cameraDepthCopyTextureID = Shader.PropertyToID("_CameraDepthTexture");
         public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_CameraColorTexture");

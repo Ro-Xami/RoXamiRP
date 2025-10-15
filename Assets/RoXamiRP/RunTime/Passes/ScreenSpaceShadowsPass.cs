@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
@@ -15,13 +16,6 @@ namespace RoXamiRenderPipeline
         private static readonly CommandBuffer cmd = new()
         {
             name = bufferName,
-        };
-
-        private static readonly string[] directionalFilterKeywords =
-        {
-            "_DIRECTIONAL_PCF3",
-            "_DIRECTIONAL_PCF5",
-            "_DIRECTIONAL_PCF7",
         };
 
         static readonly int screenSpaceShadowsTextureID = Shader.PropertyToID("_ScreenSpaceShadowsTexture");
@@ -73,7 +67,21 @@ namespace RoXamiRenderPipeline
 
         private void ComputeScreenSpaceShadows(int width, int height)
         {
-            int kernel = cs.FindKernel(kernelName);
+            int kernel = -1;
+            try
+            {
+                kernel = cs.FindKernel("ScreenSpaceShadows");
+            }
+            catch(Exception e)
+            {
+                Debug.LogError($"[RoXami] FindKernel exception: {e}");
+                return;
+            }
+
+            if (kernel < 0)
+            {
+                return;
+            }
 
             cmd.SetComputeVectorParam(cs,
                 textureSizeID, new Vector4(width, height, 1f / width, 1f / height));

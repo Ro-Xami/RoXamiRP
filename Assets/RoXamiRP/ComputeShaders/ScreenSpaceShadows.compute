@@ -1,4 +1,4 @@
-#pragma multi_compile_local _DIRECTIONAL_PCF0 _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
+#pragma multi_compile_local _ _DIRECTIONAL_PCF0 _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 #pragma kernel ScreenSpaceShadows
 
 RWTexture2D<float4> _ScreenSpaceShadowsTexture;

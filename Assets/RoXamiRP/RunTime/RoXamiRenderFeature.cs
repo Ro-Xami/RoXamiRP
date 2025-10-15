@@ -7,6 +7,8 @@ namespace RoXamiRenderPipeline
     [ExcludeFromPreset]
     public abstract class RoXamiRenderFeature : ScriptableObject, IDisposable
     {
+        public bool isActive = true;
+        
         public abstract void Create();
 
         public abstract void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData);

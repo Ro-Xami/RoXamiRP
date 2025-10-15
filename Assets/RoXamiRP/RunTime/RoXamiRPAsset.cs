@@ -132,7 +132,7 @@ namespace RoXamiRenderPipeline
 
         void SetPcfSettings()
         {
-            if (shaderAsset.screenSpaceShadowComputeShader)
+            if (shaderAsset.screenSpaceShadowComputeShader && shadowSettings != null)
             {
                 var cs = shaderAsset.screenSpaceShadowComputeShader;
                 var filter = shadowSettings.directional.filter;

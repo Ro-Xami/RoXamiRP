@@ -12,6 +12,13 @@ namespace RoXamiRenderPipeline
     {
         public RendererSettings rendererSettings;
         
+        [System.Serializable]
+        public class RendererSettings
+        {
+            public bool enableDeferredRendering;
+            public bool enableLighting;
+        }
+        
         public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>(10);
 
         public static RoXamiRendererAsset defaultAsset;
@@ -23,11 +30,5 @@ namespace RoXamiRenderPipeline
                 defaultAsset = this;
             }
         }
-    }
-
-    [System.Serializable]
-    public class RendererSettings
-    {
-        public bool enableDeferredRendering;
     }
 }

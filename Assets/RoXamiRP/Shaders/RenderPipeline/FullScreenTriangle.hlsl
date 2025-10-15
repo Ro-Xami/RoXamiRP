@@ -8,7 +8,7 @@ struct Varyings {
     float4 positionCS : SV_POSITION;
     float2 uv : TEXCORRD0;
     
-#ifdef _Post_Gaussian_BlurPass
+#ifdef _Post_BlurPass
     float4 uv1 : TEXCOORD1;
     float4 uv2 : TEXCOORD2;
     float4 uv3 : TEXCOORD3;

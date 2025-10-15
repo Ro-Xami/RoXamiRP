@@ -17,4 +17,16 @@ float4 GaussianBlurPass(Varyings IN) : SV_Target
     return col;
 }
 
+float4 BoxBlurPass(Varyings IN) : SV_Target
+{
+    float4 col = 0;
+    col += GetSource0(IN.uv) * 0.2;
+    col += GetSource0(IN.uv1.xy) * 0.2;
+    col += GetSource0(IN.uv1.zw) * 0.2;
+    col += GetSource0(IN.uv2.xy) * 0.2;
+    col += GetSource0(IN.uv2.zw) * 0.2;
+    
+    return col;
+}
+
 #endif

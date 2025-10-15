@@ -98,9 +98,9 @@ namespace RoXamiRenderPipeline
             renderingData.cameraData.cameraDepthFilterMode = cameraDepthFilterMode;
 
             ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentAId;
-            ShaderDataID.cameraDepthAttachmentId = ShaderDataID.cameraDepthAttachmentAId;
+            //ShaderDataID.cameraDepthAttachmentId = ShaderDataID.cameraDepthAttachmentAId;
             cmd.GetTemporaryRT(ShaderDataID.cameraColorAttachmentAId, cameraColorDescriptor, cameraColorFilterMode);
-            cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentAId, cameraDepthDescriptor, cameraDepthFilterMode);
+            cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentId, cameraDepthDescriptor, cameraDepthFilterMode);
                 
             cmd.GetTemporaryRT(ShaderDataID.cameraColorCopyTextureID, cameraColorDescriptor, cameraColorFilterMode);
             cmd.GetTemporaryRT(ShaderDataID.cameraDepthCopyTextureID, cameraDepthDescriptor, cameraDepthFilterMode);
@@ -110,19 +110,19 @@ namespace RoXamiRenderPipeline
                 return;
             }
             cmd.GetTemporaryRT(ShaderDataID.cameraColorAttachmentBId, cameraColorDescriptor, cameraColorFilterMode);
-            cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentBId, cameraDepthDescriptor, cameraDepthFilterMode);
+            //cmd.GetTemporaryRT(ShaderDataID.cameraDepthAttachmentBId, cameraDepthDescriptor, cameraDepthFilterMode);
         }
 
         void CleanUpCameraColorDepthRT()
         {
             cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentAId);
-            cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentAId);
+            //cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentAId);
             if (renderingData.runtimeData is { isPost: true, isAntialiasing: true} && 
                 renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base ||
                 renderingData.cameraData.additionalCameraData.cameraRenderType != CameraRenderType.Base)
             {
                 cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorAttachmentBId);
-                cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentBId);
+                cmd.ReleaseTemporaryRT(ShaderDataID.cameraDepthAttachmentId);
             }
             
             cmd.ReleaseTemporaryRT(ShaderDataID.cameraColorCopyTextureID);
