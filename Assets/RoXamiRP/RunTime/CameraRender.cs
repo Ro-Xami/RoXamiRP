@@ -53,6 +53,7 @@ namespace RoXamiRenderPipeline
             #region DrawEditor
             DrawUnsupportedShaders();
             DrawGizmos();
+            DrawWire();
             #endregion
 
             renderer.CameraCleanUp();
@@ -179,7 +180,7 @@ namespace RoXamiRenderPipeline
 
         void InitializedGlobalKeyword()
         {
-            cmd.DisableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+            cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
             cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
         }
         

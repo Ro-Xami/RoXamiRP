@@ -37,7 +37,7 @@ namespace RoXamiRenderPipeline
             
             if (needToDraw)
             {
-                cmd.EnableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 
                 int width = renderingData.cameraData.width;
                 int height = renderingData.cameraData.height;
@@ -56,7 +56,7 @@ namespace RoXamiRenderPipeline
             }
             else
             {
-                cmd.DisableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
             }
         }
 

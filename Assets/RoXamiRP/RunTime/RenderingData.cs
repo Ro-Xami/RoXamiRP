@@ -80,8 +80,8 @@ namespace RoXamiRenderPipeline
         public static readonly int reflectionTexture = Shader.PropertyToID("_RoXamiRpReflectionTexture");
 
         public static readonly int directionalShadowAtlasID = Shader.PropertyToID("_DirectionalShadowAtlas");
-        public static GlobalKeyword enableScreenSpaceShadowsID = new GlobalKeyword("SCREENSPACE_SHADOWS");
-        public static string enableScreenSpaceReflectionID = "SCREENSPACE_REFLECTION";//new GlobalKeyword("SCREENSPACE_REFLECTION");
+        public const string enableScreenSpaceShadowsID = "SCREENSPACE_SHADOWS";
+        public const string enableScreenSpaceReflectionID = "SCREENSPACE_REFLECTION";
     }
     
     public enum PostShaderPass

@@ -12,6 +12,8 @@ namespace RoXamiRenderPipeline
         partial void DrawGizmos();
         partial void PrepareForSceneWindow();
         partial void PrepareBuffer();
+        
+        partial void DrawWire();
 
 #if UNITY_EDITOR
         static readonly ShaderTagId[] legacyShaderTagIds =
@@ -64,6 +66,11 @@ namespace RoXamiRenderPipeline
             {
                 ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
             }
+        }
+
+        partial void DrawWire()
+        {
+            context.DrawWireOverlay(camera);
         }
 
         partial void PrepareBuffer()

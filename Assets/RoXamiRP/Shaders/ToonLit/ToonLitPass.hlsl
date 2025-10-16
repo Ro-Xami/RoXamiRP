@@ -57,7 +57,7 @@ Surface GetSurfaceData(Varyings IN)
 				
     float3 mra = float3(_metallic , _roughness , _ao);
     #if defined(_MRA_MAP_ON)
-    mra *= SAMPLE_TEXTURE2D(_MRAMap, sampler_MRAMap, IN.uv);
+    mra *= SAMPLE_TEXTURE2D(_MraMap, sampler_MraMap, IN.uv);
     #endif
 
     float3 emission = _emissive;

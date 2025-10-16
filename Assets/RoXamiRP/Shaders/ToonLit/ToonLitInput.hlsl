@@ -3,8 +3,8 @@
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
-TEXTURE2D(_MRAMap);
-SAMPLER(sampler_MRAMap);
+TEXTURE2D(_MraMap);
+SAMPLER(sampler_MraMap);
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
 TEXTURE2D(_EmissionMap);

@@ -119,7 +119,7 @@ Shader "RoXami RP/Unlit"
 				float4 lastColor = SampleSSPRTexture(screenSpaceUV) * IN.color;
 				//lastColor.rgb = lerp(0, lastColor.rgb, lastColor.a);
 
-				float4 blur = SAMPLE_TEXTURE2D(_ScreenShotBlurTexture, sampler_ScreenShotBlurTexture, IN.uv);
+				//float4 blur = SAMPLE_TEXTURE2D(_ScreenShotBlurTexture, sampler_ScreenShotBlurTexture, IN.uv);
 
 				//return blur;
 

@@ -50,7 +50,7 @@ Shader "RoXami RP/Scene/ToonLit"
 			#pragma shader_feature_local _ALPHACLIP_ON
 			#pragma shader_feature_local _MRA_MAP_ON
 			#pragma shader_feature_local _NORMAL_MAP_ON
-			#pragma shader_feature_local _MRAMAP_ON
+			#pragma shader_feature_local _EMISSIVE_MAP_ON
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/ToonLit/ToonLitInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/ToonLit/ToonLitPass.hlsl"

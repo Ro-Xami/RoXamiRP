@@ -29,6 +29,7 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/DeferredLit/DeferredInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Common/ToonLighting.hlsl"
+			#include_with_pragmas "Assets/RoXamiRP/ShaderLibrary/RoXamiRpRenderDebug.hlsl"
 
 			Surface GetSurfaceData(Varyings IN)
 			{
@@ -55,6 +56,8 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 				Input inputData = GetInputData(IN, surfaceData, depth);
 
 				float4 color = CalculateDeferredToonLitDiffuseEmission(inputData , surfaceData);
+
+				RoXamiRpRenderDebug(color.rgb);
 
 			    return float4(color.rgb, 1);
 			}
@@ -86,6 +89,8 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 			#include "Assets/RoXamiRP/Shaders/DeferredLit/DeferredInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Common/ToonLighting.hlsl"
 
+			#include_with_pragmas "Assets/RoXamiRP/ShaderLibrary/RoXamiRpRenderDebug.hlsl"
+
 			Surface GetSurfaceData(Varyings IN)
 			{
 				Surface OUT = (Surface)0;
@@ -111,6 +116,8 @@ Shader "RoXami RP/Hide/DeferredToonLit"
 				Input inputData = GetInputData(IN, surfaceData, depth);
 
 				float4 color = CalculateDeferredToonLitGI(inputData , surfaceData);
+
+				RoXamiRpRenderDebug(surfaceData, inputData, color.rgb);
 
 			    return float4(color.rgb, 1);
 			}
