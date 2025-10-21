@@ -15,55 +15,87 @@ namespace RoXamiRenderPipeline
             {
                 if (!m_Instance)
                 {
-                    GameObject go = new GameObject("RoXami Volume");
+                    var go = new GameObject("RoXami Volume")
+                    {
+                        hideFlags = HideFlags.HideAndDontSave
+                    };
                     m_Instance = go.AddComponent<RoXamiVolume>();
                 }
                 return m_Instance;
             }
         }
+        
+        public RoXamiVolumeAsset volumeAsset;
 
-        public bool isActive;
-
-        [SerializeField] public RoXamiGiData giData;
-
-        [Serializable]
-        public struct RoXamiGiData
+        public T GetVolumeComponent<T>() where T : RoXamiVolumeBase
         {
-            public Texture reflectionProbe;
-            public Texture giTexture;
+            if (volumeAsset != null)
+            {
+                volumeAsset.GetVolumeComponent<T>();
+            }
+
+            return null;
+        }
+
+        public void UpdateVolumesGiSettings()
+        {
+            if (volumeAsset)
+            {
+                volumeAsset.UpdateAsset();
+            }
         }
         
-        [SerializeField] public Bloom bloom;
-        [SerializeField] public ToneMapping toneMapping;
-        [SerializeField] public ColorAdjustment colorAdjustment;
-        [SerializeField] public WhiteBalance whiteBalance;
-
+        public void UpdateVolumesSettings()
+        {
+            if (volumeAsset)
+            {
+                volumeAsset.UpdateAssetVolumes();
+            }
+        }
+        
+        public void UpdateGiSettings()
+        {
+            if (volumeAsset)
+            {
+                volumeAsset.UpdateAssetGiData();
+            }
+        }
+        
+        public void UpdateVolumeSettings<T>() where T : RoXamiVolumeBase
+        {
+            if (volumeAsset)
+            {
+                volumeAsset.UpdateAssetVolumeComponent<T>();
+            }
+        }
+        
+        public void SetVolumeActive<T>(bool active) where T : RoXamiVolumeBase
+        {
+            if (volumeAsset)
+            {
+                volumeAsset.SetAssetVolumeActive<T>(active);
+            }
+        }
+        
+        public bool IsVolumeActive<T>() where T : RoXamiVolumeBase
+        {
+            if (!volumeAsset)
+            {
+                return false;
+            }
+            return volumeAsset.IsAssetVolumeActive<T>();
+        }
+        
         private void OnEnable()
         {
             m_Instance = this;
-            UpdateVolumesSettings();
+            UpdateVolumesGiSettings();
         }
 
         private void OnValidate()
         {
             m_Instance = this;
-            UpdateVolumesSettings();
-        }
-
-        public void UpdateVolumesSettings()
-        {
-            UpdateGiData();
-            
-            bloom?.UpdateVolumeSettings();
-            toneMapping?.UpdateVolumeSettings();
-            colorAdjustment?.UpdateVolumeSettings();
-            whiteBalance?.UpdateVolumeSettings();
-        }
-
-        void UpdateGiData()
-        {
-            CoreRpToRoXamiRP.SHUtility.UploadToShader();
-            Shader.SetGlobalTexture(ShaderDataID.reflectionTexture, giData.reflectionProbe);
+            UpdateVolumesGiSettings();
         }
         
 #if UNITY_EDITOR

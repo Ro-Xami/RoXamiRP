@@ -159,8 +159,7 @@ namespace RoXamiRenderPipeline
             renderingData.runtimeData.isCastShadows = false;
             renderingData.runtimeData.isDeferred = false;
             renderingData.runtimeData.isFinalBlit = isFinalBlit;
-            renderingData.runtimeData.isPost = 
-                RoXamiVolume.Instance.isActive && 
+            renderingData.runtimeData.isPost =
                 renderingData.cameraData.additionalCameraData.enablePostProcessing;
             renderingData.runtimeData.isAntialiasing = 
                 renderingData.cameraData.additionalCameraData.enableAntialiasing && 

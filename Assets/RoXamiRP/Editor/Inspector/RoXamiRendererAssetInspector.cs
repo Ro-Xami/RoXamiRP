@@ -17,19 +17,7 @@ namespace RoXamiRenderPipeline
         private List<Type> renderFeatureTypes;
         private GenericMenu featureMenu;
         
-        private static GUIStyle featureStyle = new GUIStyle();
-        private static Texture2D m_FeatureBackgroundTexture;
-        private static Texture2D featureBackgroundTexture
-        {
-            get
-            {
-                if (m_FeatureBackgroundTexture == null)
-                {
-                    m_FeatureBackgroundTexture = GetBackGroundTexture(new Color(0.17f, 0.17f, 0.2f, 1f));
-                }
-                return m_FeatureBackgroundTexture;
-            }
-        }
+        private static readonly GUIStyle featureStyle = new GUIStyle();
 
         void OnEnable()
         {
@@ -37,8 +25,8 @@ namespace RoXamiRenderPipeline
             rendererSettings = serializedObject.FindProperty("rendererSettings");
             roXamiRenderFeatures = serializedObject.FindProperty("roXamiRenderFeatures");
 
-            CollectRenderFeatureTypes();
-            featureStyle.normal.background = featureBackgroundTexture;
+            renderFeatureTypes = EditorTools.GetTypesInAssets<RoXamiRenderFeature>();
+            featureStyle.normal.background = EditorTools.backgroundTexture;
         }
 
         public override void OnInspectorGUI()
@@ -165,28 +153,6 @@ namespace RoXamiRenderPipeline
             AssetDatabase.SaveAssets();
             AssetDatabase.ImportAsset(path);
             AssetDatabase.Refresh();
-        }
-        
-        void CollectRenderFeatureTypes()
-        {
-            renderFeatureTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => t.IsSubclassOf(typeof(RoXamiRenderFeature)) && !t.IsAbstract)
-                .ToList();
-        }
-
-        private static Texture2D GetBackGroundTexture(Color color)
-        {
-            var texture = new Texture2D(1, 1);
-            for (int i = 0; i < texture.width; i++)
-            {
-                for (int j = 0; j < texture.height; j++)
-                {
-                    texture.SetPixel(i, j, color);
-                }
-            }
-            texture.Apply();
-            return texture;
         }
     }
 }

@@ -35,8 +35,8 @@ namespace RoXamiRenderPipeline
             postCmd.BeginSample(postBufferName);
             ExecuteCommandBuffer(context, postCmd);
 
-            Bloom bloomSettings = RoXamiVolume.Instance.bloom;
-            if (bloomSettings.isActive)
+            Bloom bloomSettings = RoXamiVolume.Instance.GetVolumeComponent<Bloom>();
+            if (bloomSettings && bloomSettings.isActive)
             {
                 bloomCmd.BeginSample(bloomName);
                 ExecuteCommandBuffer(context, bloomCmd);
@@ -69,8 +69,8 @@ namespace RoXamiRenderPipeline
         
         public override void CleanUp()
         {
-            var bloomSettings = RoXamiVolume.Instance.bloom;
-            if (bloomSettings.isActive)
+            var bloomSettings = RoXamiVolume.Instance.GetVolumeComponent<Bloom>();
+            if (bloomSettings && bloomSettings.isActive)
             {
                 bloomCmd.ReleaseTemporaryRT(bloomFilterID);
 
