@@ -28,7 +28,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   giData:
     giDiffuseTexture: {fileID: 0}
-    giSpecularTexture: {fileID: 0}
+    giSpecularTexture: {fileID: 8900000, guid: 77a8e069c415acb47b61fff086212dee, type: 3}
   volumes:
   - {fileID: 8156156270915082266}
   - {fileID: -821924632171251179}

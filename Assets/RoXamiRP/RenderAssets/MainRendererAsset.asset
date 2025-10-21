@@ -28,12 +28,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4ee944710e34fdfa3cb67018649624d, type: 3}
   m_Name: ScreenSpaceReflectionFeature
   m_EditorClassIdentifier: 
-  isActive: 0
+  isActive: 1
   settings:
     renderPassEvent: 160
     computeShader: {fileID: 7200000, guid: 32288154ef5b470da4229e8b0280f503, type: 3}
     maxStep: 100
-    stepSize: 0.6
+    stepSize: 0.1
     thickness: 0.001
 --- !u!114 &11400000
 MonoBehaviour:
@@ -81,7 +81,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8e9b3243e4f478c86989092fd926f1f, type: 3}
   m_Name: RenderObjectsFeature
   m_EditorClassIdentifier: 
-  isActive: 0
+  isActive: 1
   settings:
     renderPassEvent: 200
     sortingSettings: 2

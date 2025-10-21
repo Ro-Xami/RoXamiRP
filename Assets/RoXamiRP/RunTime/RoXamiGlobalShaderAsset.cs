@@ -25,21 +25,13 @@ namespace RoXamiRenderPipeline
             public float rimThreshold = 0.05f;
             [Range(0, 1)] public float outlineWidth = 0.2f;
         }
+        
+        readonly int toonLutID = Shader.PropertyToID("_ToonLitLut");
 
         readonly int rimColorID = Shader.PropertyToID("_ActorRimColor");
         readonly int rimOffestID = Shader.PropertyToID("_ActorRimOffest");
         readonly int rimThresholdID = Shader.PropertyToID("_ActorRimThreshold");
         readonly int outlineWidthID = Shader.PropertyToID("_ActorOutlineWidth");
-
-        private void OnEnable()
-        {
-            UpdateGlobalShader();
-        }
-
-        private void OnValidate()
-        {
-            UpdateGlobalShader();
-        }
 
         public void UpdateGlobalShader()
         {
@@ -50,6 +42,21 @@ namespace RoXamiRenderPipeline
                 Shader.SetGlobalFloat(rimThresholdID, actorSettings.rimThreshold);
                 Shader.SetGlobalFloat(outlineWidthID, actorSettings.outlineWidth);
             }
+
+            if (lutSettings != null)
+            {
+                Shader.SetGlobalTexture(toonLutID, lutSettings.toonLut);
+            }
+        }
+        
+        private void OnEnable()
+        {
+            UpdateGlobalShader();
+        }
+
+        private void OnValidate()
+        {
+            UpdateGlobalShader();
         }
     }
 }

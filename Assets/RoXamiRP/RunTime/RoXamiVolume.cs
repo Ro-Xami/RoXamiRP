@@ -45,12 +45,11 @@ namespace RoXamiRenderPipeline
             return null;
         }
 
-        public void UpdateVolumesGiSettings()
+        public void Update()
         {
-            if (volumeAsset)
-            {
-                volumeAsset.UpdateAsset();
-            }
+            UpdateVolumesSettings();
+            UpdateGiSettings();
+            UpdateShSettings();
         }
         
         public void UpdateVolumesSettings()
@@ -76,6 +75,11 @@ namespace RoXamiRenderPipeline
                 volumeAsset.UpdateAssetVolumeComponent<T>();
             }
         }
+
+        public void UpdateShSettings()
+        {
+            CoreRpToRoXamiRP.SHUtility.UploadToShader();
+        }
         
         public void SetVolumeActive<T>(bool active) where T : RoXamiVolumeBase
         {
@@ -97,20 +101,13 @@ namespace RoXamiRenderPipeline
         private void OnEnable()
         {
             m_Instance = this;
-            UpdateVolumesGiSettings();
+            Update();
         }
 
         private void OnValidate()
         {
             m_Instance = this;
-            UpdateVolumesGiSettings();
+            Update();
         }
-        
-#if UNITY_EDITOR
-        private void Update()
-        {
-            UpdateVolumesSettings();
-        }
-#endif
     }
 }

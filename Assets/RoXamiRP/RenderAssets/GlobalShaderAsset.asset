@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: GlobalShaderAsset
   m_EditorClassIdentifier: 
   lutSettings:
-    toonLut: {fileID: 0}
+    toonLut: {fileID: 2800000, guid: 29d874df3bde9484886d580eee591b9c, type: 3}
     actorCommonLut: {fileID: 0}
     actorFaceLut: {fileID: 0}
   actorSettings:
     rimColor: {r: 1, g: 1, b: 1, a: 1}
     rimOffest: 2.68
     rimThreshold: 0.08
-    outlineWidth: 0.08
+    outlineWidth: 0.106

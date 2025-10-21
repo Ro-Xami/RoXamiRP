@@ -51,7 +51,7 @@ namespace RoXamiRenderPipeline
 
         protected override RenderPipeline CreatePipeline()
         {
-            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings, antialiasingSettings);
+            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings, antialiasingSettings, globalShaderAsset);
         }
 
         private void OnEnable()

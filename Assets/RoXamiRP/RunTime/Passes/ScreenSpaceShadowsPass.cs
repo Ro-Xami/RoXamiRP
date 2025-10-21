@@ -42,7 +42,7 @@ namespace RoXamiRenderPipeline
                 int width = renderingData.cameraData.width;
                 int height = renderingData.cameraData.height;
                 cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
-                    width, height, 0, FilterMode.Point, RenderTextureFormat.R16,
+                    width, height, 0, FilterMode.Bilinear, RenderTextureFormat.RFloat,
                     RenderTextureReadWrite.Linear, 1, true);
                 cmd.SetRenderTarget(screenSpaceShadowsTextureID,
                     RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);

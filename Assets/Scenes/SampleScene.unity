@@ -436,7 +436,7 @@ MonoBehaviour:
     - {fileID: 1344129324}
     enableScreenSpaceShadows: 1
     enablePostProcessing: 1
-    enableAntialiasing: 0
+    enableAntialiasing: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1333,31 +1333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31bd145dae334bdfa1527684dc95f501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isActive: 1
-  giData:
-    reflectionProbe: {fileID: 8900000, guid: ce65848e2f9bfd84eb080edd953b51fb, type: 3}
-    giTexture: {fileID: 0}
-  bloom:
-    isActive: 1
-    intensity: 1.09
-    clampMax: 4.62
-    threshold: 1.11
-    scatter: 0.7
-    maxSampleCount: 5
-  toneMapping:
-    isActive: 0
-    toneMappingMode: 2
-  colorAdjustment:
-    isActive: 1
-    exposure: 0
-    colorFilter: {r: 1, g: 1, b: 1, a: 1}
-    hue: 0
-    saturation: 0
-    contrast: 0
-  whiteBalance:
-    isActive: 0
-    temperature: 0
-    tint: 0
+  volumeAsset: {fileID: 11400000, guid: 051a28e1d883ab148a04f2b2c871310c, type: 2}
 --- !u!4 &1603396154
 Transform:
   m_ObjectHideFlags: 0

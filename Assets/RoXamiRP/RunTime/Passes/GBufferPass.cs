@@ -69,13 +69,13 @@ namespace RoXamiRenderPipeline
                 renderingData.cameraData.cameraColorDescriptor, renderingData.cameraData.cameraColorFilterMode);
             
             cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], 
-                width, height, 0, FilterMode.Point, RenderTextureFormat.ARGBFloat);
+                width, height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGBFloat);
 
             cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.MRA],
-                width, height, 0, FilterMode.Point, RenderTextureFormat.ARGB32);
+                width, height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32);
 
             cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Emission],
-                renderingData.cameraData.cameraColorDescriptor, FilterMode.Point);
+                renderingData.cameraData.cameraColorDescriptor, FilterMode.Bilinear);
         }
 
         void ClearCmdRenderTarget()

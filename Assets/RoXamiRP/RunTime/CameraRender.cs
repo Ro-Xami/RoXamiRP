@@ -93,7 +93,7 @@ namespace RoXamiRenderPipeline
                     depthBufferBits = 32,
                     colorFormat = RenderTextureFormat.Depth
                 };
-            FilterMode cameraDepthFilterMode = FilterMode.Point;
+            FilterMode cameraDepthFilterMode = FilterMode.Bilinear;
 
             renderingData.cameraData.cameraColorDescriptor = cameraColorDescriptor;
             renderingData.cameraData.cameraDepthDescriptor = cameraDepthDescriptor;

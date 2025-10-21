@@ -27,8 +27,8 @@ namespace RoXamiRenderPipeline
         [Serializable]
         public class RoXamiGlobalGiData
         {
-            public Texture2D giDiffuseTexture;
-            public Texture2D giSpecularTexture;
+            public Cubemap giDiffuseTexture;
+            public Cubemap giSpecularTexture;
         }
 
         public void UpdateAsset()

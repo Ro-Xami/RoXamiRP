@@ -56,16 +56,14 @@ namespace RoXamiRenderPipeline
         private void GiDataWindow()
         {
             EditorGUILayout.LabelField("RoXami GI Data", EditorStyles.boldLabel);
-
-            var diffuse = volume.volumeAsset.giData.giDiffuseTexture;
-            diffuse = EditorGUILayout.ObjectField("Gi Diffuse Texture", 
-                diffuse, typeof(Texture2D), 
-                false,GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Texture2D;
             
-            var specular = volume.volumeAsset.giData.giSpecularTexture;
-            specular = EditorGUILayout.ObjectField("Gi Specular Texture", 
-                specular, typeof(Texture2D), 
-                false,GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Texture2D;
+            volume.volumeAsset.giData.giDiffuseTexture = EditorGUILayout.ObjectField("Gi Diffuse Texture", 
+                volume.volumeAsset.giData.giDiffuseTexture, typeof(Cubemap), 
+                true,GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Cubemap;
+            
+            volume.volumeAsset.giData.giSpecularTexture = EditorGUILayout.ObjectField("Gi Specular Texture", 
+                volume.volumeAsset.giData.giSpecularTexture, typeof(Cubemap), 
+                true,GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Cubemap;
         }
 
         private void CreatVolume()
