@@ -1,4 +1,4 @@
-﻿Shader "RoXami RP/Hidden/Blur"
+﻿Shader "RoXamiRP/Hide/Blur"
 {
 	SubShader
 	{

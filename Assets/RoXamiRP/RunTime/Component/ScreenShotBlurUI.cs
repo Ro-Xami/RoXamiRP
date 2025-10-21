@@ -15,7 +15,7 @@ namespace RoXamiRenderPipeline
             {
                 if (m_Material == null)
                 {
-                    m_Material = CoreUtils.CreateEngineMaterial("RoXami RP/UI/UIScreenBlur");
+                    m_Material = CoreUtils.CreateEngineMaterial("RoXamiRP/UI/UIScreenBlur");
                 }
                 return m_Material;
             }

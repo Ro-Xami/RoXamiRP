@@ -33,22 +33,22 @@ namespace RoXamiRenderPipeline
             deferredGiPass = new DeferredGiPass(RenderPassEvent.BeforeRenderingDeferredGI + 10);
         }
 
-        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
         {
             renderingData.runtimeData.isDeferred = true;
             
-            renderer.EnqueuePass(gBufferPass);
+            renderLoop.EnqueuePass(gBufferPass);
             
-            renderer.EnqueuePass(ssShadowsPass);
+            renderLoop.EnqueuePass(ssShadowsPass);
             
-            renderer.EnqueuePass(deferredDiffusePass);
+            renderLoop.EnqueuePass(deferredDiffusePass);
             
             if (deferredToonLitSettings != null && deferredToonLitSettings.Length != 0)
             {
-                renderer.EnqueuePass(deferredCustomPass);
+                renderLoop.EnqueuePass(deferredCustomPass);
             }
             
-            renderer.EnqueuePass(deferredGiPass);
+            renderLoop.EnqueuePass(deferredGiPass);
         }
     }
 }

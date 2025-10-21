@@ -47,15 +47,15 @@ namespace RoXamiRenderPipeline
         
         public override void Create()
         {
-            blurMaterial = CoreUtils.CreateEngineMaterial("RoXami RP/Hidden/Blur");
+            blurMaterial = CoreUtils.CreateEngineMaterial("RoXamiRP/Hidden/Blur");
             pass = new BlurPass(blurMode, blurSettings, blurMaterial);
         }
 
-        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
         {
             if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenShotBlurUI))
             {
-                renderer.EnqueuePass(pass);
+                renderLoop.EnqueuePass(pass);
                 RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
             }
         }

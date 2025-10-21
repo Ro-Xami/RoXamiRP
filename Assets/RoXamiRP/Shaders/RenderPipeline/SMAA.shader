@@ -1,4 +1,4 @@
-﻿Shader "RoXami RP/Hide/SMAA"
+﻿Shader "RoXamiRP/Hide/SMAA"
 {
 	SubShader
 	{

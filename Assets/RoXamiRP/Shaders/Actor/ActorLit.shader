@@ -1,4 +1,4 @@
-Shader "RoXami RP/Actor/ActorLit"
+Shader "RoXamiRP/Actor/ActorLit"
 {
 	Properties
 	{

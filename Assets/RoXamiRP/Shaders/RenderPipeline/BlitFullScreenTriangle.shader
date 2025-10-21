@@ -1,4 +1,4 @@
-﻿Shader "RoXami RP/Hide/BlitFullScreenTriangle"
+﻿Shader "RoXamiRP/Hide/BlitFullScreenTriangle"
 {
 	SubShader
 	{

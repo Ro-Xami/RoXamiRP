@@ -30,12 +30,12 @@ namespace RoXamiRenderPipeline
             ssr = new SsrPass(settings);
         }
 
-        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
         {
             //&& RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenSpaceReflectionFeature)
             if (ssr != null)
             {
-                renderer.EnqueuePass(ssr);
+                renderLoop.EnqueuePass(ssr);
             }
         }
         

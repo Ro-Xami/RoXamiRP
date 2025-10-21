@@ -13,7 +13,7 @@ namespace RoXamiRenderPipeline
         const string bufferName = "RoXami Render";
 
         private RenderingData renderingData = new RenderingData();
-        private readonly RoXamiRenderer renderer = new RoXamiRenderer();
+        private readonly RoXamiRenderLoop renderLoop = new RoXamiRenderLoop();
 
         readonly CommandBuffer cmd = new CommandBuffer
         {
@@ -46,9 +46,9 @@ namespace RoXamiRenderPipeline
             cmd.BeginSample(SampleName);
             ExecuteBuffer();
 
-            renderer.InitializedActiveRenderPass(rendererAsset, ref renderingData);
-            renderer.CameraSetup(cmd, ref renderingData);
-            renderer.ExecuteRoXamiRenderPass(context, ref renderingData);
+            renderLoop.InitializedActiveRenderPass(rendererAsset, ref renderingData);
+            renderLoop.CameraSetup(cmd, ref renderingData);
+            renderLoop.ExecuteRoXamiRenderPass(context, ref renderingData);
 
             #region DrawEditor
             DrawUnsupportedShaders();
@@ -56,7 +56,7 @@ namespace RoXamiRenderPipeline
             DrawWire();
             #endregion
 
-            renderer.CameraCleanUp();
+            renderLoop.CameraCleanUp();
             if (renderingData.runtimeData.isFinalBlit)
             {
                 CleanUpCameraColorDepthRT();

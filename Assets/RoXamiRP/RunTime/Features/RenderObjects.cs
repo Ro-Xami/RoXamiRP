@@ -37,11 +37,11 @@ namespace RoXamiRenderPipeline
             pass = new RenderObjectsPass(settings);
         }
 
-        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
         {
             if (pass != null)
             {
-                renderer.EnqueuePass(pass);
+                renderLoop.EnqueuePass(pass);
             }
             
         }

@@ -79,6 +79,7 @@ namespace RoXamiRenderPipeline
             CoreUtils.Destroy(shaderAsset.fxaaMaterial);
             CoreUtils.Destroy(shaderAsset.smaaMaterial);
             CoreUtils.Destroy(shaderAsset.deferredMaterial);
+            CoreUtils.Destroy(shaderAsset.renderingDebugMaterial);
         }
 
         public void UpdateRoXamiRPSettings()
@@ -161,9 +162,9 @@ namespace RoXamiRenderPipeline
         {
             get
             {
-                if (post == null)
+                if (!post)
                 {
-                    post = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/Post");
+                    post = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/Post");
                 }
 
                 return post;
@@ -175,9 +176,9 @@ namespace RoXamiRenderPipeline
         {
             get
             {
-                if (deferred == null)
+                if (!deferred)
                 {
-                    deferred = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/DeferredToonLit");
+                    deferred = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/DeferredToonLit");
                 }
         
                 return deferred;
@@ -189,9 +190,9 @@ namespace RoXamiRenderPipeline
         {
             get
             {
-                if (fxaa == null)
+                if (!fxaa)
                 {
-                    fxaa = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/FXAA");
+                    fxaa = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/FXAA");
                 }
 
                 return fxaa;
@@ -203,26 +204,40 @@ namespace RoXamiRenderPipeline
         {
             get
             {
-                if (smaa == null)
+                if (!smaa)
                 {
-                    smaa = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/SMAA");
+                    smaa = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/SMAA");
                 }
 
                 return smaa;
             }
         }
         
-        Material blitFullScreenTriangle;
+        Material  blitFullScreenTriangle;
         public Material blitFullScreenTriangleMaterial
         {
             get
             {
-                if (blitFullScreenTriangle == null)
+                if (! blitFullScreenTriangle)
                 {
-                    blitFullScreenTriangle = CoreUtils.CreateEngineMaterial("RoXami RP/Hide/BlitFullScreenTriangle");
+                    blitFullScreenTriangle = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/BlitFullScreenTriangle");
                 }
 
-                return blitFullScreenTriangle;
+                return  blitFullScreenTriangle;
+            }
+        }
+        
+        Material renderingDebug;
+        public Material renderingDebugMaterial
+        {
+            get
+            {
+                if (!renderingDebug)
+                {
+                    renderingDebug = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/RenderingDebug");
+                }
+
+                return renderingDebug;
             }
         }
 

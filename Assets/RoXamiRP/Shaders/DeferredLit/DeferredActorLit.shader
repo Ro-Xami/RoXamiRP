@@ -1,4 +1,4 @@
-Shader "RoXami RP/Deferred/DeferredActorLit"
+Shader "RoXamiRP/Deferred/DeferredActorLit"
 {
 	Properties
 	{

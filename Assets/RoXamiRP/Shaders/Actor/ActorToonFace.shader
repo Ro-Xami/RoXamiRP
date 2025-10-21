@@ -1,4 +1,4 @@
-Shader "RoXami RP/Actor/ActorToonFace"
+Shader "RoXamiRP/Actor/ActorToonFace"
 {
 	Properties
 	{
@@ -57,7 +57,7 @@ Shader "RoXami RP/Actor/ActorToonFace"
 //			#pragma multi_compile _instancing
 //			#pragma multi_compile _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
 //			#pragma shader_feature_local _ALPHACLIP_ON
-//			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+//	#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 //			#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
 //			#include "Assets/RoXamiRP/Shaders/Actor/ActorToonFaceFragmentPass.hlsl"
 //

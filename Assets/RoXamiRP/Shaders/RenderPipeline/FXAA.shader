@@ -1,4 +1,4 @@
-﻿Shader "RoXami RP/Hide/FXAA"
+﻿Shader "RoXamiRP/Hide/FXAA"
 {
 	SubShader
 	{

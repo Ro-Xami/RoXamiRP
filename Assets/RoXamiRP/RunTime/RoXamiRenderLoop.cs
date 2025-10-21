@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
-    public class RoXamiRenderer
+    public class RoXamiRenderLoop
     {
         readonly List<RoXamiRenderPass> activePasses = 
             new List<RoXamiRenderPass>(32);
@@ -42,7 +42,12 @@ namespace RoXamiRenderPipeline
         private readonly FinalBlitPass finalBlitPass = 
             new FinalBlitPass(RenderPassEvent.AfterRendering + 1);
 
-        public RoXamiRenderer()
+#if UNITY_EDITOR
+        private readonly RenderingDebugPass renderingDebugPass =
+            new RenderingDebugPass(RenderPassEvent.AfterRendering + 100);
+#endif
+
+        public RoXamiRenderLoop()
         {
         }
 
@@ -126,6 +131,15 @@ namespace RoXamiRenderPipeline
                 }
             }
             
+            #if UNITY_EDITOR
+
+            if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.RenderingDebug) && 
+                renderingData.cameraData.additionalCameraData.cameraRenderType == CameraRenderType.Base)
+            {
+                activePasses.Add(renderingDebugPass);
+            }
+
+            #endif
         }
 
         private void AddRenderFeatures(RoXamiRendererAsset asset, ref RenderingData renderingData)

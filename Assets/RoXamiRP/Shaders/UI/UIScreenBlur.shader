@@ -1,4 +1,4 @@
-Shader "RoXami RP/UI/UIScreenBlur"
+Shader "RoXamiRP/UI/UIScreenBlur"
 {
 	Properties
 	{

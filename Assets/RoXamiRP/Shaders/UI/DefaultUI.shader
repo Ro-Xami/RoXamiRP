@@ -1,4 +1,4 @@
-Shader "RoXami RP/UI/DefaultUI"
+Shader "RoXamiRP/UI/DefaultUI"
 {
 	Properties
 	{

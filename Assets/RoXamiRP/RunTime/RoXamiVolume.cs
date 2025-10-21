@@ -15,11 +15,19 @@ namespace RoXamiRenderPipeline
             {
                 if (!m_Instance)
                 {
-                    var go = new GameObject("RoXami Volume")
+                    var volume = FindAnyObjectByType<RoXamiVolume>();
+                    if (volume)
                     {
-                        hideFlags = HideFlags.HideAndDontSave
-                    };
-                    m_Instance = go.AddComponent<RoXamiVolume>();
+                        m_Instance = volume;
+                    }
+                    else
+                    {
+                        var go = new GameObject("RoXamiVolume")
+                        {
+                            hideFlags = HideFlags.HideAndDontSave
+                        };
+                        m_Instance = go.AddComponent<RoXamiVolume>();
+                    }
                 }
                 return m_Instance;
             }
@@ -31,7 +39,7 @@ namespace RoXamiRenderPipeline
         {
             if (volumeAsset != null)
             {
-                volumeAsset.GetVolumeComponent<T>();
+                return volumeAsset.GetVolumeComponent<T>();
             }
 
             return null;

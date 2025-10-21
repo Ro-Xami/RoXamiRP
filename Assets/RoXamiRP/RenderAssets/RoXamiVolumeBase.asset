@@ -1,6 +1,38 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7622577024548387730
+--- !u!114 &-821924632171251179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26e15c2e0eb4420c92dbd75b4662efc0, type: 3}
+  m_Name: ToneMapping
+  m_EditorClassIdentifier: 
+  isActive: 1
+  toneMappingMode: 2
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2785c908b097419f99c54ab5e269e208, type: 3}
+  m_Name: RoXamiVolumeBase
+  m_EditorClassIdentifier: 
+  giData:
+    giDiffuseTexture: {fileID: 0}
+    giSpecularTexture: {fileID: 0}
+  volumes:
+  - {fileID: 8156156270915082266}
+  - {fileID: -821924632171251179}
+--- !u!114 &8156156270915082266
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -18,32 +50,3 @@ MonoBehaviour:
   threshold: 0.9
   scatter: 0.7
   maxSampleCount: 5
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2785c908b097419f99c54ab5e269e208, type: 3}
-  m_Name: RoXamiVolumeBase
-  m_EditorClassIdentifier: 
-  volumes:
-  - {fileID: 7847079675344564910}
-  - {fileID: -7622577024548387730}
---- !u!114 &7847079675344564910
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26e15c2e0eb4420c92dbd75b4662efc0, type: 3}
-  m_Name: ToneMapping
-  m_EditorClassIdentifier: 
-  isActive: 1
-  toneMappingMode: 1

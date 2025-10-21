@@ -1,4 +1,4 @@
-Shader "RoXami RP/Unlit"
+Shader "RoXamiRP/Unlit"
 {
 	Properties
 	{

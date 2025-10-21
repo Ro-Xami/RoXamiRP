@@ -1,4 +1,4 @@
-Shader "RoXami RP/Scene/ToonLit"
+Shader "RoXamiRP/Scene/ToonLit"
 {
 	Properties
 	{

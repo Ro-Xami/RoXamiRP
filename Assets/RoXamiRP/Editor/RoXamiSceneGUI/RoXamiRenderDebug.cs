@@ -6,7 +6,6 @@ namespace RoXamiRenderPipeline
     {
         private string[] renderDebugKeywords =
         {
-            "_Debug_None",
             "_Debug_Albedo",
             "_Debug_Normal",
             "_Debug_Metallic",
@@ -27,10 +26,16 @@ namespace RoXamiRenderPipeline
 
         public override void OnSceneView(float width, float height)
         {
+            if (GUILayout.Button("OFF"))
+            {
+                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.RenderingDebug, false);
+            }
+            
             for (int i = 0; i < renderDebugKeywords.Length; i++)
             {
                 if (GUILayout.Button(renderDebugKeywords[i]))
                 {
+                    RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.RenderingDebug, true);
                     EnableKeyWord(i);
                 }
             }

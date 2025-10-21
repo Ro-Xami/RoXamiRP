@@ -113,14 +113,14 @@ namespace RoXamiRenderPipeline
             pass = new ScreenSpacePlanarReflectionPass(RenderPassEvent.AfterRenderingSkybox, ssprCompute, planeHeight);
         }
 
-        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
         {
             if (!ssprCompute)
             {
                 return;
             }
             
-            renderer.EnqueuePass(pass);
+            renderLoop.EnqueuePass(pass);
         }
     }
 }
