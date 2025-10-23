@@ -25,4 +25,12 @@ float3 _faceFrontDir;
 
 CBUFFER_END
 
+#ifdef INSTANCING_ON
+    UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
+        UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
+    UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
+
+#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
+#endif
+
 #endif

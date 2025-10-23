@@ -49,11 +49,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rendererSettings:
     enableLighting: 1
+    copyColorAfterSkybox: 0
+    copyDepthAfterOpaque: 0
   roXamiRenderFeatures:
   - {fileID: -2352079972310408686}
   - {fileID: 1571461644891948011}
   - {fileID: 560601761701961137}
   - {fileID: -43280244536266904}
+  - {fileID: 444915565210774432}
+--- !u!114 &444915565210774432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 202ad88497834288b3f42bbf4882f65a, type: 3}
+  m_Name: GlobalFogFeature
+  m_EditorClassIdentifier: 
+  isActive: 1
+  renderPassEvent: 260
 --- !u!114 &560601761701961137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,7 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isActive: 1
   settings:
-    renderPassEvent: 200
+    renderPassEvent: 240
     sortingSettings: 2
     lightModes:
     - ActorOutline

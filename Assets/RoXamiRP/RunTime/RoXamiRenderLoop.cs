@@ -30,6 +30,12 @@ namespace RoXamiRenderPipeline
         private readonly DrawSkyboxPass drawSkyboxPass = 
              new DrawSkyboxPass(RenderPassEvent.BeforeRenderingSkybox + 10);
 
+        private readonly CopyCameraColorPass copyCameraColorPass =
+            new CopyCameraColorPass(RenderPassEvent.AfterRenderingSkybox);
+        
+        private readonly CopyCameraDepthPass copyCameraDepthPass =
+            new CopyCameraDepthPass(RenderPassEvent.AfterRenderingSkybox);
+
         private readonly ForwardTransparentPass forwardTransparentPass =
             new ForwardTransparentPass(RenderPassEvent.BeforeRenderingTransparents + 10);
 
@@ -71,6 +77,7 @@ namespace RoXamiRenderPipeline
         {
             foreach (var pass in activePasses)
             {
+                //Debug.Log(renderingData.rendererAsset.name + ":" + pass.GetType().Name);
                 pass.Execute(context, ref renderingData);
             }
         }
@@ -110,6 +117,16 @@ namespace RoXamiRenderPipeline
                  activePasses.Add(drawSkyboxPass);
             }
 
+            if (renderingData.rendererAsset.rendererSettings.copyColorAfterSkybox)
+            {
+                activePasses.Add(copyCameraColorPass);
+            }
+
+            if (renderingData.rendererAsset.rendererSettings.copyDepthAfterOpaque)
+            {
+                activePasses.Add(copyCameraDepthPass);
+            }
+            
             activePasses.Add(forwardTransparentPass);
 
             //=========================================================================

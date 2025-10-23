@@ -82,16 +82,8 @@ namespace RoXamiRenderPipeline
             FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
             context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-
-            CopyCameraColor(cmd);
             
             context.Submit();
-        }
-        
-        void CopyCameraColor(CommandBuffer cmd)
-        {
-            cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
-            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
         }
     }
 }

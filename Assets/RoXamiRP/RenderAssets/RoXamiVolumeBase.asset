@@ -1,5 +1,23 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-9074908628491690467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6f2b8ac2ab451fb34f6b6cc2a7eab0, type: 3}
+  m_Name: GlobalFog
+  m_EditorClassIdentifier: 
+  isActive: 1
+  fogMode: 2
+  fogColor: {r: 0.34420612, g: 0.5296031, b: 0.8018868, a: 1}
+  start: 6.96
+  end: 300
+  fogDensity: 0.006
 --- !u!114 &-821924632171251179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32,6 +50,7 @@ MonoBehaviour:
   volumes:
   - {fileID: 8156156270915082266}
   - {fileID: -821924632171251179}
+  - {fileID: -9074908628491690467}
 --- !u!114 &8156156270915082266
 MonoBehaviour:
   m_ObjectHideFlags: 0

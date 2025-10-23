@@ -81,6 +81,7 @@ void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
     float3 rayPositionWS = positionWS + normalDir * 0.001f;
     float3 rayMarchStep = reflectionDir * _stepSize;
 
+    UNITY_LOOP
     for (int i = 0; i < _maxStep; i++)
     {
         rayPositionWS += rayMarchStep;

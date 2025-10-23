@@ -50,12 +50,6 @@ namespace RoXamiRenderPipeline
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
         }
 
-        void CopyCameraColor(CommandBuffer cmd)
-        {
-            cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
-            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
-        }
-
         void DrawTransparent()
         {
             SortingSettings sortingSettings = new SortingSettings(renderingData.cameraData.camera)
@@ -80,8 +74,6 @@ namespace RoXamiRenderPipeline
 
             context.DrawRenderers(
                 renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-
-            CopyCameraColor(transparentCmd);
 
             context.Submit();
         }

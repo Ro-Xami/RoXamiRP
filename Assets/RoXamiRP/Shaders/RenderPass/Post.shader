@@ -8,7 +8,7 @@
 		
 		HLSLINCLUDE
 		#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
-		#include "PostPass.hlsl"
+		#include "Assets/RoXamiRP/Shaders/RenderPass/PostPass.hlsl"
 		ENDHLSL
 
 		Pass

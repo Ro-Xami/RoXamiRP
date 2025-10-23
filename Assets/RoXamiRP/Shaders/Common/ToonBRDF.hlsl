@@ -29,14 +29,20 @@ ToonBRDF GetToonBRDF(Input inputData, Surface surfaceData, Light light)
 
     toonBRDF.halfDir = SafeNormalize(inputData.viewWS + light.direction);
     toonBRDF.NoH = max(safeDataMin ,saturate(dot(surfaceData.normal, toonBRDF.halfDir)));
-    toonBRDF.NoL = max(safeDataMin ,saturate(dot(surfaceData.normal, light.direction) * light.shadowAttenuation));
+    float NoL = dot(surfaceData.normal, light.direction);
+    toonBRDF.NoL = max(safeDataMin ,saturate(NoL * light.shadowAttenuation));
     toonBRDF.NoV = max(safeDataMin ,saturate(dot(surfaceData.normal, inputData.viewWS)));
     toonBRDF.HoV = max(safeDataMin ,saturate(dot(inputData.viewWS,   light.direction)));
     toonBRDF.HoL = max(safeDataMin ,saturate(dot(toonBRDF.halfDir,   light.direction)));
     toonBRDF.F0 = lerp(linear_F0, surfaceData.albedo, surfaceData.metallic);
 
-    float clampedNoL = clamp(toonBRDF.NoL, 0.05f, 0.95f);
+    // float3 shadowColor = SAMPLE_TEXTURE2D(_ToonLitLut, sampler_ToonLitLut, 0.5).rgb;
+    // float3 toonShadow = step(0.999f, light.shadowAttenuation) + lerp(0, half3(0,0,1), light.shadowAttenuation) * light.shadowAttenuation;
+    // toonShadow = saturate(toonShadow);
+    
+    float clampedNoL = clamp((NoL * light.shadowAttenuation * 0.5f + 0.5f), 0.05f, 0.95f);
     toonBRDF.toonDiffuse = SAMPLE_TEXTURE2D(_ToonLitLut, sampler_ToonLitLut, clampedNoL).rgb;
+    //toonBRDF.toonDiffuse *= toonShadow;
 
     return toonBRDF;
 }

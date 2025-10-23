@@ -69,22 +69,22 @@ float3 DirectSpec_Hair(float NoH , float2 uv1 , float3 viewDir)
 	return 1;
 }
 
-float SDF_NoL(float2 uv, float3 lightDir)
-{
-	float4 leftLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, uv);
-	float4 rightLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, float2(1 - uv.x , uv.y));
-	float2 rightDir_XZ = normalize(half2(1,0));
-	float2 lightDir_XZ = normalize(lightDir.xz);
-	float2 frontDir_XZ = normalize(_faceFrontDir.xz);
-	float isFront = dot(lightDir_XZ , frontDir_XZ);
-	float isRight = dot(lightDir.xz , rightDir_XZ);
-	float4 sdf_LightShadow = isRight > 0 ? rightLightShadow : leftLightShadow;
-	float NoL = (sdf_LightShadow.r - 0.5) * 2 + isFront;
-	NoL = min(0.95, NoL);
-	NoL = max(0.05, NoL);
-
-	return NoL;
-}
+// float SDF_NoL(float2 uv, float3 lightDir)
+// {
+// 	float4 leftLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, uv);
+// 	float4 rightLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, float2(1 - uv.x , uv.y));
+// 	float2 rightDir_XZ = normalize(half2(1,0));
+// 	float2 lightDir_XZ = normalize(lightDir.xz);
+// 	float2 frontDir_XZ = normalize(_faceFrontDir.xz);
+// 	float isFront = dot(lightDir_XZ , frontDir_XZ);
+// 	float isRight = dot(lightDir.xz , rightDir_XZ);
+// 	float4 sdf_LightShadow = isRight > 0 ? rightLightShadow : leftLightShadow;
+// 	float NoL = (sdf_LightShadow.r - 0.5) * 2 + isFront;
+// 	NoL = min(0.95, NoL);
+// 	NoL = max(0.05, NoL);
+//
+// 	return NoL;
+// }
 
 float DepthRim(float2 screenSpaceUV , float3 normal , float positionCS_W, float depth)
 {
@@ -150,7 +150,7 @@ float4 CalculateActorFace(Input inputData , Surface surfaceData, float2 uv, floa
 	float diffuse = dot(surfaceData.normal, mainLight.direction);
 	diffuse = (diffuse + 1) * 0.5;
 
-	diffuse = SDF_NoL(uv, mainLight.direction);
+	//diffuse = SDF_NoL(uv, mainLight.direction);
 
 	//return diffuse;
 	

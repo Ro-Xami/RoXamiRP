@@ -10,6 +10,7 @@ namespace RoXamiRenderPipeline
         DeferredLitSettings[] deferredToonLitSettings;
 
         GBufferPass gBufferPass;
+        CopyCameraDepthPass copyDepthPass;
         ScreenSpaceShadowsPass ssShadowsPass;
         DeferredDiffusePass deferredDiffusePass;
         DeferredCustomPass deferredCustomPass;
@@ -18,6 +19,8 @@ namespace RoXamiRenderPipeline
         public override void Create()
         {
             gBufferPass = new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer + 10);
+
+            copyDepthPass = new CopyCameraDepthPass(RenderPassEvent.BeforeRenderingGbuffer + 11);
             
             ssShadowsPass = new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 9);
             
@@ -38,6 +41,8 @@ namespace RoXamiRenderPipeline
             renderingData.runtimeData.isDeferred = true;
             
             renderLoop.EnqueuePass(gBufferPass);
+            
+            renderLoop.EnqueuePass(copyDepthPass);
             
             renderLoop.EnqueuePass(ssShadowsPass);
             

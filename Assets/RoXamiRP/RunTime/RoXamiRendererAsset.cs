@@ -17,6 +17,8 @@ namespace RoXamiRenderPipeline
         {
             //public bool enableDeferredRendering;
             public bool enableLighting;
+            public bool copyColorAfterSkybox;
+            public bool copyDepthAfterOpaque;
         }
         
         public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>(10);

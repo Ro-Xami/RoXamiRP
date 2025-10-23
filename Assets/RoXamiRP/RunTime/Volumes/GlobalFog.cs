@@ -18,7 +18,7 @@ namespace RoXamiRenderPipeline
         [SerializeField] Color fogColor = Color.white;
         [SerializeField] float start = 0f;
         [SerializeField] float end = 300f;
-        [SerializeField] float fogDensity = 0.1f;
+        [SerializeField] [Range(0f, 1f)] float fogDensity = 0.1f;
         
         static readonly int fogParamsID = Shader.PropertyToID("_GlobalFogParams");
         static readonly int fogColorID = Shader.PropertyToID("_GlobalFogColor");

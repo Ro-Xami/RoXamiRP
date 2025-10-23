@@ -18,18 +18,18 @@ float3 GetDirectionalLight (Surface surface, Input input, ToonBRDF brdf, Light l
     return (Kd * brdf.toonDiffuse + BRDFSpec * brdf.NoL) * light.color;
 }
 
-float3 InDirectionalLight(float NoV , float3 normalWS, float3 viewWS , float3 albedo , float metallic , float roughness, float occlusion, float3 F0 , GI gi)
+float3 InDirectionalLight(Input inputData, Surface surfaceData, ToonBRDF brdfData, Light light, GI gi)
 {
     float3 SHColor = gi.diffuse;
-    float3 Ks = Fresnel_InLight(NoV, roughness, F0);
-    float3 Kd = saturate((1 - Ks)) * (1 - metallic);
-    float3 InDiffuse = SHColor * Kd * albedo;
+    float3 Ks = Fresnel_InLight(brdfData.NoV, surfaceData.roughness, brdfData.F0);
+    float3 Kd = saturate((1 - Ks)) * (1 - surfaceData.metallic);
+    float3 InDiffuse = SHColor * Kd * surfaceData.albedo;
     
     float3 F_IndirectionLight = Ks;
     float3 SpecCubeColor = gi.specular;
-    float2 LUT = LUT_Approx(roughness, NoV);
+    float2 LUT = LUT_Approx(surfaceData.roughness, brdfData.NoV);
     float3 InSpec = SpecCubeColor * (F_IndirectionLight * LUT.r + LUT.g);
-    return (InDiffuse + InSpec) * occlusion;
+    return (InDiffuse + InSpec) * surfaceData.ao;
     //return InSpec;
 }
 
@@ -93,20 +93,12 @@ float4 CalculateDeferredToonLitDiffuseEmission(Input inputData , Surface surface
 
 float4 CalculateDeferredToonLitGI(Input inputData , Surface surfaceData)
 {
-    float3 albedo = surfaceData.albedo;
-    float3 normalDir = surfaceData.normal;
-    float occlusion = surfaceData.ao;
-    float roughness = LinearStep( 0.003 , 1 , surfaceData.roughness);
-    float metallic = surfaceData.metallic;
-    
+    Light mainLight = GetMainLight(inputData);
+    ToonBRDF brdfData = GetToonBRDF(inputData, surfaceData, mainLight);
     GI gi = GetGI(inputData , surfaceData);
-
-    float NoV = max(saturate(dot(normalDir, inputData.viewWS)), 0.01);
-
-    float3 F0 = lerp(linear_F0, albedo, metallic);
     
     float4 finalColor = float4(0, 0, 0, 0);
-    finalColor.rgb = InDirectionalLight(NoV, normalDir, inputData.viewWS, albedo, metallic, roughness, occlusion , F0 , gi);
+    finalColor.rgb = InDirectionalLight(inputData , surfaceData, brdfData, mainLight, gi);
     finalColor.a = 1;
 
     return finalColor;

@@ -172,6 +172,11 @@ namespace RoXamiRenderPipeline
             CoreRpToRoXamiRP.SHUtility.UploadToShader();
         }
 
+        protected void RoXamiRPCopyTexture(CommandBuffer cmd, int from, int to)
+        {
+            cmd.CopyTexture(from, to);
+        }
+
         public static bool operator <(RoXamiRenderPass lhs, RoXamiRenderPass rhs)
         {
             return lhs.renderPassEvent < rhs.renderPassEvent;

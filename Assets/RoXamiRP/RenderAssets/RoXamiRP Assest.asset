@@ -25,14 +25,14 @@ MonoBehaviour:
     antialiasingQuality: 0
   shadowSettings:
     enableDirectionalShadows: 1
-    maxDistance: 150
-    distanceFade: 0.001
+    maxDistance: 60
+    distanceFade: 0.278
     directional:
       atlasSize: 2048
       filter: 3
-      cascadeRatio1: 0.071
-      cascadeRatio2: 0.141
-      cascadeRatio3: 0.268
+      cascadeRatio1: 0.098
+      cascadeRatio2: 0.155
+      cascadeRatio3: 0.351
       cascadeFade: 0.001
   shaderAsset:
     screenSpaceShadowComputeShader: {fileID: 7200000, guid: a8c4476fc8586e3479414139329386ec,

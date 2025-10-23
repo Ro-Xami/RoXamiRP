@@ -8,13 +8,24 @@ namespace RoXamiRenderPipeline
     {
         [SerializeField] RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
 
-        private Material mat;
+        private Material m_Mat;
+        private Material mat
+        {
+            get
+            {
+                if (!m_Mat)
+                {
+                    m_Mat = CoreUtils.CreateEngineMaterial("RoXamiRP/Hide/FullScreenGlobalFog");
+                }
+                return m_Mat;
+            }
+        }
+        
         const int passIndex = 0;
         private GlobalFogPass pass;
         
         public override void Create()
         {
-            mat = CoreUtils.CreateEngineMaterial("");
             pass = new GlobalFogPass(renderPassEvent, mat, passIndex);
         }
 
@@ -55,6 +66,14 @@ namespace RoXamiRenderPipeline
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
+                cmd.SetGlobalTexture(
+                    ShaderDataID.cameraDepthCopyTextureID, 
+                    ShaderDataID.cameraDepthAttachmentId);
+                
+                cmd.SetRenderTarget(
+                    ShaderDataID.cameraColorAttachmentId, 
+                    RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                
                 cmd.BeginSample(bufferName);
                 ExecuteCommandBuffer(context, cmd);
                 

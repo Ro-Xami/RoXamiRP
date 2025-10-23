@@ -41,7 +41,9 @@ namespace RoXamiRenderPipeline
             context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
             context.Submit();
 
-            CopyCameraDepth();
+            // RoXamiRPCopyTexture(cmd, 
+            //     ShaderDataID.cameraDepthAttachmentId, 
+            //     ShaderDataID.cameraDepthCopyTextureID);
 
             cmd.EndSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
@@ -53,11 +55,6 @@ namespace RoXamiRenderPipeline
             {
                 cmd.ReleaseTemporaryRT(gBufferID);
             }
-        }
-
-        private void CopyCameraDepth()
-        {
-            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
         }
 
         private void GetGBufferRT()

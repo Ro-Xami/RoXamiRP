@@ -3,14 +3,10 @@
 
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Surface.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Light.hlsl"
 
-#ifdef INSTANCING_ON
-    UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
-        UNITY_DEFINE_INSTANCED_PROP(float4, _BaseColor)
-    UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
-
-#define _BaseColor              UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseColor)
-#endif
+TEXTURE2D(_SdfFaceMap);
+SAMPLER(sampler_SdfFaceMap);
 
 struct Attributes
 {
@@ -102,6 +98,46 @@ void ActorLitGBufferPassFragment (Varyings IN,
 
     GT0 = float4(surfaceData.albedo, 1);
     GT1 = float4(surfaceData.normal, 1);
+    GT2 = float4(surfaceData.metallic, surfaceData.roughness, surfaceData.ao, 1);
+    GT3 = float4(surfaceData.emissive, 1);
+}
+
+float SDF_NoL(float2 uv, float3 lightDir)
+{
+    float4 leftLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, uv);
+    float4 rightLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, float2(1 - uv.x , uv.y));
+    float2 rightDir_XZ = normalize(half2(1,0));
+    float2 lightDir_XZ = normalize(lightDir.xz);
+    float2 frontDir_XZ = normalize(_faceFrontDir.xz);
+    float isFront = dot(lightDir_XZ , frontDir_XZ);
+    float isRight = dot(lightDir.xz , rightDir_XZ);
+    float4 sdf_LightShadow = isRight > 0 ? rightLightShadow : leftLightShadow;
+    float NoL = (sdf_LightShadow.r - 0.5) * 2 + isFront;
+    // NoL = min(0.95, NoL);
+    // NoL = max(0.05, NoL);
+
+    return NoL;
+}
+
+void ActorLitFaceGBufferPassFragment (Varyings IN,
+    out float4 GT0 : SV_Target0,
+    out float4 GT1 : SV_Target1,
+    out float4 GT2 : SV_Target2,
+    out float4 GT3 : SV_Target3)
+{
+    UNITY_SETUP_INSTANCE_ID(IN);
+    
+    Surface surfaceData = GetSurfaceData(IN);
+
+    #ifdef _ALPHACLIP_ON
+    clip(surfaceData.alpha - _cutout);
+    #endif
+    
+    Light mainLight = GetMainLight();
+    float3 faceNormal = lerp(mainLight.direction, - mainLight.direction, SDF_NoL(IN.uv, mainLight.direction));
+
+    GT0 = SDF_NoL(IN.uv, mainLight.direction);//float4(surfaceData.albedo, 1);
+    GT1 = float4(faceNormal, 1);
     GT2 = float4(surfaceData.metallic, surfaceData.roughness, surfaceData.ao, 1);
     GT3 = float4(surfaceData.emissive, 1);
 }
