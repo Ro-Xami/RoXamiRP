@@ -43,9 +43,9 @@ namespace RoXamiRenderPipeline
         {
             cmd.SetRenderTarget(
                 ShaderDataID.cameraColorAttachmentId,
-                RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                // ShaderDataID.cameraDepthAttachmentId,
+                // RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             cmd.ClearRenderTarget(false, true, Color.clear);
             
             cmd.DrawProcedural(

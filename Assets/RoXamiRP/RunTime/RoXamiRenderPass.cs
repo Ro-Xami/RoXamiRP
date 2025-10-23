@@ -158,6 +158,14 @@ namespace RoXamiRenderPipeline
                 MeshTopology.Triangles, 3
             );
         }
+
+        protected void DrawFullScreenTriangles(CommandBuffer cmd, Material mat, int passIndex)
+        {
+            cmd.DrawProcedural(
+                Matrix4x4.identity, mat, passIndex,
+                MeshTopology.Triangles, 3
+            );
+        }
         
         protected void UpdateGlobalSHColor()
         {
