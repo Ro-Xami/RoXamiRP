@@ -1,15 +1,12 @@
 #ifndef ACTOR_LIGHTING_INCLUDE
 #define ACTOR_LIGHTING_INCLUDE
 
-#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Surface.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Input.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/Light.hlsl"
 #include "Assets/RoXamiRP/ShaderLibrary/GI.hlsl"
-#include "Assets/RoXamiRP/Shaders/Common/CameraColorAttachment.hlsl"
-
-#define linear_F0 0.04
+#include "Assets/RoXamiRP/Shaders/Common/ToonBRDF.hlsl"
 
 #define _rimSmoothLeft 0.5
 #define _rimSmoothRight 0.65
@@ -17,44 +14,21 @@ float3 _ActorRimColor;
 float _ActorRimOffest;
 float _ActorRimThreshold;
 
-TEXTURE2D(_LutMap);
-SAMPLER(sampler_LutMap);
+TEXTURE2D(_ActorLutMap);
+SAMPLER(sampler_ActorLutMap);
 
-TEXTURE2D(_SdfFaceMap);
-SAMPLER(sampler_SdfFaceMap);
+TEXTURE2D(_ActorSkinMap);
+SAMPLER(sampler_ActorSkinMap);
 
-struct LightingData
+ToonBRDF GetActorLitBRDFData(Input input, Surface surface, Light light)
 {
-    half3 giColor;
-    half3 mainLightColor;
-    half3 additionalLightsColor;
-    half3 emissionColor;
-};
+	float NoL;
+	ToonBRDF brdfData = GetToonBRDF(input, surface, light, NoL);
 
-struct CommonData
-{
-    float3 F0;
-    float3 halfDir;
-    float NoH;
-    float NoL;
-    float NoV;
-    float HoV;
-    float HoL;
-};
+	float clampedNoL = clamp((NoL * light.shadowAttenuation * 0.5f + 0.5f), 0.02f, 0.98f);
+	brdfData.toonDiffuse = SAMPLE_TEXTURE2D(_ActorLutMap, sampler_ActorLutMap, clampedNoL).rgb;
 
-CommonData GetCommonData(Light light, Surface surface, Input input)
-{
-    CommonData data = (CommonData) 0;
-
-    data.F0 = lerp(linear_F0, surface.albedo, surface.metallic);
-    data.halfDir = SafeNormalize(input.viewWS + light.direction);
-    data.NoH = saturate(dot(surface.normal, data.halfDir));
-    data.NoL = saturate(dot(surface.normal, light.direction));
-    data.NoV = saturate(dot(surface.normal, input.viewWS));
-    data.HoV = saturate(dot(input.viewWS, light.direction));
-    data.HoL = saturate(dot(data.halfDir, light.direction));
-
-    return data;
+	return brdfData;
 }
 
 //==============================================================================================================
@@ -69,30 +43,12 @@ float3 DirectSpec_Hair(float NoH , float2 uv1 , float3 viewDir)
 	return 1;
 }
 
-// float SDF_NoL(float2 uv, float3 lightDir)
-// {
-// 	float4 leftLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, uv);
-// 	float4 rightLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, float2(1 - uv.x , uv.y));
-// 	float2 rightDir_XZ = normalize(half2(1,0));
-// 	float2 lightDir_XZ = normalize(lightDir.xz);
-// 	float2 frontDir_XZ = normalize(_faceFrontDir.xz);
-// 	float isFront = dot(lightDir_XZ , frontDir_XZ);
-// 	float isRight = dot(lightDir.xz , rightDir_XZ);
-// 	float4 sdf_LightShadow = isRight > 0 ? rightLightShadow : leftLightShadow;
-// 	float NoL = (sdf_LightShadow.r - 0.5) * 2 + isFront;
-// 	NoL = min(0.95, NoL);
-// 	NoL = max(0.05, NoL);
-//
-// 	return NoL;
-// }
-
-float DepthRim(float2 screenSpaceUV , float3 normal , float positionCS_W, float depth)
+float DepthRim(Input inputData, float depth)
 {
-	float3 normalVS = TransformWorldToViewDir(normal, true);
+	float3 normalVS = TransformWorldToViewDir(inputData.normalWS, true);
 	float2 signDir = normalVS.xy;
-	float2 offestSamplePos = screenSpaceUV + _ActorRimOffest * GetCameraDepthTexelSize().xy / positionCS_W * signDir;
+	float2 offestSamplePos = inputData.screenSpaceUV + _ActorRimOffest * GetCameraDepthTexelSize().xy / inputData.positionCS.w * signDir;
 	float offsetDepth = SampleCameraDepth(offestSamplePos);
-	//float depth = SampleCameraDepth(screenSpaceUV);
 	//Rim
 	float linear01EyeOffestDepth = Linear01Depth(offsetDepth , _ZBufferParams);
 	float linear01EyeDepth = Linear01Depth(depth , _ZBufferParams);
@@ -101,84 +57,105 @@ float DepthRim(float2 screenSpaceUV , float3 normal , float positionCS_W, float 
 	return rim;
 }
 
+//=====================================================================================
+//Lighting
+float3 GetDirectionalLight (Surface surface, Input input, ToonBRDF brdf, Light light)
+{ 
+	float3 Ks = Fresnel_Light(brdf.HoL, brdf.F0);
+	float3 Kd = saturate((1 - Ks)) * (1 - surface.metallic);
+    
+	//BRDF
+	float3 BRDFSpec = GGX_Spec(brdf.HoL , brdf.NoH , brdf.F0 , surface.roughness);
+
+	return (Kd * brdf.toonDiffuse + BRDFSpec * brdf.NoL) * light.color;
+}
+
+float3 GetRimColor(Input inputData, float NoL, float depth)
+{
+	return NoL * DepthRim(inputData, depth);
+}
+
+float3 GetRimColor(Input inputData, ToonBRDF brdf, float depth)
+{
+	return GetRimColor(inputData, brdf.NoL, depth);
+}
+
+float3 GetInDirectionalLight(Input inputData, Surface surfaceData, ToonBRDF brdfData, Light light, GI gi)
+{
+	float3 SHColor = gi.diffuse;
+	float3 Ks = Fresnel_InLight(brdfData.NoV, surfaceData.roughness, brdfData.F0);
+	float3 Kd = saturate((1 - Ks)) * (1 - surfaceData.metallic);
+	float3 InDiffuse = SHColor * Kd * surfaceData.albedo;
+    
+	float3 F_IndirectionLight = Ks;
+	float3 SpecCubeColor = gi.specular;
+	float2 LUT = LUT_Approx(surfaceData.roughness, brdfData.NoV);
+	float3 InSpec = SpecCubeColor * (F_IndirectionLight * LUT.r + LUT.g);
+	return (InDiffuse + InSpec) * surfaceData.ao;
+}
+
+float3 GetAdditionalLightColor(Input input)
+{
+	float3 additionalLightColor = float3(0 , 0 , 0);
+	int additionalLightCount = GetAdditionalLightCount();
+	
+	UNITY_LOOP
+	for (int additionLightIndex = 0 ; additionLightIndex < additionalLightCount ; additionLightIndex++)
+	{
+		Light additionalLight = GetAdditionalLight(additionLightIndex , input);
+		float NoL = saturate(dot(additionalLight.direction , input.normalWS));
+		additionalLightColor += additionalLight.color * NoL * additionalLight.shadowAttenuation;
+	}
+	return additionalLightColor;
+}
+
+float3 GetEmissiveColor(Surface surface)
+{
+	return surface.emissive;
+}
+
 //===========================================================================================================================
 //FinalColor
 float4 CalculateActorLighting(Input inputData , Surface surfaceData, float depth)
 {
 	Light mainLight = GetMainLight(inputData);
 	GI gi = GetGI(inputData , surfaceData);
+	ToonBRDF brdfData = GetActorLitBRDFData(inputData, surfaceData, mainLight);
 
-    CommonData commonData = GetCommonData(mainLight, surfaceData, inputData);
+	//return float4(gi.specular, 1);
 
-	float diffuse = dot(surfaceData.normal, mainLight.direction);
-	diffuse = (diffuse + 1) * 0.5;
-	diffuse = lerp(0.5f, diffuse, mainLight.shadowAttenuation);
+	float4 color = 0;
+	color.rgb += GetDirectionalLight (surfaceData, inputData, brdfData, mainLight);
+	color.rgb += GetAdditionalLightColor(inputData);
+	color.rgb += GetInDirectionalLight(inputData, surfaceData, brdfData, mainLight, gi);
+	color.rgb *= surfaceData.albedo;
+	color.rgb += GetRimColor(inputData, brdfData, depth);
+	color.rgb += GetEmissiveColor(surfaceData);
+	color.a = 1;
 	
-	float3 toonDiffuse = SAMPLE_TEXTURE2D(_LutMap, sampler_LutMap, float2(diffuse, 0)).rgb;
-	float3 toonRim = smoothstep(_rimSmoothLeft, _rimSmoothRight, diffuse) *
-		DepthRim(inputData.screenSpaceUV, surfaceData.normal, inputData.positionCS.w, depth);
-	
-	float3 mainLightColor = surfaceData.albedo * mainLight.color * toonDiffuse + toonRim;
-
-	return float4(mainLightColor, 1);
-	
-	float3 additionalLightColor = float3(0 , 0 , 0);
-	int additionalLightCount = GetAdditionalLightCount();
-	
-	UNITY_LOOP
-	for (int additionLightIndex = 0 ; additionLightIndex < additionalLightCount ; additionLightIndex++)
-	{
-		Light additionalLight = GetAdditionalLight(additionLightIndex , inputData);
-		float NoL = saturate(dot(additionalLight.direction , surfaceData.normal));
-		additionalLightColor += additionalLight.color * NoL * additionalLight.shadowAttenuation;
-	}
-
-    float4 finalColor = float4(0, 0, 0, 0);
-
-    finalColor.a = surfaceData.alpha;
-
-    return finalColor;
+	return color;
 }
 
-float4 CalculateActorFace(Input inputData , Surface surfaceData, float2 uv, float depth)
+float4 CalculateActorSkin(Input inputData , Surface surfaceData, float depth)
 {
 	Light mainLight = GetMainLight(inputData);
+	//ToonBRDF brdfData = GetActorLitBRDFData(inputData, surfaceData, mainLight);
 	GI gi = GetGI(inputData , surfaceData);
 
-	CommonData commonData = GetCommonData(mainLight, surfaceData, inputData);
-
+	float faceMask = 0;//(1 - surfaceData.alpha);
+	float shadow = saturate(mainLight.shadowAttenuation + faceMask);
 	float diffuse = dot(surfaceData.normal, mainLight.direction);
-	diffuse = (diffuse + 1) * 0.5;
+	diffuse = (diffuse * shadow + 1) * 0.5;
+	diffuse = min(0.98f, max(0.02f, diffuse));
+	float3 toonDiffuse = SAMPLE_TEXTURE2D(_ActorSkinMap, sampler_ActorSkinMap, float2(diffuse, 0)).rgb;
 
-	//diffuse = SDF_NoL(uv, mainLight.direction);
-
-	//return diffuse;
+	float4 color = 0;
+	color.rgb += toonDiffuse;
+	color.rgb *= surfaceData.albedo;
+	color.rgb += GetRimColor(inputData, diffuse, depth);
+	color.a = 1;
 	
-	float3 toonDiffuse = SAMPLE_TEXTURE2D(_LutMap, sampler_LutMap, float2(diffuse, 0)).rgb;
-	float3 toonRim = smoothstep(_rimSmoothLeft, _rimSmoothRight, diffuse) *
-		DepthRim(inputData.screenSpaceUV, surfaceData.normal, inputData.positionCS.w, depth);
-	
-	float3 mainLightColor = surfaceData.albedo * toonDiffuse + toonRim;
-
-	return float4(mainLightColor, surfaceData.alpha);
-
-	
-	float3 additionalLightColor = float3(0 , 0 , 0);
-	int additionalLightCount = GetAdditionalLightCount();
-	
-	UNITY_LOOP
-	for (int additionLightIndex = 0 ; additionLightIndex < additionalLightCount ; additionLightIndex++)
-	{
-		Light additionalLight = GetAdditionalLight(additionLightIndex , inputData);
-		float NoL = saturate(dot(additionalLight.direction , surfaceData.normal));
-		additionalLightColor += additionalLight.color * NoL * additionalLight.shadowAttenuation;
-	}
-
-	float4 finalColor = float4(0, 0, 0, 0);
-
-	finalColor.a = surfaceData.alpha;
-
-	return finalColor;
+	return color;
 }
 
 #endif

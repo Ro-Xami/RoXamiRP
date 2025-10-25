@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: DeferredToonLitFeature
   m_EditorClassIdentifier: 
   isActive: 1
-  deferredToonLitSettings:
+  deferredToonLitMaterial: {fileID: 2100000, guid: 39ed17f165852954fb752d68454dde6e,
+    type: 2}
+  deferredCustomLitSettings:
   - mat: {fileID: 2100000, guid: 0d2bfc97b294231478cc2709039101b3, type: 2}
     passIndex: 0
+  - mat: {fileID: 2100000, guid: 0d2bfc97b294231478cc2709039101b3, type: 2}
+    passIndex: 1
 --- !u!114 &-43280244536266904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57,6 +61,7 @@ MonoBehaviour:
   - {fileID: 560601761701961137}
   - {fileID: -43280244536266904}
   - {fileID: 444915565210774432}
+  - {fileID: 1326430091380443188}
 --- !u!114 &444915565210774432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,6 +91,28 @@ MonoBehaviour:
   isActive: 0
   ssprCompute: {fileID: 7200000, guid: fa87b42df27c87e449eecff4a8ed8fa0, type: 3}
   planeHeight: 0
+--- !u!114 &1326430091380443188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40aa95b8ed846614eb848b34c736ec3d, type: 3}
+  m_Name: VolumeLightingFeature
+  m_EditorClassIdentifier: 
+  isActive: 1
+  settings:
+    computeShader: {fileID: 7200000, guid: 91ba666542544a00a1da99f36806dd0d, type: 3}
+    renderPassEvent: 340
+    downSample: 3
+    maxStep: 150
+    stepSize: 0.003
+    maxRayLength: 40
+    rayStart: 0
+    blurSize: 2.5
 --- !u!114 &1571461644891948011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,8 +129,16 @@ MonoBehaviour:
   settings:
     renderPassEvent: 240
     sortingSettings: 2
-    lightModes:
-    - ActorOutline
     layerMask:
       serializedVersion: 2
       m_Bits: 64
+    lightModes:
+    - ActorOutline
+    paramSettings:
+      floatParams: []
+      vectorParams:
+      - vectorParam: {x: 0.42, y: 0.7, z: 2, w: 0}
+        vectorParamID: _ActorOutlineParams
+      colorParams:
+      - colorParam: {r: 0.23584908, g: 0.11903704, b: 0.11903704, a: 0}
+        colorParamID: _ActorOutlineColor

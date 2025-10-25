@@ -66,6 +66,11 @@ namespace RoXamiRenderPipeline
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
+                if (!m_Mat)
+                {
+                    return;
+                }
+                
                 cmd.SetGlobalTexture(
                     ShaderDataID.cameraDepthCopyTextureID, 
                     ShaderDataID.cameraDepthAttachmentId);

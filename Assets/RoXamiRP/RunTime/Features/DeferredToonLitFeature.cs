@@ -4,10 +4,20 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
+    [Serializable]
+    public class DeferredLitSettings
+    {
+        public Material mat;
+        public int passIndex;
+    }
+    
     public class DeferredToonLitFeature : RoXamiRenderFeature
     {
         [SerializeField]
-        DeferredLitSettings[] deferredToonLitSettings;
+        Material deferredToonLitMaterial;
+        
+        [SerializeField]
+        DeferredLitSettings[] deferredCustomLitSettings;
 
         GBufferPass gBufferPass;
         CopyCameraDepthPass copyDepthPass;
@@ -24,13 +34,13 @@ namespace RoXamiRenderPipeline
             
             ssShadowsPass = new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 9);
             
-            deferredDiffusePass = new DeferredDiffusePass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 10);
+            deferredDiffusePass = new DeferredDiffusePass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 10, deferredToonLitMaterial);
             
-            if (deferredToonLitSettings != null && deferredToonLitSettings.Length != 0)
+            if (deferredCustomLitSettings != null && deferredCustomLitSettings.Length != 0)
             {
                 deferredCustomPass = new DeferredCustomPass(
                     RenderPassEvent.BeforeRenderingDeferredDiffuse + 11, 
-                    deferredToonLitSettings);
+                    deferredCustomLitSettings);
             }
 
             deferredGiPass = new DeferredGiPass(RenderPassEvent.BeforeRenderingDeferredGI + 10);
@@ -48,7 +58,7 @@ namespace RoXamiRenderPipeline
             
             renderLoop.EnqueuePass(deferredDiffusePass);
             
-            if (deferredToonLitSettings != null && deferredToonLitSettings.Length != 0)
+            if (deferredCustomLitSettings != null && deferredCustomLitSettings.Length != 0)
             {
                 renderLoop.EnqueuePass(deferredCustomPass);
             }

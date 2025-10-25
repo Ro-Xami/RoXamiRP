@@ -1,0 +1,76 @@
+#define _DIRECTIONAL_PCF0
+#pragma kernel VolumeLighting
+
+RWTexture2D<float4> _VolumeLightingTexture;
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/ShaderLibrary/Shadows.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraDepthAttachment.hlsl"
+
+// TEXTURE2D(_GBuffer1);
+// SAMPLER(sampler_GBuffer1);
+float4 _texelSize;
+uint _volumeLightDownSample;
+float4 _volumeLightingParams;
+#define _stepSize _volumeLightingParams.x
+#define _maxStep _volumeLightingParams.y
+#define _maxRayLength _volumeLightingParams.z
+#define _rayStartLength _volumeLightingParams.w
+
+float SampleShadow(float3 positionWS)
+{
+    return GetDirectionalShadowAttenuation(positionWS);
+}
+
+[numthreads(8,8,1)]
+void VolumeLighting (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_texelSize.x || id.y >= (uint)_texelSize.y)
+    {
+        return;
+    }
+    float2 screenSpaceUV = id.xy * _texelSize.zw;
+    
+    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, screenSpaceUV, 1).x;
+    //withoutSkybox
+    #if defined(UNITY_REVERSED_Z)
+    if (depth <= FLT_MIN)
+    {
+        _VolumeLightingTexture[id.xy] = _maxStep;
+        return;
+    }
+    #else
+    depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
+    if (depth >= 1)
+    {
+        _VolumeLightingTexture[id.xy] = _maxStep;
+        return;
+    }
+    #endif
+    
+    float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
+    float3 cameraWS = _WorldSpaceCameraPos.xyz;
+    float3 rayVec = positionWS - cameraWS;
+    
+    float3 rayDir = normalize(rayVec);
+    float3 rayStart = cameraWS;
+    float rayMaxLength = min(length(positionWS - cameraWS), _maxRayLength);
+    float volumeLighting = 0;
+    float rayLength = _rayStartLength;
+    
+    UNITY_LOOP
+    for(int j = 0 ; j < _maxStep ; j++)
+    {
+        rayLength += _stepSize * j;
+        if(rayLength > rayMaxLength)
+        {
+            break;
+        }
+        float3 rayPositionWS = rayStart + rayDir * rayLength;
+
+        volumeLighting += SampleShadow(rayPositionWS);
+    }
+
+    //TotalInt = pow(saturate(TotalInt) , _LightPower);
+    
+    _VolumeLightingTexture[id.xy] = float4(volumeLighting.xxx, 1);
+}

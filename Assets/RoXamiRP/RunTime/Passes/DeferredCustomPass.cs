@@ -4,15 +4,6 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRenderPipeline
 {
-    [Serializable]
-    public class DeferredLitSettings
-    {
-        public Material mat;
-        public int passIndex;
-        // public string stencilPropertyName;
-        // public int stencil;
-    }
-    
     public class DeferredCustomPass : RoXamiRenderPass
     {
         readonly m_DeferredLitSettings[] settings;

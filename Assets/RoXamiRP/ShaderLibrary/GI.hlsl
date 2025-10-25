@@ -40,9 +40,8 @@ float3 SampleLightProbe (float3 normal)
 	return max(0.0, SampleSH9(coefficients, normal));
 }
 
-float3 SampleEnvironmentCube(float3 normalWS , float3 viewWS , float roughness) {
+float3 SampleEnvironmentCube(float3 normalWS , float3 viewWS , float mip) {
 	float3 uvw = reflect(-viewWS, normalWS);
-	float mip = PerceptualRoughnessToMipmapLevel(roughness);
 	float4 environment = SAMPLE_TEXTURECUBE_LOD(
 		_RoXamiRpReflectionTexture, sampler_RoXamiRpReflectionTexture, uvw, mip
 	);
@@ -54,12 +53,13 @@ GI GetGI(Input inputData , Surface surfaceData)
 {
 	GI OUT = (GI)0;
 	OUT.diffuse = SampleLightProbe(inputData.normalWS);
+	float mip = PerceptualRoughnessToMipmapLevel(surfaceData.roughness);
 	#ifdef SCREENSPACE_REFLECTION
-		float4 ssr = SampleSSRTexture(inputData.screenSpaceUV);
-		float3 cube = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
+		float4 ssr = SampleSSRTexture(inputData.screenSpaceUV, mip);
+		float3 cube = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , mip);
 		OUT.specular = lerp(cube, ssr.rgb, ssr.a);
 	#else
-		OUT.specular = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , surfaceData.roughness);
+		OUT.specular = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , mip);
 	#endif
 
 	return OUT;

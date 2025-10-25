@@ -23,8 +23,6 @@ namespace RoXamiRenderPipeline
         }
         
         public RoXamiRendererAsset[] rendererAssets;
-        
-        public RoXamiGlobalShaderAsset globalShaderAsset;
 
         public CommonSettings commonSettings;
 
@@ -51,7 +49,7 @@ namespace RoXamiRenderPipeline
 
         protected override RenderPipeline CreatePipeline()
         {
-            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings, antialiasingSettings, globalShaderAsset);
+            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings, antialiasingSettings);
         }
 
         private void OnEnable()
@@ -87,15 +85,6 @@ namespace RoXamiRenderPipeline
             SetAAKeyWords();
             SetPcfSettings();
             SetDirectionalShadowsKeyword();
-            SetRoXamiGlobalShaderAsset();
-        }
-
-        void SetRoXamiGlobalShaderAsset()
-        {
-            if (globalShaderAsset)
-            {
-                globalShaderAsset.UpdateGlobalShader();
-            }
         }
 
         void SetDirectionalShadowsKeyword()

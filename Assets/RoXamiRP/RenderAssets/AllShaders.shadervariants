@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AllShaders
+  m_Shaders:
+  - first: {fileID: 66, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+  - first: {fileID: 106, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: _SUNDISK_SIMPLE
+        passType: 0
+  - first: {fileID: 9000, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9001, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9002, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9003, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9004, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9007, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9101, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 9103, guid: 0000000000000000f000000000000000, type: 0}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 4800000, guid: 038c173609a85274dac85229246ab7db, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 13
+  - first: {fileID: 4800000, guid: cf25610f8f1bf53419adecb6b58647a5, type: 3}
+    second:
+      variants:
+      - keywords: _instancing
+        passType: 13
+  - first: {fileID: 4800000, guid: 9ee7024e4c304a41a3b13f95147e2935, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: INSTANCING_ON _ALPHACLIP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: INSTANCING_ON _MRA_MAP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: _ALPHACLIP_ON
+        passType: 13
+      - keywords: _ALPHACLIP_ON _MRA_MAP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: _ALPHACLIP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: _EMISSIVE_MAP_ON _MRA_MAP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: _MRA_MAP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: _NORMAL_MAP_ON
+        passType: 13
+  - first: {fileID: 4800000, guid: 6cefba19da1e456b8c03fafdb5c70c8d, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: _Post_AcesSimple_ON
+        passType: 0
+      - keywords: _Post_AcesSimple_ON _Post_Bloom_ON
+        passType: 0
+      - keywords: _Post_Bloom_ON
+        passType: 0
+  - first: {fileID: 4800000, guid: 6ff6e2ae66184a2d94dc9c90e9a18896, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION
+        passType: 0
+      - keywords: SCREENSPACE_SHADOWS
+        passType: 0
+  - first: {fileID: 4800000, guid: 57081fe43f3747e6baf0bdee15fdd87c, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: _ALPHACLIP_ON
+        passType: 13
+      - keywords: _MRA_MAP_ON _NORMAL_MAP_ON
+        passType: 13
+      - keywords: _NORMAL_MAP_ON
+        passType: 13
+  - first: {fileID: 4800000, guid: cd5e1c0d53864e19ad34d7a2a27bc726, type: 3}
+    second:
+      variants:
+      - keywords: _AA_HIGH
+        passType: 0
+  - first: {fileID: 4800000, guid: be7d8b7493b2475f91d864f0c72c0737, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: _ACTOR_FACE_ON
+        passType: 13
+  - first: {fileID: 4800000, guid: 8ada232af08f45589c59968733099fe2, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: SCREENSPACE_SHADOWS
+        passType: 0
+  - first: {fileID: 4800000, guid: f73fd825fba142a9bcf8bd896580dfdf, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Albedo
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Ao
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Emission
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_GiDiffuse
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_GiSpecular
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Metallic
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Normal
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Roughness
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION SCREENSPACE_SHADOWS _Debug_Shadow
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION _Debug_Albedo
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION _Debug_Ao
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION _Debug_Metallic
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION _Debug_Normal
+        passType: 0
+      - keywords: SCREENSPACE_REFLECTION _Debug_Roughness
+        passType: 0
+  - first: {fileID: 4800000, guid: dfeb832d25c04acb8952793719f1a165, type: 3}
+    second:
+      variants:
+      - keywords: _GlobalFog_EXP
+        passType: 0
+      - keywords: _GlobalFog_EXP2
+        passType: 0
+  - first: {fileID: 4800000, guid: 28b8eba5cc4a00c48b27b0c90652c3eb, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0

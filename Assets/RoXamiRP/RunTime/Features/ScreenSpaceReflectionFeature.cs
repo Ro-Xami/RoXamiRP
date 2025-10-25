@@ -46,7 +46,7 @@ namespace RoXamiRenderPipeline
             private const string bufferName = "ScreenSpaceReflection";
             public SsrPass(SsrSettings settings)
             {
-                if (settings == null || settings.computeShader == null)
+                if (settings == null || !settings.computeShader)
                 {
                     return;
                 }
@@ -115,10 +115,14 @@ namespace RoXamiRenderPipeline
             {
                 var descriptor = renderingData.cameraData.cameraColorDescriptor;
                 descriptor.enableRandomWrite = true;
+                descriptor.useMipMap = true;
+                descriptor.autoGenerateMips = true;
+                descriptor.mipCount = 7;
                 width = descriptor.width;
                 height =descriptor.height;
                 
                 cmd.GetTemporaryRT(ssrTextureID,descriptor, FilterMode.Bilinear);
+                //cmd.GenerateMips(ssrTextureID);
                 
                 cmd.SetRenderTarget(ssrTextureID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
                 //cmd.ClearRenderTarget(true, true, Color.clear);

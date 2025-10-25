@@ -134,4 +134,19 @@ float GetDirectionalShadowAttenuation (float3 positionWS , float3 normalWS)
 	return shadow;
 }
 
+float GetDirectionalShadowAttenuation (float3 positionWS) 
+{
+	ShadowCascadeData cascadeData = GetShadowCascadeData(positionWS);
+	DirectionalShadowData data = GetDirectionalShadowData(cascadeData , 0);
+
+	float shadow = 1;
+	if (data.strength != 0)
+	{
+		float3 positionSTS = mul(_DirectionalShadowMatrices[cascadeData.cascadeIndex] , float4(positionWS, 1.0)).xyz;
+		shadow = FilterDirectionalShadow(positionSTS);
+		shadow = lerp(1.0, shadow, data.strength);
+	}
+	return shadow;
+}
+
 #endif

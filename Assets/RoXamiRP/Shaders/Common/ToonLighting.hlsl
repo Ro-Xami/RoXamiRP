@@ -6,6 +6,19 @@
 #include "Assets//RoXamiRP/ShaderLibrary/GI.hlsl"
 #include "Assets/RoXamiRP/Shaders/Common/ToonBRDF.hlsl"
 
+TEXTURE2D(_ToonLitLut);
+SAMPLER(sampler_ToonLitLut);
+
+ToonBRDF GetToonLitBRDFData(Input input, Surface surface, Light light)
+{
+    float NoL;
+    ToonBRDF brdfData = GetToonBRDF(input, surface, light, NoL);
+
+    float clampedNoL = clamp((NoL * light.shadowAttenuation * 0.5f + 0.5f), 0.05f, 0.95f);
+    brdfData.toonDiffuse = SAMPLE_TEXTURE2D(_ToonLitLut, sampler_ToonLitLut, clampedNoL).rgb;
+
+    return brdfData;
+}
 
 float3 GetDirectionalLight (Surface surface, Input input, ToonBRDF brdf, Light light)
 { 
@@ -62,7 +75,7 @@ float GetTransparentAlpha(Surface surface)
 float4 CalculateToonLighting(Input inputData , Surface surfaceData)
 {
     Light mainLight = GetMainLight(inputData);
-    ToonBRDF brdfData = GetToonBRDF(inputData, surfaceData, mainLight);
+    ToonBRDF brdfData = GetToonLitBRDFData(inputData, surfaceData, mainLight);
     
     float4 finalColor = float4(0, 0, 0, 0);
     finalColor.rgb += GetDirectionalLight(surfaceData, inputData, brdfData, mainLight);
@@ -77,7 +90,7 @@ float4 CalculateToonLighting(Input inputData , Surface surfaceData)
 float4 CalculateDeferredToonLitDiffuseEmission(Input inputData , Surface surfaceData)
 {
     Light mainLight = GetMainLight(inputData);
-    ToonBRDF brdfData = GetToonBRDF(inputData, surfaceData, mainLight);
+    ToonBRDF brdfData = GetToonLitBRDFData(inputData, surfaceData, mainLight);
     
     float4 finalColor = float4(0, 0, 0, 0);
     finalColor.rgb += GetDirectionalLight(surfaceData, inputData, brdfData, mainLight);
@@ -94,7 +107,7 @@ float4 CalculateDeferredToonLitDiffuseEmission(Input inputData , Surface surface
 float4 CalculateDeferredToonLitGI(Input inputData , Surface surfaceData)
 {
     Light mainLight = GetMainLight(inputData);
-    ToonBRDF brdfData = GetToonBRDF(inputData, surfaceData, mainLight);
+    ToonBRDF brdfData = GetToonLitBRDFData(inputData, surfaceData, mainLight);
     GI gi = GetGI(inputData , surfaceData);
     
     float4 finalColor = float4(0, 0, 0, 0);

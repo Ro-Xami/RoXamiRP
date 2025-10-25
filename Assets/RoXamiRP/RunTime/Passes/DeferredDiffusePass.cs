@@ -7,9 +7,11 @@ namespace RoXamiRenderPipeline
 {
     public class DeferredDiffusePass : RoXamiRenderPass
     {
-        public DeferredDiffusePass(RenderPassEvent evt)
+        Material material;
+        public DeferredDiffusePass(RenderPassEvent evt, Material material)
         {
             renderPassEvent = evt;
+            this.material = material;
         }
 
         const string bufferName = "RoXami Deferred";
@@ -41,6 +43,11 @@ namespace RoXamiRenderPipeline
 
         void Draw(RenderingData renderingData)
         {
+            if (!material)
+            {
+                material = renderingData.shaderAsset.deferredMaterial;
+            }
+            
             cmd.SetRenderTarget(
                 ShaderDataID.cameraColorAttachmentId,
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
@@ -49,7 +56,7 @@ namespace RoXamiRenderPipeline
             cmd.ClearRenderTarget(false, true, Color.clear);
             
             cmd.DrawProcedural(
-                Matrix4x4.identity, renderingData.shaderAsset.deferredMaterial, 0,
+                Matrix4x4.identity, material, 0,
                 MeshTopology.Triangles, 3
             );
         }

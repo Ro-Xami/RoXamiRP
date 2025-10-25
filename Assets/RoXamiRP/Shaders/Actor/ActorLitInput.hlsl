@@ -9,6 +9,8 @@ TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
 TEXTURE2D(_EmissionMap);
 SAMPLER(sampler_EmissionMap);
+TEXTURE2D(_MatcapMap);
+SAMPLER(sampler_MatcapMap);
 
 CBUFFER_START(UnityPerMaterial)
 float4 _BaseMap_ST;
@@ -20,8 +22,13 @@ float _ao;
 float _normalStrength;
 float3 _emissive;
 
+//Matcap
+float _matcapIntensity;
+
 //Face
-float3 _faceFrontDir;
+float4 _faceFrontRightDir;
+#define _faceFrontDirXZ _faceFrontRightDir.xy
+#define _faceRightDirXZ _faceFrontRightDir.zw
 
 CBUFFER_END
 

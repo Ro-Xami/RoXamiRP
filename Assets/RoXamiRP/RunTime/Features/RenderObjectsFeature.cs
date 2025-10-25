@@ -15,9 +15,42 @@ namespace RoXamiRenderPipeline
         {
             public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
             public SortingCriteria sortingSettings = SortingCriteria.CommonOpaque;
-            //public int moveRenderPassEvent = 0;
-            public string[] lightModes;
             public LayerMask layerMask;
+            public string[] lightModes;
+            [SerializeField]
+            public ParamSettings paramSettings = new ParamSettings();
+        }
+
+        [Serializable]
+        public class ParamSettings
+        {
+            [SerializeField]
+            public FloatParam[] floatParams;
+            [SerializeField]
+            public VectorParam[] vectorParams;
+            [SerializeField]
+            public ColorParam[] colorParams;
+        }
+
+        [Serializable]
+        public class FloatParam
+        {
+            public float floatParam;
+            public string floatParamID;
+        }
+
+        [Serializable]
+        public class VectorParam
+        {
+            public Vector4 vectorParam;
+            public string vectorParamID;
+        }
+
+        [Serializable]
+        public class ColorParam
+        {
+            public Color colorParam;
+            public string colorParamID;
         }
 
         private RenderObjectsPass pass;
@@ -32,6 +65,46 @@ namespace RoXamiRenderPipeline
             if (settings.renderPassEvent >= RenderPassEvent.BeforeRenderingPostProcessing)
             {
                 settings.renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
+            }
+            
+            var paramSettings = settings.paramSettings;
+            if (paramSettings != null)
+            {
+                if (paramSettings.floatParams == null)
+                {
+                    return;
+                }
+                foreach (var p in paramSettings.floatParams)
+                {
+                    if (p.floatParamID != null)
+                    {
+                        Shader.SetGlobalFloat(p.floatParamID, p.floatParam);
+                    }
+                }
+                
+                if (paramSettings.vectorParams == null)
+                {
+                    return;
+                }
+                foreach (var p in paramSettings.vectorParams)
+                {
+                    if (p.vectorParamID != null)
+                    {
+                        Shader.SetGlobalVector(p.vectorParamID, p.vectorParam);
+                    }
+                }
+                
+                if (paramSettings.colorParams == null)
+                {
+                    return;
+                }
+                foreach (var p in paramSettings.colorParams)
+                {
+                    if (p.colorParamID != null)
+                    {
+                        Shader.SetGlobalColor(p.colorParamID, p.colorParam);
+                    }
+                }
             }
             
             pass = new RenderObjectsPass(settings);

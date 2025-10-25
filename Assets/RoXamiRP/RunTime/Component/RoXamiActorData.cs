@@ -6,7 +6,7 @@ namespace RoXamiRenderPipeline
     [ExecuteInEditMode]
     public class RoXamiActorData : MonoBehaviour
     {
-        private static readonly int faceFrontDir = Shader.PropertyToID("_faceFrontDir");
+        private static readonly int faceFrontRightDirID = Shader.PropertyToID("_faceFrontRightDir");
         
         [SerializeField] Transform faceTransform;
         [SerializeField] private Material faceMaterial;
@@ -25,7 +25,9 @@ namespace RoXamiRenderPipeline
         {
             if (faceTransform && faceMaterial)
             {
-                faceMaterial.SetVector(faceFrontDir, faceTransform.forward);
+                faceMaterial.SetVector(faceFrontRightDirID, 
+                    new Vector4(faceTransform.forward.x, faceTransform.forward.z, 
+                    faceTransform.right.x, faceTransform.right.z));
             }
         }
 

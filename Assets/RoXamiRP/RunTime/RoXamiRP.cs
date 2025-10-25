@@ -16,10 +16,9 @@ namespace RoXamiRenderPipeline
         private readonly RoXamiRendererAsset[] rendererAssets;
         private readonly CommonSettings commonSettings;
         private readonly AntialiasingSettings antialiasingSettings;
-        private readonly RoXamiGlobalShaderAsset globalShaderAsset;
 
         public RoXamiRP(ShadowSettings shadowSettings, ShaderAsset shaderAsset, RoXamiRendererAsset[] rendererAssets, 
-            CommonSettings commonSettings, AntialiasingSettings antialiasingSettings, RoXamiGlobalShaderAsset globalShaderAsset)
+            CommonSettings commonSettings, AntialiasingSettings antialiasingSettings)
         {
             GraphicsSettings.useScriptableRenderPipelineBatching = enableSrpBatcher;
             GraphicsSettings.lightsUseLinearIntensity = lightsUseLinearIntensity;
@@ -28,7 +27,6 @@ namespace RoXamiRenderPipeline
             this.rendererAssets = rendererAssets;
             this.commonSettings = commonSettings;
             this.antialiasingSettings = antialiasingSettings;
-            this.globalShaderAsset = globalShaderAsset;
         }
 
         protected override void Render(
@@ -45,7 +43,6 @@ namespace RoXamiRenderPipeline
             }
 
 #if UNITY_EDITOR
-            globalShaderAsset.UpdateGlobalShader();
             RoXamiVolume.Instance.Update();
 #endif
             

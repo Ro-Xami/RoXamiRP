@@ -15,7 +15,6 @@ MonoBehaviour:
   rendererAssets:
   - {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920, type: 2}
   - {fileID: 11400000, guid: 600ce9f3d115edd4b804cfe6e0f1f8e5, type: 2}
-  globalShaderAsset: {fileID: 11400000, guid: 07ddd307e66adaf4895ef59267b1975e, type: 2}
   commonSettings:
     enableGpuInstancing: 1
     enableDynamicBatching: 0
@@ -29,10 +28,10 @@ MonoBehaviour:
     distanceFade: 0.278
     directional:
       atlasSize: 2048
-      filter: 3
-      cascadeRatio1: 0.098
-      cascadeRatio2: 0.155
-      cascadeRatio3: 0.351
+      filter: 1
+      cascadeRatio1: 0.166
+      cascadeRatio2: 0.503
+      cascadeRatio3: 0.773
       cascadeFade: 0.001
   shaderAsset:
     screenSpaceShadowComputeShader: {fileID: 7200000, guid: a8c4476fc8586e3479414139329386ec,

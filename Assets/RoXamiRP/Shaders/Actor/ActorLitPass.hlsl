@@ -26,7 +26,6 @@ struct Varyings {
     float3 tangentWS : TEXCOORD2;
     float3 biTangentWS : TEXCOORD3;
     float4 color : COLOR;
-
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -70,6 +69,13 @@ Surface GetSurfaceData(Varyings IN)
     #else
     float3 normal = IN.normalWS;
     #endif
+
+    #ifdef _Matcap_MAP_ON
+    float3 normalVS = TransformWorldToViewNormal(normal);
+    normalVS = normalVS * 0.5 + 0.5;
+    float3 matcap = SAMPLE_TEXTURE2D(_MatcapMap,sampler_MatcapMap, normalVS.xy).rgb;
+    albedo.rgb += matcap * _matcapIntensity;
+    #endif
 	
     OUT.albedo = albedo.rgb;
     OUT.normal = normal;
@@ -82,6 +88,8 @@ Surface GetSurfaceData(Varyings IN)
     return OUT;
 }
 
+//======================================================
+//ActorLit
 void ActorLitGBufferPassFragment (Varyings IN,
     out float4 GT0 : SV_Target0,
     out float4 GT1 : SV_Target1,
@@ -102,24 +110,25 @@ void ActorLitGBufferPassFragment (Varyings IN,
     GT3 = float4(surfaceData.emissive, 1);
 }
 
+//======================================================
+//Skin
+
 float SDF_NoL(float2 uv, float3 lightDir)
 {
     float4 leftLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, uv);
     float4 rightLightShadow = SAMPLE_TEXTURE2D(_SdfFaceMap, sampler_SdfFaceMap, float2(1 - uv.x , uv.y));
-    float2 rightDir_XZ = normalize(half2(1,0));
+    float2 rightDir_XZ = normalize(_faceRightDirXZ);
     float2 lightDir_XZ = normalize(lightDir.xz);
-    float2 frontDir_XZ = normalize(_faceFrontDir.xz);
+    float2 frontDir_XZ = normalize(_faceFrontDirXZ);
     float isFront = dot(lightDir_XZ , frontDir_XZ);
     float isRight = dot(lightDir.xz , rightDir_XZ);
-    float4 sdf_LightShadow = isRight > 0 ? rightLightShadow : leftLightShadow;
-    float NoL = (sdf_LightShadow.r - 0.5) * 2 + isFront;
-    // NoL = min(0.95, NoL);
-    // NoL = max(0.05, NoL);
+    float sdf_LightShadow = isRight > 0 ? rightLightShadow.r : leftLightShadow.r;
+    float NoL = step(1- isFront, sdf_LightShadow);
 
     return NoL;
 }
 
-void ActorLitFaceGBufferPassFragment (Varyings IN,
+void ActorLitSkinGBufferPassFragment (Varyings IN,
     out float4 GT0 : SV_Target0,
     out float4 GT1 : SV_Target1,
     out float4 GT2 : SV_Target2,
@@ -132,12 +141,19 @@ void ActorLitFaceGBufferPassFragment (Varyings IN,
     #ifdef _ALPHACLIP_ON
     clip(surfaceData.alpha - _cutout);
     #endif
-    
-    Light mainLight = GetMainLight();
-    float3 faceNormal = lerp(mainLight.direction, - mainLight.direction, SDF_NoL(IN.uv, mainLight.direction));
 
-    GT0 = SDF_NoL(IN.uv, mainLight.direction);//float4(surfaceData.albedo, 1);
-    GT1 = float4(faceNormal, 1);
+    #ifdef _ACTOR_FACE_ON
+    Light mainLight = GetMainLight();
+    surfaceData.normal = lerp(normalize(-mainLight.direction), mainLight.direction, SDF_NoL(IN.uv, mainLight.direction));
+    #endif
+
+    float mask = 1;
+    #ifdef _ACTOR_FACE_ON
+    mask = 0;
+    #endif
+    
+    GT0 = float4(surfaceData.albedo, mask);
+    GT1 = float4(surfaceData.normal, 1);
     GT2 = float4(surfaceData.metallic, surfaceData.roughness, surfaceData.ao, 1);
     GT3 = float4(surfaceData.emissive, 1);
 }

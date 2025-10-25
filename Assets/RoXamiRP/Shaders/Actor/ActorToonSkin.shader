@@ -1,40 +1,36 @@
-Shader "RoXamiRP/Actor/ActorLit"
+Shader "RoXamiRP/Actor/ActorToonSkin"
 {
 	Properties
 	{
 		[HDR] _BaseColor ("Base Color" , color) = (1,1,1,1)
 		[NoScaleOffset] _BaseMap ("Base Map" , 2D) = "white" {}
 		
-		[Space(10)][Header(Metallic Roughtness Ao)]
-		[Toggle(_MRA_MAP_ON)] _enableMraMap ("Enable MRA Map", Float) = 0
-		[NoScaleOffset] _MraMap ("MRA Map", 2D) = "white" {}
-		_roughness ("Roughness" , Range(0 , 1)) = 0.5
-		_metallic ("Metallic" , Range(0 , 1)) = 0
-		_ao ("AO" , Range(0 , 1)) = 1
-		
-		[Space(10)][Header(Normal)]
-		[Toggle(_NORMAL_MAP_ON)] _enableNormalMap ("Enable Normal Map", Float) = 0
-		[NoScaleOffset] _NormalMap ("Normal Map", 2D) = "bump" {}
-		_normalStrength ("Normal Strength", Float) = 0
-		
-		[Space(10)][Header(Emission)]
-		[Toggle(_EMISSIVE_MAP_ON)] _enableEmissionMap ("Enable Emission Map", Float) = 0
-		[HDR]_emissive ("Emissive" , Color) = (0,0,0,0)
-		[NoScaleOffset] _EmissionMap ("Emission Map", 2D) = "black" {}
-		
-		[Space(10)][Header(Matcap)]
-		[Toggle(_Matcap_MAP_ON)] _enableMatcapMap ("Enable Matcap Map", Float) = 0
-		[NoScaleOffset] _MatcapMap ("Matcap Map", 2D) = "black" {}
-		_matcapIntensity ("Matcap Intensity" , Range(0, 1)) = 1
+		[Space(10)][Header(Face)]
+		[Toggle(_ACTOR_FACE_ON)] _actorFaceON ("Is Face", Float) = 0
+		[NoScaleOffset] _SdfFaceMap ("Sdf Face Map", 2D) = "white" {}
 		
 		[Space(10)][Header(Alpha Clip)]
 		[Toggle(_ALPHACLIP_ON)] _alphaClip ("Alpha Clip" , float) = 0
 		_cutout ("Cut Out" , Range(0 , 1)) = 0.5
 		
-		[Space(10)][Header(Render Settings)]
-		[Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src Blend", Float) = 1
-		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst Blend", Float) = 0
-		[Enum(Off, 0, On, 1)] _ZWrite ("Z Write", Float) = 1
+		
+		
+		[Space(10)]
+		[Header(Metallic Roughtness Ao)]
+		_roughness ("Roughness" , Range(0 , 1)) = 0.5
+		_metallic ("Metallic" , Range(0 , 1)) = 0
+		_ao ("AO" , Range(0 , 1)) = 1
+		
+		[HideInInspector] [NoScaleOffset] _MraMap ("MRA Map", 2D) = "white" {}
+		[HideInInspector] _faceFrontRightDir ("Face Front Dir", Vector) = (1,1,1,1)
+		
+		//[Space(10)][Header(Normal)]
+		[HideInInspector] [NoScaleOffset] _NormalMap ("Normal Map", 2D) = "bump" {}
+		[HideInInspector] _normalStrength ("Normal Strength", Float) = 0
+		
+		//[Space(10)][Header(Emission)]
+		[HideInInspector] [HDR]_emissive ("Emissive" , Color) = (0,0,0,0)
+		[HideInInspector] [NoScaleOffset] _EmissionMap ("Emission Map", 2D) = "white" {}
 	}
 	
 	SubShader
@@ -45,24 +41,20 @@ Shader "RoXamiRP/Actor/ActorLit"
 
 		Pass
 		{
-			Name "ActorGBuffer"
+			Name "ToonGBuffer"
 			Tags{"LightMode" = "ToonGBuffer"}
 			
 			Stencil
 			{
-				Ref 101
+				Ref 102
 				Pass Replace
 			}
 			
 			HLSLPROGRAM
 			#pragma vertex ActorLitGBufferPassVertex
-			#pragma fragment ActorLitGBufferPassFragment
-			#pragma multi_compile_instancing
+			#pragma fragment ActorLitSkinGBufferPassFragment
+			#pragma multi_compile _ _ACTOR_FACE_ON
 			#pragma shader_feature_local _ALPHACLIP_ON
-			#pragma shader_feature_local _MRA_MAP_ON
-			#pragma shader_feature_local _NORMAL_MAP_ON
-			#pragma shader_feature_local _MRAMAP_ON
-			#pragma shader_feature_local _Matcap_MAP_ON
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorLitInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorLitPass.hlsl"
@@ -87,7 +79,6 @@ Shader "RoXamiRP/Actor/ActorLit"
 			#include "Assets/RoXamiRP/Shaders/Actor/ActorOutLinePass.hlsl"
 
 			ENDHLSL
-			
 		}
 
 		Pass

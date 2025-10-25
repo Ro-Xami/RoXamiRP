@@ -2,7 +2,7 @@ Shader "RoXamiRP/Hide/DeferredToonLit"
 {
 	Properties
 	{
-		
+		[NoScaleOffset] _ToonLitLut ("Lut", 2D) = "white" {}
 	}
 	
 	SubShader
