@@ -1,5 +1,5 @@
 #define _DIRECTIONAL_PCF0
-#pragma kernel VolumeLighting
+#pragma kernel RayMarchVolumeLighting
 
 RWTexture2D<float4> _VolumeLightingTexture;
 #include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
@@ -22,7 +22,7 @@ float SampleShadow(float3 positionWS)
 }
 
 [numthreads(8,8,1)]
-void VolumeLighting (uint3 id : SV_DispatchThreadID)
+void RayMarchVolumeLighting (uint3 id : SV_DispatchThreadID)
 {
     if (id.x >= (uint)_texelSize.x || id.y >= (uint)_texelSize.y)
     {

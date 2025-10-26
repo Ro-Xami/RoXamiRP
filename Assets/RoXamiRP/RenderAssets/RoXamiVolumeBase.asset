@@ -31,42 +31,9 @@ MonoBehaviour:
   m_Name: VolumeLighting
   m_EditorClassIdentifier: 
   isActive: 1
-  intensity: 0.000058
-  power: 2.41
-  volumeLightColor: {r: 0.020158425, g: 0.02423016, b: 0.028301895, a: 1}
---- !u!114 &-4273207639060884194
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7db4151047246f196daa47a4435bc8d, type: 3}
-  m_Name: ColorAdjustment
-  m_EditorClassIdentifier: 
-  isActive: 0
-  exposure: 0
-  colorFilter: {r: 1, g: 1, b: 1, a: 1}
-  hue: 0
-  saturation: 0
-  contrast: 0
---- !u!114 &-1380831852547790517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e26ce90dfbe470c88e567eeec6f25d2, type: 3}
-  m_Name: WhiteBalance
-  m_EditorClassIdentifier: 
-  isActive: 0
-  temperature: 0
-  tint: 0
+  intensity: 0.000129
+  power: 2.28
+  volumeLightColor: {r: 0.02, g: 0.015210667, b: 0.01102, a: 1}
 --- !u!114 &-821924632171251179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,8 +68,6 @@ MonoBehaviour:
   - {fileID: -821924632171251179}
   - {fileID: -9074908628491690467}
   - {fileID: -6230536393023632318}
-  - {fileID: -4273207639060884194}
-  - {fileID: -1380831852547790517}
 --- !u!114 &8156156270915082266
 MonoBehaviour:
   m_ObjectHideFlags: 0

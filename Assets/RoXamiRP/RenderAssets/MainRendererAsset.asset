@@ -104,15 +104,14 @@ MonoBehaviour:
   m_Name: VolumeLightingFeature
   m_EditorClassIdentifier: 
   isActive: 1
-  settings:
+  rayMarchSettings:
     computeShader: {fileID: 7200000, guid: 91ba666542544a00a1da99f36806dd0d, type: 3}
-    renderPassEvent: 340
-    downSample: 3
-    maxStep: 150
-    stepSize: 0.003
-    maxRayLength: 40
+    downSample: 2
+    maxStep: 100
+    stepSize: 0.004
+    maxRayLength: 60
     rayStart: 0
-    blurSize: 2.5
+    blurSize: 1
 --- !u!114 &1571461644891948011
 MonoBehaviour:
   m_ObjectHideFlags: 0

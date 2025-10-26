@@ -5,14 +5,22 @@ using UnityEngine.Rendering;
 
 public class VolumeLightingFeature : RoXamiRenderFeature
 {
+    //================================================================================//
+    //////////////////////////////////  RayMarch   /////////////////////////////////////
+    //================================================================================//
     [SerializeField]
-    VolumeLightSettings settings;
+    RayMarchSettings rayMarchSettings;
+    
+    RayMarchPass rayMarchPass;
+    private Material rayMarchMaterial;
+    private const int rayMarchPassIndex = 0;
+    const string kernelName = "RayMarchVolumeLighting";
     
     [Serializable]
-    class VolumeLightSettings
+    class RayMarchSettings
     {
         public ComputeShader computeShader;
-        public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
+        //public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
         [Range(1, 4)] 
         public int downSample = 1;
         [Min(0)]
@@ -27,57 +35,163 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         public float blurSize = 1f;
     }
     
-    VolumeLightingPass m_ScriptablePass;
-    private Material m_Material;
-    private VolumeLighting volume;
-    private const int m_PassIndex = 0;
+    //================================================================================//
+    //////////////////////////////////  RadioBlur  /////////////////////////////////////
+    //================================================================================//
+    [SerializeField]
+    RadioBlurSettings radioBlurSettings;
+    
+    RadioBlurPass radioBlurPass;
+    Material radioBlurMaterial;
+    
+    [Serializable]
+    class RadioBlurSettings
+    {
+        
+    }
     
     public override void Create()
+    {
+        CreatRayMarchTypePass();
+        CreateRadioBlurPass();
+    }
+
+    public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+    {
+        AddTypePass(renderLoop);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        CoreUtils.Destroy(rayMarchMaterial);
+    }
+    
+    private void CreatRayMarchTypePass()
     {
         var shader = Shader.Find("RoXamiRP/Hide/VolumeLightingBlur");
         if (!shader)
         {
             return;
         }
-        m_Material = CoreUtils.CreateEngineMaterial(shader);
+        radioBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
         
-        if (settings == null || !settings.computeShader)
+        if (radioBlurSettings == null)
         {
             return;
         }
 
-        m_ScriptablePass = new VolumeLightingPass(settings, m_Material, m_PassIndex);
-    }
-
-    public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
-    {
-        renderLoop.EnqueuePass(m_ScriptablePass);
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        CoreUtils.Destroy(m_Material);
+        radioBlurPass = new RadioBlurPass(radioBlurSettings, rayMarchMaterial, 0);
     }
     
-    class VolumeLightingPass : RoXamiRenderPass
+    private void AddTypePass(RoXamiRenderLoop renderLoop)
     {
-        readonly VolumeLightSettings settings;
+        var volumeSettings = RoXamiVolume.Instance.GetVolumeComponent<VolumeLighting>();
+        if (!volumeSettings || !volumeSettings.isActive)
+        {
+            return;
+        }
+        
+        switch (volumeSettings.type)
+        {
+            case VolumeLightingType.RadioBlur:
+                if (rayMarchPass != null)
+                {
+                    renderLoop.EnqueuePass(rayMarchPass);
+                }
+                break;
+            
+            case VolumeLightingType.RayMarching:
+                if (radioBlurPass != null)
+                {
+                    radioBlurPass.volumeSettings = volumeSettings;
+                    renderLoop.EnqueuePass(radioBlurPass);
+                }
+                break;
+        }
+    }
+
+    private void CreateRadioBlurPass()
+    {
+        var shader = Shader.Find("");
+        if (!shader)
+        {
+            return;
+        }
+        rayMarchMaterial = CoreUtils.CreateEngineMaterial(shader);
+        
+        if (rayMarchSettings == null || !rayMarchSettings.computeShader || rayMarchSettings.computeShader.FindKernel(kernelName) < 0)
+        {
+            return;
+        }
+
+        int kernel = rayMarchSettings.computeShader.FindKernel(kernelName);
+
+        rayMarchPass = new RayMarchPass(rayMarchSettings, kernel, rayMarchMaterial, rayMarchPassIndex);
+    }
+    
+    //================================================================================//
+    //////////////////////////////////  RadioBlur  /////////////////////////////////////
+    //================================================================================//
+
+    #region RadioBlur
+    class RadioBlurPass : RoXamiRenderPass
+    {
+        private RadioBlurSettings settings;
+        Material m_Material;
+        public VolumeLighting volumeSettings;
+        public RadioBlurPass(RadioBlurSettings settings, Material material, int passIndex)
+        {
+            renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
+            this.settings = settings;
+            m_Material = material;
+        }
+
+        private const string bufferName = "VolumeLighting";
+        private readonly CommandBuffer cmd = new CommandBuffer()
+        {
+            name = bufferName
+        };
+
+        public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
+        {
+            
+        }
+
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+        {
+            cmd.BeginSample(bufferName);
+            ExecuteCommandBuffer(context, cmd);
+            
+            cmd.EndSample(bufferName);
+            ExecuteCommandBuffer(context, cmd);
+        }
+
+        public override void CleanUp()
+        {
+            
+        }
+    }
+    #endregion
+
+    
+    //================================================================================//
+    //////////////////////////////////  RayMarch   /////////////////////////////////////
+    //================================================================================//
+    #region RayMarchPass
+    class RayMarchPass : RoXamiRenderPass
+    {
+        readonly RayMarchSettings settings;
         private readonly int kernel;
-        private VolumeLighting volume;
         private readonly Material m_Material;
         private readonly int passIndex;
         
-        public VolumeLightingPass(VolumeLightSettings settings, Material material, int passIndex)
+        public RayMarchPass(RayMarchSettings settings, int kernel, Material material, int passIndex)
         {
             this.settings = settings;
-            renderPassEvent = settings.renderPassEvent;
+            renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;//settings.renderPassEvent;
             m_Material = material;
             this.passIndex = passIndex;
-            
-            if (settings.computeShader)
-            {
-                kernel = settings.computeShader.FindKernel(bufferName);
-            }
+            this.kernel = kernel;
         }
         
         const string bufferName = "VolumeLighting";
@@ -100,12 +214,6 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            volume = RoXamiVolume.Instance.GetVolumeComponent<VolumeLighting>();
-            if (!volume || !volume.isActive)
-            {
-                return;
-            }
-            
             cmd.BeginSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
             
@@ -169,4 +277,6 @@ public class VolumeLightingFeature : RoXamiRenderFeature
             DrawFullScreenTriangles(cmd, m_Material, passIndex);
         }
     }
+    #endregion
+    
 }

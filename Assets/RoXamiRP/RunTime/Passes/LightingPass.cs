@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -79,6 +80,11 @@ namespace RoXamiRenderPipeline
             addLightDirection = new Vector4[maxAdditionalLightCount];
             addLightAngles = new Vector4[maxAdditionalLightCount];
 
+            renderingData.lightData.directionalLights = new List<Light>();
+            renderingData.lightData.additionalLights = new List<Light>();
+            renderingData.lightData.pointLights = new List<Light>();
+            renderingData.lightData.spotLights = new List<Light>();
+
             NativeArray<VisibleLight> visibleLights = cullingResults.visibleLights;
             for (int i = 0; i < visibleLights.Length; i++)
             {
@@ -91,6 +97,8 @@ namespace RoXamiRenderPipeline
                             SetUpDirectionalLightAndShadow(visibleLight);
                             dirLight = visibleLight.light;
                             dirLightCount++;
+                            
+                            renderingData.lightData.directionalLights.Add(dirLight);
                         }
 
                         break;
@@ -100,6 +108,9 @@ namespace RoXamiRenderPipeline
                         {
                             SetupPointLight(addLightCount, ref visibleLight);
                             addLightCount++;
+                            
+                            renderingData.lightData.pointLights.Add(visibleLight.light);
+                            renderingData.lightData.additionalLights.Add(visibleLight.light);
                         }
 
                         break;
@@ -109,6 +120,9 @@ namespace RoXamiRenderPipeline
                         {
                             SetupSpotLight(addLightCount, ref visibleLight);
                             addLightCount++;
+                            
+                            renderingData.lightData.spotLights.Add(visibleLight.light);
+                            renderingData.lightData.additionalLights.Add(visibleLight.light);
                         }
 
                         break;

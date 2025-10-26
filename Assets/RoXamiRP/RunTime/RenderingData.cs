@@ -15,7 +15,16 @@ namespace RoXamiRenderPipeline
         public ShadowSettings shadowSettings;
         public ShaderAsset shaderAsset;
         public AntialiasingSettings antialiasingSettings;
+        public LightData lightData;
         public RuntimeData runtimeData;
+    }
+
+    public struct LightData
+    {
+        public List<Light> directionalLights;
+        public List<Light> additionalLights;
+        public List<Light> pointLights;
+        public List<Light> spotLights;
     }
 
     public struct CameraData
