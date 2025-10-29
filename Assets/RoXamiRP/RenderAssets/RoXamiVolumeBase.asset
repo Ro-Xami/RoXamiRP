@@ -31,9 +31,15 @@ MonoBehaviour:
   m_Name: VolumeLighting
   m_EditorClassIdentifier: 
   isActive: 1
-  intensity: 0.000129
-  power: 2.28
-  volumeLightColor: {r: 0.02, g: 0.015210667, b: 0.01102, a: 1}
+  type: 0
+  rayMarchingSettings:
+    intensity: 0.23
+    power: 3.01
+    volumeLightColor: {r: 1, g: 1, b: 1, a: 1}
+  radioBlurSettings:
+    intensity: 0.53
+    clampMax: 10
+    threshold: 0.88
 --- !u!114 &-821924632171251179
 MonoBehaviour:
   m_ObjectHideFlags: 0

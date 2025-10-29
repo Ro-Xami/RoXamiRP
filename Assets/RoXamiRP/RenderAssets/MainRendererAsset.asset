@@ -111,7 +111,11 @@ MonoBehaviour:
     stepSize: 0.004
     maxRayLength: 60
     rayStart: 0
-    blurSize: 1
+    blurSize: 2.75
+  radioBlurSettings:
+    sampleCount: 8
+    blurIterations: 4
+    blurSize: 115.9
 --- !u!114 &1571461644891948011
 MonoBehaviour:
   m_ObjectHideFlags: 0

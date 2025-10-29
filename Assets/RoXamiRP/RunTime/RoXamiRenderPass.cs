@@ -158,6 +158,20 @@ namespace RoXamiRenderPipeline
                 MeshTopology.Triangles, 3
             );
         }
+        
+        protected void DrawDontCareStore(
+            CommandBuffer cmd, RenderTargetIdentifier from, RenderTargetIdentifier to, 
+            Material mat, int passIndex)
+        {
+            cmd.SetGlobalTexture(ShaderDataID.TempRtSource0ID, from);
+            cmd.SetRenderTarget(
+                to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
+            );
+            cmd.DrawProcedural(
+                Matrix4x4.identity, mat, passIndex,
+                MeshTopology.Triangles, 3
+            );
+        }
 
         protected void DrawFullScreenTriangles(CommandBuffer cmd, Material mat, int passIndex)
         {

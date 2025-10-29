@@ -1,4 +1,4 @@
-Shader "RoXamiRP/Hide/VolumeLightingBlur"
+Shader "RoXamiRP/Hide/RayMarchVolumeLighting"
 {
 	Properties
 	{
@@ -28,11 +28,10 @@ Shader "RoXamiRP/Hide/VolumeLightingBlur"
 			TEXTURE2D(_VolumeLightingTexture);
 			SAMPLER(sampler_VolumeLightingTexture);
 
-			float _volumeLightIntensity;
-			float _volumeLightPower;
-			float3 _volumeLightColor;
-			float4 _volumeLightBlurTexelSize;
-			#define _texelSize _volumeLightBlurTexelSize
+			float _VolumeLighting_RayMarch_Intensity;
+			float _VolumeLighting_RayMarch_Power;
+			float4 _VolumeLighting_TexelSize;
+			#define _texelSize _VolumeLighting_TexelSize
 
 			float SampleVolumeLight(float2 uv)
 			{
@@ -54,10 +53,10 @@ Shader "RoXamiRP/Hide/VolumeLightingBlur"
                 volumeLight += SampleVolumeLight(IN.uv + float2(_texelSize.z, -_texelSize.w)) * 0.0947416f;
                 volumeLight += SampleVolumeLight(IN.uv + float2(-_texelSize.z, _texelSize.w)) * 0.0947416f;
 
-				volumeLight = pow(volumeLight, max(0.0001f, _volumeLightPower));
+				volumeLight = pow(volumeLight, max(0.0001f, _VolumeLighting_RayMarch_Power));
 
 				Light mainLight = GetMainLight();
-				float3 color = volumeLight * _volumeLightColor * mainLight.color * _volumeLightIntensity;
+				float3 color = volumeLight * mainLight.color * _VolumeLighting_RayMarch_Intensity;
 
 			    return float4(color, 1);
 			}
