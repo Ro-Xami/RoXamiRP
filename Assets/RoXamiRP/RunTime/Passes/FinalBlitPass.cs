@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class FinalBlitPass : RoXamiRenderPass
     {
@@ -25,13 +25,12 @@ namespace RoXamiRenderPipeline
             ExecuteCommandBuffer(context, cmd);
             
             DrawDontCareDontCare(cmd, 
-                ShaderDataID.cameraColorAttachmentId, 
+                renderingData.renderer.GetCameraColorBufferRT(), 
                 //========================================
                 //to
-                renderingData.runtimeData.isFinalBlit? 
+                renderingData.runtimeData.isCameraStackFinally? 
                     BuiltinRenderTextureType.CameraTarget : 
-                ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentId == ShaderDataID.cameraColorAttachmentAId?
-                    ShaderDataID.cameraColorAttachmentBId: ShaderDataID.cameraColorAttachmentAId, 
+                    renderingData.renderer.GetSwitchCameraColorBufferRT(), 
                 //========================================
                 renderingData.shaderAsset.blitFullScreenTriangleMaterial, 0);
             

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [Serializable]
     public class WhiteBalance : RoXamiVolumeBase

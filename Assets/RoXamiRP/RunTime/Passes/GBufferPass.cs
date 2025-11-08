@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class GBufferPass : RoXamiRenderPass
     {
@@ -43,7 +43,7 @@ namespace RoXamiRenderPipeline
 
             // RoXamiRPCopyTexture(cmd, 
             //     ShaderDataID.cameraDepthAttachmentId, 
-            //     ShaderDataID.cameraDepthCopyTextureID);
+            //     renderingData.renderer.GetCameraDepthCopyRT());
 
             cmd.EndSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
@@ -77,7 +77,7 @@ namespace RoXamiRenderPipeline
 
         void ClearCmdRenderTarget()
         {
-            cmd.SetRenderTarget(gBufferTargets, ShaderDataID.cameraDepthAttachmentId);
+            cmd.SetRenderTarget(gBufferTargets, renderingData.renderer.GetCameraDepthBufferRT());
 
             cmd.ClearRenderTarget(true, true, Color.clear);
         }

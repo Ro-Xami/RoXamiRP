@@ -49,18 +49,26 @@ float3 SampleEnvironmentCube(float3 normalWS , float3 viewWS , float mip) {
 	return DecodeHDREnvironment(environment, _RoXamiRpReflectionTexture_HDR);
 }
 
+float3 GetGiSpecular(Surface surfaceData, Input inputData)
+{
+	float3 specular;
+	float mip = PerceptualRoughnessToMipmapLevel(surfaceData.roughness);
+	#ifdef SCREENSPACE_REFLECTION
+	float4 ssr = SampleSSRTexture(inputData.screenSpaceUV, mip);
+	float3 cube = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , mip);
+	specular = lerp(cube, ssr.rgb, ssr.a);
+	#else
+	specular = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , mip);
+	#endif
+
+	return specular;
+}
+
 GI GetGI(Input inputData , Surface surfaceData)
 {
 	GI OUT = (GI)0;
 	OUT.diffuse = SampleLightProbe(inputData.normalWS);
-	float mip = PerceptualRoughnessToMipmapLevel(surfaceData.roughness);
-	#ifdef SCREENSPACE_REFLECTION
-		float4 ssr = SampleSSRTexture(inputData.screenSpaceUV, mip);
-		float3 cube = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , mip);
-		OUT.specular = lerp(cube, ssr.rgb, ssr.a);
-	#else
-		OUT.specular = SampleEnvironmentCube(inputData.normalWS , inputData.viewWS , mip);
-	#endif
+	OUT.specular = GetGiSpecular(surfaceData, inputData);
 
 	return OUT;
 }

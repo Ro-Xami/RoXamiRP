@@ -1,4 +1,4 @@
-﻿namespace RoXamiRenderPipeline
+﻿namespace RoXamiRP
 {
     public abstract class RoXamiSceneWindowBase
     {

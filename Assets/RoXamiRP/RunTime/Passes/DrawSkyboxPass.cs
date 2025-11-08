@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class DrawSkyboxPass : RoXamiRenderPass
     {
@@ -45,23 +45,16 @@ namespace RoXamiRenderPipeline
         private void SetRenderTarget(CommandBuffer cmd)
         {
             cmd.SetRenderTarget(
-                ShaderDataID.cameraColorAttachmentId,
+                renderingData.renderer.GetCameraColorBufferRT(),
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.renderer.GetCameraDepthBufferRT(),
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
         }
 
         void DrawSkybox()
         {
             context.DrawSkybox(renderingData.cameraData.camera);
-            CopyCameraColor(cmd);
             context.Submit();
-        }
-
-        void CopyCameraColor(CommandBuffer cmd)
-        {
-            cmd.CopyTexture(ShaderDataID.cameraColorAttachmentId, ShaderDataID.cameraColorCopyTextureID);
-            cmd.CopyTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
         }
     }
 }

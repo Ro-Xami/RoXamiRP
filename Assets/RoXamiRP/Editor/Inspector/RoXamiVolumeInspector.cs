@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [CustomEditor(typeof(RoXamiVolume))]
     public class RoXamiVolumeInspector : Editor

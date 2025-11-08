@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [ExecuteAlways]
     public class ScreenShotBlurUI : MonoBehaviour

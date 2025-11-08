@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class CopyCameraDepthPass : RoXamiRenderPass
     {
@@ -22,7 +22,8 @@ namespace RoXamiRenderPipeline
             ExecuteCommandBuffer(context, cmd);
           
             RoXamiRPCopyTexture(cmd, 
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.renderer.GetCameraDepthBufferRT(),
+                renderingData.renderer.GetCameraDepthCopyRT(), 
                 ShaderDataID.cameraDepthCopyTextureID);
           
             cmd.EndSample(bufferName);

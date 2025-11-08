@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class CopyCameraColorPass : RoXamiRenderPass
     {
@@ -22,7 +22,8 @@ namespace RoXamiRenderPipeline
           ExecuteCommandBuffer(context, cmd);
           
           RoXamiRPCopyTexture(cmd, 
-              ShaderDataID.cameraColorAttachmentId,
+              renderingData.renderer.GetCameraColorBufferRT(),
+              renderingData.renderer.GetCameraColorCopyRT(),
               ShaderDataID.cameraColorCopyTextureID);
           
           cmd.EndSample(bufferName);

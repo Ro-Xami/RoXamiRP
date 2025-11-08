@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class RenderObjectsFeature : RoXamiRenderFeature
     {
@@ -110,11 +110,11 @@ namespace RoXamiRenderPipeline
             pass = new RenderObjectsPass(settings);
         }
 
-        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
             if (pass != null)
             {
-                renderLoop.EnqueuePass(pass);
+                renderer.EnqueuePass(pass);
             }
             
         }

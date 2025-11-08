@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [CreateAssetMenu(fileName = "RoXamiRenderer Asset", menuName = "RoXamiRP/RoXamiRenderer Asset")]
 

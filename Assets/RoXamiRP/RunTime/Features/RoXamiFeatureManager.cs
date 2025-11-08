@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using UnityEngine.Device;
+using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public enum RoXamiFeatureStack
     {
@@ -29,12 +31,12 @@ namespace RoXamiRenderPipeline
 
         private readonly Dictionary<int, bool> m_Features = new Dictionary<int, bool>();
 
-        public void SetActive(RoXamiFeatureStack stack, bool active)
+        public void SetFeatureActive(RoXamiFeatureStack stack, bool active)
         {
             m_Features[(int)stack] = active;
         }
 
-        public bool IsActive(RoXamiFeatureStack stack)
+        public bool IsFeatureActive(RoXamiFeatureStack stack)
         {
             if (!m_Features.TryGetValue((int)stack, out var active))
             {

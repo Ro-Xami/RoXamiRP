@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [Serializable]
     public class ColorAdjustment : RoXamiVolumeBase

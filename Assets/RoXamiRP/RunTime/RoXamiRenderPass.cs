@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public enum RenderPassEvent
     {
@@ -186,9 +186,10 @@ namespace RoXamiRenderPipeline
             CoreRpToRoXamiRP.SHUtility.UploadToShader();
         }
 
-        protected void RoXamiRPCopyTexture(CommandBuffer cmd, int from, int to)
+        protected void RoXamiRPCopyTexture(CommandBuffer cmd, RTHandle from, RTHandle to, int nameID)
         {
             cmd.CopyTexture(from, to);
+            cmd.SetGlobalTexture(nameID, to);
         }
 
         public static bool operator <(RoXamiRenderPass lhs, RoXamiRenderPass rhs)

@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class LutMaker : EditorWindow
     {

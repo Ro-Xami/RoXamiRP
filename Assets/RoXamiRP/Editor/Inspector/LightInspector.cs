@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [CanEditMultipleObjects]
         [CustomEditor(typeof(Light))]

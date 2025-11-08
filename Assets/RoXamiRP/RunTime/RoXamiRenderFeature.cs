@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [ExcludeFromPreset]
     public abstract class RoXamiRenderFeature : ScriptableObject, IDisposable
@@ -11,7 +11,7 @@ namespace RoXamiRenderPipeline
         
         public abstract void Create();
 
-        public abstract void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData);
+        public abstract void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData);
 
         public void OnEnable()
         {

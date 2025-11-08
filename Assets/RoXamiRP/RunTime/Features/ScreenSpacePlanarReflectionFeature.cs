@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [Serializable]
 
@@ -72,7 +72,7 @@ namespace RoXamiRenderPipeline
                 cmd.SetComputeVectorParam(compute, texelSizeID,
                     new Vector4(width, height, 1 / (float)width, 1 / (float)height));
                 cmd.SetComputeTextureParam(compute, ssprKernel,
-                    ShaderDataID.cameraDepthCopyTextureID, ShaderDataID.cameraDepthCopyTextureID);
+                    renderingData.renderer.GetCameraDepthCopyRT(), renderingData.renderer.GetCameraDepthCopyRT());
                 cmd.SetComputeTextureParam(compute, ssprKernel,
                     ShaderDataID.cameraColorCopyTextureID, ShaderDataID.cameraColorCopyTextureID);
                 cmd.SetComputeTextureParam(compute, ssprKernel,
@@ -113,14 +113,14 @@ namespace RoXamiRenderPipeline
             pass = new ScreenSpacePlanarReflectionPass(RenderPassEvent.AfterRenderingSkybox, ssprCompute, planeHeight);
         }
 
-        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
             if (!ssprCompute)
             {
                 return;
             }
             
-            renderLoop.EnqueuePass(pass);
+            renderer.EnqueuePass(pass);
         }
     }
 }

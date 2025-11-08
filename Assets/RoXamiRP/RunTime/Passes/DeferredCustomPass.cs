@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class DeferredCustomPass : RoXamiRenderPass
     {
@@ -110,7 +110,7 @@ namespace RoXamiRenderPipeline
         // void SetClearRenderTarget()
         // {
         //     cmd.SetRenderTarget(
-        //         ShaderDataID.cameraColorAttachmentId,
+        //         renderingData.renderer.GetCameraColorBufferRT(),
         //         RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
         //         ShaderDataID.cameraDepthAttachmentId,
         //         RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);

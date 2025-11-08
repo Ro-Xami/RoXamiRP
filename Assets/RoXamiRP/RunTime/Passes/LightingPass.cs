@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
-using RoXamiRenderPipeline;
+using RoXamiRP;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class LightingPass : RoXamiRenderPass
     {

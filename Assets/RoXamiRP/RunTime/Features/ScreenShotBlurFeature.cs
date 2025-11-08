@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public enum BlurMode
     {
@@ -37,7 +37,7 @@ namespace RoXamiRenderPipeline
                 return;
             }
             
-            RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, true);
+            RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.ScreenShotBlurUI, true);
         }
 
         public static void EndBlur()
@@ -51,12 +51,12 @@ namespace RoXamiRenderPipeline
             pass = new BlurPass(blurMode, blurSettings, blurMaterial);
         }
 
-        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenShotBlurUI))
+            if (RoXamiFeatureManager.Instance.IsFeatureActive(RoXamiFeatureStack.ScreenShotBlurUI))
             {
-                renderLoop.EnqueuePass(pass);
-                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
+                renderer.EnqueuePass(pass);
+                RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
             }
         }
 
@@ -144,7 +144,7 @@ namespace RoXamiRenderPipeline
                     DrawDontCareDontCare
                     (
                         cmd, 
-                        i == 0 ? ShaderDataID.cameraColorAttachmentId: gaussianDownSample, 
+                        i == 0 ? renderingData.renderer.GetCameraColorBufferRT(): gaussianDownSample, 
                         gaussianUpSample, 
                         blurMaterial, 0
                     );

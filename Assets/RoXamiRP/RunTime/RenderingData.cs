@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using RoXamiRenderPipeline;
+using RoXamiRP;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public struct RenderingData
     {
@@ -17,6 +17,7 @@ namespace RoXamiRenderPipeline
         public AntialiasingSettings antialiasingSettings;
         public LightData lightData;
         public RuntimeData runtimeData;
+        public RoXamiRenderer renderer;
     }
 
     public struct LightData
@@ -42,7 +43,7 @@ namespace RoXamiRenderPipeline
     public struct RuntimeData
     {
         public bool isDeferred;
-        public bool isFinalBlit;
+        public bool isCameraStackFinally;
         public bool isCastShadows;
         public bool isPost;
         public bool isAntialiasing;
@@ -65,11 +66,14 @@ namespace RoXamiRenderPipeline
         public static readonly ShaderTagId unityLitShaderTagId = new ShaderTagId("UniversalForward");
         public static readonly ShaderTagId unityUnlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
 
-        public static readonly int cameraDepthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
-        public static int cameraColorAttachmentId;
+        public const string cameraColorAttachmentBufferAName = "_CameraColorAttachmentA";
+        public const string cameraColorAttachmentBufferBName = "_CameraColorAttachmentB";
         
-        public static readonly int cameraColorAttachmentAId = Shader.PropertyToID("_CameraColorAttachmentA");
-        public static readonly int cameraColorAttachmentBId = Shader.PropertyToID("_CameraColorAttachmentB");
+        public const string cameraDepthAttachmentBufferName = "_CameraDepthAttachment";
+        public const string cameraDepthCopyTextureName = "_CameraDepthCopyRT";
+        
+        public static readonly int cameraDepthCopyTextureID = Shader.PropertyToID("_CameraDepthTexture");
+        public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_CameraColorTexture");
         
         public static readonly int[] gBufferNameIDs = new int[]
         {
@@ -78,10 +82,7 @@ namespace RoXamiRenderPipeline
             Shader.PropertyToID("_GBuffer2"),
             Shader.PropertyToID("_GBuffer3"),
         };
-        
-        public static readonly int cameraDepthCopyTextureID = Shader.PropertyToID("_CameraDepthTexture");
-        public static readonly int cameraColorCopyTextureID = Shader.PropertyToID("_CameraColorTexture");
-        
+
         public static readonly int TempRtSource0ID = Shader.PropertyToID("_TempRtSource0");
         public static readonly int TempRtSource1ID = Shader.PropertyToID("_TempRtSource1");
         

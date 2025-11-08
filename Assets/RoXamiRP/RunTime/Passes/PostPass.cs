@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class PostPass : RoXamiRenderPass
     {
@@ -50,15 +50,14 @@ namespace RoXamiRenderPipeline
             Draw
             (
                 postCmd, 
-                ShaderDataID.cameraColorAttachmentId,
+                renderingData.renderer.GetCameraColorBufferRT(),
                 //==================================================
                 //Draw to
-                renderingData.runtimeData.isFinalBlit && 
+                renderingData.runtimeData.isCameraStackFinally && 
                 !renderingData.cameraData.additionalCameraData.enableAntialiasing && 
                 renderingData.antialiasingSettings.antialiasingMode != AntialiasingMode.None?
                     BuiltinRenderTextureType.CameraTarget:
-                    ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentId == ShaderDataID.cameraColorAttachmentAId?
-                        ShaderDataID.cameraColorAttachmentBId : ShaderDataID.cameraColorAttachmentAId,
+                    renderingData.renderer.GetSwitchCameraColorBufferRT(),
                 //==================================================
                 PostShaderPass.combine
             );
@@ -112,7 +111,7 @@ namespace RoXamiRenderPipeline
 
             //Filter
             bloomCmd.GetTemporaryRT(bloomFilterID, width, height, 0, filter, format);
-            Draw(bloomCmd, ShaderDataID.cameraColorAttachmentId, bloomFilterID, PostShaderPass.filter);
+            Draw(bloomCmd, renderingData.renderer.GetCameraColorBufferRT(), bloomFilterID, PostShaderPass.filter);
         
             //DownSample
             bloomDownSampleIDs = new int[sampleCount];

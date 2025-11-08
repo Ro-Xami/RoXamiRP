@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class ScreenSpaceReflectionFeature : RoXamiRenderFeature
     {
@@ -27,18 +27,26 @@ namespace RoXamiRenderPipeline
                 return;
             }
 
-            ssr = new SsrPass(settings);
+            if (ssr == null)
+            {
+                ssr = new SsrPass(settings);
+            }
         }
 
-        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
             //&& RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenSpaceReflectionFeature)
             if (ssr != null)
             {
-                renderLoop.EnqueuePass(ssr);
+                renderer.EnqueuePass(ssr);
             }
         }
-        
+
+        protected override void Dispose(bool disposing)
+        {
+            ssr?.Dispose();
+        }
+
         private class SsrPass : RoXamiRenderPass
         {
             private readonly SsrSettings settings;
@@ -60,6 +68,8 @@ namespace RoXamiRenderPipeline
             {
                 name = bufferName,
             };
+
+            private RTHandle ssrRT;
             
             private readonly int 
                 ssrTextureID = Shader.PropertyToID("_ScreenSpaceReflectionTexture"),
@@ -68,13 +78,19 @@ namespace RoXamiRenderPipeline
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
             {
-                
+                var cameraData = renderingData.cameraData;
+                var descriptor = renderingData.cameraData.cameraColorDescriptor;
+                descriptor.enableRandomWrite = true;
+                descriptor.useMipMap = true;
+                descriptor.autoGenerateMips = true;
+                descriptor.mipCount = 7;
+
+                RoXamiRTHandlePool.GetRTHandleIfNeeded(ref ssrRT, descriptor, name:"ScreenSpaceReflectionTexture", FilterMode.Bilinear);
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 if (settings == null || !settings.computeShader || kernel < 0)
-                   // !renderingData.rendererAsset.rendererSettings.enableDeferredRendering
                 {
                     cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
                     return;
@@ -88,6 +104,8 @@ namespace RoXamiRenderPipeline
                 GetSetClearRtTarget(renderingData, out int width, out int height);
 
                 Draw(width, height);
+                
+                cmd.SetGlobalTexture(ssrTextureID, ssrRT);
 
                 cmd.EndSample(bufferName);
                 ExecuteCommandBuffer(context, cmd);
@@ -101,10 +119,10 @@ namespace RoXamiRenderPipeline
                 cmd.SetComputeVectorParam(cs, texelSizeID,
                     new Vector4(width, height, 1 / (float)width, 1 / (float)height));
                 
-                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraColorCopyTextureID, ShaderDataID.cameraColorAttachmentId);
-                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthCopyTextureID, ShaderDataID.cameraDepthAttachmentId);
+                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraColorCopyTextureID, renderingData.renderer.GetCameraColorBufferRT());
+                cmd.SetComputeTextureParam(cs, kernel, renderingData.renderer.GetCameraDepthCopyRT(), renderingData.renderer.GetCameraDepthBufferRT());
                 cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal]);
-                cmd.SetComputeTextureParam(cs, kernel, ssrTextureID, ssrTextureID);
+                cmd.SetComputeTextureParam(cs, kernel, ssrTextureID, ssrRT);
                 
                 int threadGroupX = Mathf.CeilToInt(width / 8.0f);
                 int threadGroupY = Mathf.CeilToInt(height / 8.0f);
@@ -121,16 +139,17 @@ namespace RoXamiRenderPipeline
                 width = descriptor.width;
                 height =descriptor.height;
                 
-                cmd.GetTemporaryRT(ssrTextureID,descriptor, FilterMode.Bilinear);
-                //cmd.GenerateMips(ssrTextureID);
-                
-                cmd.SetRenderTarget(ssrTextureID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
-                //cmd.ClearRenderTarget(true, true, Color.clear);
+                cmd.SetRenderTarget(ssrRT, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
             }
 
             public override void CleanUp()
             {
-                cmd.ReleaseTemporaryRT(ssrTextureID);
+                
+            }
+
+            public void Dispose()
+            {
+                ssrRT?.Release();
             }
         }
     }

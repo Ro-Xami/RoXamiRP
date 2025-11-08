@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [Serializable]
     public class DeferredLitSettings
@@ -46,24 +46,24 @@ namespace RoXamiRenderPipeline
             deferredGiPass = new DeferredGiPass(RenderPassEvent.BeforeRenderingDeferredGI + 10);
         }
 
-        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
             renderingData.runtimeData.isDeferred = true;
             
-            renderLoop.EnqueuePass(gBufferPass);
+            renderer.EnqueuePass(gBufferPass);
             
-            renderLoop.EnqueuePass(copyDepthPass);
+            renderer.EnqueuePass(copyDepthPass);
             
-            renderLoop.EnqueuePass(ssShadowsPass);
+            renderer.EnqueuePass(ssShadowsPass);
             
-            renderLoop.EnqueuePass(deferredDiffusePass);
+            renderer.EnqueuePass(deferredDiffusePass);
             
             if (deferredCustomLitSettings != null && deferredCustomLitSettings.Length != 0)
             {
-                renderLoop.EnqueuePass(deferredCustomPass);
+                renderer.EnqueuePass(deferredCustomPass);
             }
             
-            renderLoop.EnqueuePass(deferredGiPass);
+            renderer.EnqueuePass(deferredGiPass);
         }
     }
 }

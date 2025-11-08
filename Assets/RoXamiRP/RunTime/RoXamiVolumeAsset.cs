@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [ExcludeFromPreset]
     public abstract class RoXamiVolumeBase : ScriptableObject

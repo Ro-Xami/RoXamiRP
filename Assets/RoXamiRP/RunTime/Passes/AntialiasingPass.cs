@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class AntialiasingPass : RoXamiRenderPass
     {
@@ -64,12 +64,12 @@ namespace RoXamiRenderPipeline
 
         void DrawFXAAQuality(ShaderAsset shaderAsset)
         {
-            FinalDraw(ShaderDataID.cameraColorAttachmentId, shaderAsset.fxaaMaterial, 0);
+            FinalDraw(renderingData.renderer.GetCameraColorBufferRT(), shaderAsset.fxaaMaterial, 0);
         }
         
         void DrawFXAAConsole(ShaderAsset shaderAsset)
         {
-            FinalDraw(ShaderDataID.cameraColorAttachmentId, shaderAsset.fxaaMaterial, 1);
+            FinalDraw(renderingData.renderer.GetCameraColorBufferRT(), shaderAsset.fxaaMaterial, 1);
         }
         
         void DrawSMAA(ShaderAsset shaderAsset)
@@ -80,23 +80,22 @@ namespace RoXamiRenderPipeline
             cmd.GetTemporaryRT(smaaFactorRTID, 
                 cameraData.cameraColorDescriptor, FilterMode.Bilinear);
             
-            Draw(ShaderDataID.cameraColorAttachmentId, smaaEdgeRTID,
+            Draw(renderingData.renderer.GetCameraColorBufferRT(), smaaEdgeRTID,
                 shaderAsset.smaaMaterial, 0);
             
             Draw(smaaEdgeRTID, smaaFactorRTID,
                 shaderAsset.smaaMaterial, 1);
             
-            FinalDraw(ShaderDataID.cameraColorAttachmentId, shaderAsset.smaaMaterial, 2);
+            FinalDraw(renderingData.renderer.GetCameraColorBufferRT(), shaderAsset.smaaMaterial, 2);
         }
 
         void FinalDraw(RenderTargetIdentifier from, Material mat, int passIndex)
         {
             Draw(
                 from,
-                renderingData.runtimeData.isFinalBlit?
+                renderingData.runtimeData.isCameraStackFinally?
                     BuiltinRenderTextureType.CameraTarget:
-                    ShaderDataID.cameraColorAttachmentId = ShaderDataID.cameraColorAttachmentId == ShaderDataID.cameraColorAttachmentAId?
-                        ShaderDataID.cameraColorAttachmentBId : ShaderDataID.cameraColorAttachmentAId,
+                    renderingData.renderer.GetSwitchCameraColorBufferRT(),
                 mat, passIndex);
         }
 
@@ -107,7 +106,7 @@ namespace RoXamiRenderPipeline
             cmd.SetRenderTarget(
                 to,
                 RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.renderer.GetCameraDepthBufferRT(),
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             
             cmd.DrawProcedural(

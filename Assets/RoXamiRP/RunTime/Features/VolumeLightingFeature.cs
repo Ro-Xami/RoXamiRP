@@ -1,5 +1,5 @@
 using System;
-using RoXamiRenderPipeline;
+using RoXamiRP;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -61,9 +61,9 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         CreateRadioBlurTypePass();
     }
 
-    public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+    public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
     {
-        AddTypePass(renderLoop, renderingData);
+        AddTypePass(renderer, renderingData);
     }
 
     protected override void Dispose(bool disposing)
@@ -71,7 +71,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         CoreUtils.Destroy(rayMarchMaterial);
     }
     
-    private void AddTypePass(RoXamiRenderLoop renderLoop, RenderingData renderingData)
+    private void AddTypePass(RoXamiRenderer renderer, RenderingData renderingData)
     {
         var volumeSettings = RoXamiVolume.Instance.GetVolumeComponent<VolumeLighting>();
         if (!volumeSettings || !volumeSettings.isActive)
@@ -85,7 +85,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                 if (rayMarchPass != null)
                 {
                     rayMarchPass.volumeSettings = volumeSettings;
-                    renderLoop.EnqueuePass(rayMarchPass);
+                    renderer.EnqueuePass(rayMarchPass);
                 }
                 break;
             
@@ -93,7 +93,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                 if (radioBlurPass != null && radioBlurSettings is not { blurIterations: < 1 })
                 {
                     radioBlurPass.volumeSettings = volumeSettings;
-                    renderLoop.EnqueuePass(radioBlurPass);
+                    renderer.EnqueuePass(radioBlurPass);
                 }
                 break;
         }
@@ -201,9 +201,9 @@ public class VolumeLightingFeature : RoXamiRenderFeature
 
         void DrawFilter()
         {
-            cmd.SetGlobalTexture(ShaderDataID.cameraDepthAttachmentId, ShaderDataID.cameraDepthCopyTextureID);
+            cmd.SetGlobalTexture(renderingData.renderer.GetCameraDepthBufferRT(), renderingData.renderer.GetCameraDepthCopyRT());
             DrawDontCareStore(cmd, 
-                ShaderDataID.cameraColorAttachmentId, radioBlurVolumeLightingTextureAID,
+                renderingData.renderer.GetCameraColorBufferRT(), radioBlurVolumeLightingTextureAID,
                 m_Material, 0);
         }
 
@@ -231,7 +231,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                     //from
                     isAB? radioBlurVolumeLightingTextureAID : radioBlurVolumeLightingTextureBID, 
                     //to
-                    isFinalDraw? ShaderDataID.cameraColorAttachmentId: 
+                    isFinalDraw? renderingData.renderer.GetCameraColorBufferRT(): 
                     isAB? radioBlurVolumeLightingTextureBID : radioBlurVolumeLightingTextureAID, 
                     //mat
                     m_Material, isFinalDraw ? 2: 1);
@@ -369,7 +369,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                 new Vector4(width, height, 1 / (float)width, 1 / (float)height));
             cmd.SetComputeFloatParam(cs, volumeLightDownSampleID, settings.downSample);
             
-            cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthCopyTextureID, ShaderDataID.cameraDepthAttachmentId);
+            cmd.SetComputeTextureParam(cs, kernel, renderingData.renderer.GetCameraDepthCopyRT(), renderingData.renderer.GetCameraDepthBufferRT());
             cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.directionalShadowAtlasID, ShaderDataID.directionalShadowAtlasID);
             cmd.SetComputeTextureParam(cs, kernel, volumeLightingTextureID, volumeLightingTextureID);
                 
@@ -380,7 +380,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
 
         void DrawBlur()
         {
-            cmd.SetRenderTarget(ShaderDataID.cameraColorAttachmentId, 
+            cmd.SetRenderTarget(renderingData.renderer.GetCameraColorBufferRT(), 
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             DrawFullScreenTriangles(cmd, m_Material, passIndex);
         }

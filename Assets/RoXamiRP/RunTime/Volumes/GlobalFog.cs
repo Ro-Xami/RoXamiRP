@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [Serializable]
     public enum FogMode
@@ -36,14 +36,14 @@ namespace RoXamiRenderPipeline
             if (isActive && fogMode != FogMode.None)
             {
                 SetKeyword(fogMode);
-                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.GlobalFog, true);
+                RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.GlobalFog, true);
                 Shader.SetGlobalVector(fogParamsID, new Vector4(start, end, fogDensity, 1f));
                 Shader.SetGlobalColor(fogColorID, fogColor);
             }
             else
             {
                 SetKeyword(FogMode.None);
-                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.GlobalFog, false);
+                RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.GlobalFog, false);
             }
         }
 

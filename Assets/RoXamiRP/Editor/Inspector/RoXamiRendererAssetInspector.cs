@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [CustomEditor(typeof(RoXamiRendererAsset))]
 

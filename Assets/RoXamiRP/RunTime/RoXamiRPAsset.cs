@@ -4,33 +4,23 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [CreateAssetMenu(fileName = "RoXamiRPAsset", menuName = "RoXamiRP/RoXamiRP Asset")]
     public class RoXamiRPAsset : RenderPipelineAsset, IDisposable
     {
-        private static RoXamiRPAsset m_Instance;
-        public static RoXamiRPAsset Instance
-        {
-            get
-            {
-                if (m_Instance == null)
-                {
-                    m_Instance = ScriptableObject.CreateInstance<RoXamiRPAsset>();
-                }
-                return m_Instance;
-            }
-        }
-        
+        //===============================================================================//
+        //===================================Property====================================//
+        //===============================================================================//
         public RoXamiRendererAsset[] rendererAssets;
 
         public CommonSettings commonSettings;
 
         public AntialiasingSettings antialiasingSettings;
 
-        [SerializeField] ShadowSettings shadowSettings = default;
+        public ShadowSettings shadowSettings = default;
 
-        [SerializeField] public ShaderAsset shaderAsset = new ShaderAsset();
+        public ShaderAsset shaderAsset = new ShaderAsset();
         
         private readonly string[] antialiasingQualityKeywords = new string[]
         {
@@ -46,30 +36,10 @@ namespace RoXamiRenderPipeline
             "_DIRECTIONAL_PCF5",
             "_DIRECTIONAL_PCF7"
         };
-
-        protected override RenderPipeline CreatePipeline()
-        {
-            return new RoXamiRP(shadowSettings, shaderAsset, rendererAssets, commonSettings, antialiasingSettings);
-        }
-
-        private void OnEnable()
-        {
-            m_Instance = this;
-            UpdateRoXamiRPSettings();
-        }
-
-        protected override void OnValidate()
-        {
-            m_Instance = this;
-            UpdateRoXamiRPSettings();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
+        
+        //===============================================================================//
+        //==================================UpdateVoid===================================//
+        //===============================================================================//
         private void Dispose(bool disposing)
         {
             CoreUtils.Destroy(shaderAsset.postMaterial);
@@ -134,8 +104,40 @@ namespace RoXamiRenderPipeline
                 cs.EnableKeyword(pcfKeyWords[(int)filter]);
             }
         }
+        
+        //===============================================================================//
+        //=======================================Base====================================//
+        //===============================================================================//
+
+        public RoXamiRenderPipline m_RoXamiRP;
+        
+        protected override RenderPipeline CreatePipeline()
+        {
+            m_RoXamiRP = new RoXamiRenderPipline(this);
+            
+            return m_RoXamiRP;
+        }
+
+        private void OnEnable()
+        {
+            UpdateRoXamiRPSettings();
+        }
+
+        protected override void OnValidate()
+        {
+            UpdateRoXamiRPSettings();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 
+    //===============================================================================//
+    //=================================SettingClasses================================//
+    //===============================================================================//
     [Serializable]
     public class AntialiasingSettings
     {

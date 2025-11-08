@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     [System.Serializable]
     public class Bloom : RoXamiVolumeBase

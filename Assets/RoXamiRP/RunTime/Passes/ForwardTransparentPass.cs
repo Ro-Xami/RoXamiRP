@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class ForwardTransparentPass : RoXamiRenderPass
     {
@@ -44,9 +44,9 @@ namespace RoXamiRenderPipeline
         private void SetRenderTarget(CommandBuffer cmd)
         {
             cmd.SetRenderTarget(
-                ShaderDataID.cameraColorAttachmentId,
+                renderingData.renderer.GetCameraColorBufferRT(),
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                ShaderDataID.cameraDepthAttachmentId,
+                renderingData.renderer.GetCameraDepthBufferRT(),
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
         }
 

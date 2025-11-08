@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class RenderingPrePasses : RoXamiRenderPass
     {

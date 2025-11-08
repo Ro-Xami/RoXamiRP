@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace RoXamiRenderPipeline
+namespace RoXamiRP
 {
     public class GlobalFogFeature : RoXamiRenderFeature
     {
@@ -29,11 +29,11 @@ namespace RoXamiRenderPipeline
             pass = new GlobalFogPass(renderPassEvent, mat, passIndex);
         }
 
-        public override void AddRenderPasses(RoXamiRenderLoop renderLoop, ref RenderingData renderingData)
+        public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.GlobalFog))
+            if (RoXamiFeatureManager.Instance.IsFeatureActive(RoXamiFeatureStack.GlobalFog))
             {
-                renderLoop.EnqueuePass(pass);
+                renderer.EnqueuePass(pass);
             }
         }
 
@@ -72,11 +72,11 @@ namespace RoXamiRenderPipeline
                 }
                 
                 cmd.SetGlobalTexture(
-                    ShaderDataID.cameraDepthCopyTextureID, 
-                    ShaderDataID.cameraDepthAttachmentId);
+                    renderingData.renderer.GetCameraDepthCopyRT(), 
+                    renderingData.renderer.GetCameraDepthBufferRT());
                 
                 cmd.SetRenderTarget(
-                    ShaderDataID.cameraColorAttachmentId, 
+                    renderingData.renderer.GetCameraColorBufferRT(), 
                     RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
                 
                 cmd.BeginSample(bufferName);
