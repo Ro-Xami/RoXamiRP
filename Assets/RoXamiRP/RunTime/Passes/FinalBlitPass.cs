@@ -38,7 +38,7 @@ namespace RoXamiRP
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void CleanUp(CommandBuffer commandBuffer)
         {
         }
     }

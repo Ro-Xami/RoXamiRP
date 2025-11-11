@@ -9,75 +9,93 @@ namespace RoXamiRP
         public ScreenSpaceShadowsPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
         const string bufferName = "RoXami ScreenSpaceShadows";
+        private CommandBuffer cmd;
 
-        private static readonly CommandBuffer cmd = new()
+        private const string screenSpaceShadowsRtName = "_ScreenSpaceShadowsTexture";
+        static readonly int screenSpaceShadowsRtID = Shader.PropertyToID(screenSpaceShadowsRtName);
+        private RTHandle screenSpaceShadowsRT;
+
+        private RenderTextureDescriptor screenSpaceShadowsRtDesc = new RenderTextureDescriptor(1, 1)
         {
-            name = bufferName,
+            depthBufferBits = 0,
+            colorFormat = RenderTextureFormat.RFloat,
+            enableRandomWrite = true,
+            msaaSamples = 1,
         };
-
-        static readonly int screenSpaceShadowsTextureID = Shader.PropertyToID("_ScreenSpaceShadowsTexture");
+        
         static readonly int textureSizeID = Shader.PropertyToID("_TextureSize");
         private const string kernelName = "ScreenSpaceShadows";
         RenderingData renderingData;
 
         ComputeShader cs;
-        private bool needToDraw = false;
+        private int kernel = -1;
+        private RTHandle directionalShadowAtlas;
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
         {
             renderingData = renderData;
+            cmd = renderData.commandBuffer;
 
+            directionalShadowAtlas = renderingData.cameraData.directionalLightShadowAtlas;
             cs = renderingData.shaderAsset.screenSpaceShadowComputeShader;
+
+            if (!cs) 
+            {
+                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                ExecuteCommandBuffer(context, cmd);
+                
+                return;
+            }
+
+            kernel = cs.FindKernel(kernelName);
             
-            needToDraw = cs &&
-                 renderingData.runtimeData.isCastShadows;
-            
-            if (needToDraw)
+            if (kernel < 0 || !renderingData.runtimeData.isCastShadows ||
+                directionalShadowAtlas == null || !directionalShadowAtlas.rt)
+            {
+                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                ExecuteCommandBuffer(context, cmd);
+                
+                return;
+            }
+
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
                 
-                int width = renderingData.cameraData.width;
-                int height = renderingData.cameraData.height;
-                cmd.GetTemporaryRT(screenSpaceShadowsTextureID,
-                    width, height, 0, FilterMode.Bilinear, RenderTextureFormat.RFloat,
-                    RenderTextureReadWrite.Linear, 1, true);
-                cmd.SetRenderTarget(screenSpaceShadowsTextureID,
+                int width = screenSpaceShadowsRtDesc.width = renderingData.cameraData.width;
+                int height = screenSpaceShadowsRtDesc.height = renderingData.cameraData.height;
+
+                RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                    ref screenSpaceShadowsRT, screenSpaceShadowsRtDesc, FilterMode.Bilinear, screenSpaceShadowsRtName);
+                cmd.SetRenderTarget(screenSpaceShadowsRT,
                     RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
-                cmd.BeginSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
 
                 ComputeScreenSpaceShadows(width, height);
-
-                cmd.EndSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
+                
+                cmd.SetGlobalTexture(screenSpaceShadowsRtID, screenSpaceShadowsRT);
             }
-            else
-            {
-                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
-            }
+            ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void Dispose()
         {
-            if (needToDraw)
-            {
-                cmd.ReleaseTemporaryRT(screenSpaceShadowsTextureID);
-            }
+            screenSpaceShadowsRT?.Release();
         }
 
         private void ComputeScreenSpaceShadows(int width, int height)
         {
-            int kernel = cs.FindKernel(kernelName);
-
             cmd.SetComputeVectorParam(cs,
                 textureSizeID, new Vector4(width, height, 1f / width, 1f / height));
             cmd.SetComputeTextureParam(cs, kernel,
-                ShaderDataID.directionalShadowAtlasID, ShaderDataID.directionalShadowAtlasID);
+                ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthBufferRT());
             cmd.SetComputeTextureParam(cs, kernel,
-                screenSpaceShadowsTextureID, screenSpaceShadowsTextureID);
+                ShaderDataID.directionalShadowAtlasID, renderingData.cameraData.directionalLightShadowAtlas);
+            cmd.SetComputeTextureParam(cs, kernel,
+                screenSpaceShadowsRtID, screenSpaceShadowsRT);
 
             int threadGroupX = Mathf.CeilToInt(width / 8.0f);
             int threadGroupY = Mathf.CeilToInt(height / 8.0f);

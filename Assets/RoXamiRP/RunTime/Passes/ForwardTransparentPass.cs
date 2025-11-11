@@ -7,17 +7,14 @@ namespace RoXamiRP
 {
     public class ForwardTransparentPass : RoXamiRenderPass
     {
+        const string bufferName = "RoXami Forward Transparent";
         public ForwardTransparentPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
-        static readonly string transparentBufferName = "RoXami Forward Transparent";
-
-        static readonly CommandBuffer transparentCmd = new CommandBuffer()
-        {
-            name = transparentBufferName
-        };
+        CommandBuffer cmd;
 
         private RenderingData renderingData;
         private ScriptableRenderContext context;
@@ -27,17 +24,18 @@ namespace RoXamiRP
             renderingData = renderData;
             context = scriptableRenderContext;
 
-            SetRenderTarget(transparentCmd);
-            transparentCmd.BeginSample(transparentBufferName);
-            ExecuteCommandBuffer(context, transparentCmd);
-
-            DrawTransparent();
-
-            transparentCmd.EndSample(transparentBufferName);
-            ExecuteCommandBuffer(context, transparentCmd);
+            cmd = renderingData.commandBuffer;
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                SetRenderTarget(cmd);
+                ExecuteCommandBuffer(context, cmd);
+                
+                DrawTransparent();
+            }
+            ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void CleanUp(CommandBuffer commandBuffer)
         {
         }
 
@@ -74,8 +72,6 @@ namespace RoXamiRP
 
             context.DrawRenderers(
                 renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-
-            context.Submit();
         }
     }
 }

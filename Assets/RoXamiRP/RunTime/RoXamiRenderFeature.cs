@@ -13,6 +13,11 @@ namespace RoXamiRP
 
         public abstract void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData);
 
+        protected bool IsGameOrSceneCamera(Camera camera)
+        {
+            return camera.cameraType == CameraType.Game || camera.cameraType == CameraType.SceneView;
+        }
+
         public void OnEnable()
         {
             Create();

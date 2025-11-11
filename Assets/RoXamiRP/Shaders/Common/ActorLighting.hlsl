@@ -25,7 +25,7 @@ ToonBRDF GetActorLitBRDFData(Input input, Surface surface, Light light)
 	float NoL;
 	ToonBRDF brdfData = GetToonBRDF(input, surface, light, NoL);
 
-	float clampedNoL = clamp((NoL * light.shadowAttenuation * 0.5f + 0.5f), 0.02f, 0.98f);
+	float clampedNoL = clamp((NoL * lerp(0.5, 1, light.shadowAttenuation) * 0.5f + 0.5f), 0.02f, 0.98f);
 	brdfData.toonDiffuse = SAMPLE_TEXTURE2D(_ActorLutMap, sampler_ActorLutMap, clampedNoL).rgb;
 
 	return brdfData;

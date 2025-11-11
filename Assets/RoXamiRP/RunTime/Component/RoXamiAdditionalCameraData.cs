@@ -24,7 +24,7 @@ namespace RoXamiRP
         {
             camera.TryGetComponent(out RoXamiAdditionalCameraData data);
 
-            AdditionalCameraData additionalCameraData = data == null
+            AdditionalCameraData additionalCameraData = !data
                 ? RoXamiAdditionalCameraData.DefaultAdditionalCameraData
                 : data.additionalCameraData ??
                   RoXamiAdditionalCameraData.DefaultAdditionalCameraData;
@@ -36,7 +36,7 @@ namespace RoXamiRP
     [Serializable]
     public class AdditionalCameraData
     {
-        [HideInInspector] public int roXamiRendererAssetID;
+        public RoXamiRendererAsset roXamiRendererAsset;
         public CameraRenderType cameraRenderType;
         public BackgroundType backgroundType;
         public List<Camera> cameraStack;
@@ -44,14 +44,28 @@ namespace RoXamiRP
         public bool enablePostProcessing;
         public bool enableAntialiasing;
 
-        public AdditionalCameraData(int roXamiRendererAssetID, CameraRenderType cameraRenderType, List<Camera> cameraStack)
+        private RoXamiRenderer m_Renderer;
+        internal RoXamiRenderer renderer
         {
-            this.roXamiRendererAssetID = roXamiRendererAssetID;
+            get
+            {
+                if (m_Renderer == null)
+                {
+                    m_Renderer = new RoXamiRenderer();
+                }
+                return m_Renderer;
+            }
+        }
+
+        public AdditionalCameraData(RoXamiRendererAsset roXamiRendererAsset, CameraRenderType cameraRenderType, List<Camera> cameraStack)
+        {
+            this.roXamiRendererAsset = roXamiRendererAsset;
             this.cameraRenderType = cameraRenderType;
             this.cameraStack = cameraStack;
         }
     }
 
+    [ExecuteAlways]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Camera))]
     public class RoXamiAdditionalCameraData : MonoBehaviour
@@ -71,7 +85,7 @@ namespace RoXamiRP
 
                     var rpAsset = (RoXamiRPAsset)GraphicsSettings.renderPipelineAsset;
                     defaultAdditionalCameraData =
-                        new AdditionalCameraData(0, CameraRenderType.Base, null);
+                        new AdditionalCameraData(RoXamiRendererAsset.defaultAsset, CameraRenderType.Base, null);
                     defaultAdditionalCameraData.backgroundType = BackgroundType.Skybox;
                     defaultAdditionalCameraData.enableScreenSpaceShadows = true;
                     defaultAdditionalCameraData.enablePostProcessing = true;

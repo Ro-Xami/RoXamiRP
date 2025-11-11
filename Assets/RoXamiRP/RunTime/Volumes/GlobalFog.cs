@@ -36,14 +36,14 @@ namespace RoXamiRP
             if (isActive && fogMode != FogMode.None)
             {
                 SetKeyword(fogMode);
-                RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.GlobalFog, true);
+                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.GlobalFog, true);
                 Shader.SetGlobalVector(fogParamsID, new Vector4(start, end, fogDensity, 1f));
                 Shader.SetGlobalColor(fogColorID, fogColor);
             }
             else
             {
                 SetKeyword(FogMode.None);
-                RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.GlobalFog, false);
+                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.GlobalFog, false);
             }
         }
 

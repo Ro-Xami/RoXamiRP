@@ -40,6 +40,8 @@ void ScreenSpaceShadows (uint3 id : SV_DispatchThreadID)
     float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
     float3 normalWS = _GBuffer1.SampleLevel(sampler_GBuffer1, screenSpaceUV, 0).xyz;
     float shadow = GetDirectionalShadowAttenuation(positionWS , normalWS);
+
+    //shadow = step(0.5, shadow);
     
     _ScreenSpaceShadowsTexture[id.xy] = float4(shadow.xxx, 1);
 }

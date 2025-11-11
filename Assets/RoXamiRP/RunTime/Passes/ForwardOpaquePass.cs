@@ -10,14 +10,10 @@ namespace RoXamiRP
         public ForwardOpaquePass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
-        static readonly string bufferName = "RoXami Forward Opaque";
-
-        static readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        const string bufferName = "RoXami Forward Opaque";
 
         private RenderingData renderingData;
         private ScriptableRenderContext context;
@@ -27,21 +23,23 @@ namespace RoXamiRP
             renderingData = renderData;
             context = scriptableRenderContext;
 
-            SetRenderTarget();
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
+            CommandBuffer cmd = renderingData.commandBuffer;
+            
+            SetRenderTarget(cmd);
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                ExecuteCommandBuffer(context, cmd);
 
-            DrawOpaque();
-
-            cmd.EndSample(bufferName);
+                DrawOpaque();
+            }
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void CleanUp(CommandBuffer commandBuffer)
         {
         }
 
-        private void SetRenderTarget()
+        private void SetRenderTarget(CommandBuffer cmd)
         {
             cmd.SetRenderTarget(
                 renderingData.renderer.GetCameraColorBufferRT(),
@@ -49,7 +47,7 @@ namespace RoXamiRP
                 renderingData.renderer.GetCameraDepthBufferRT(),
                 RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 
-            if (!renderingData.runtimeData.isDeferred)
+            if (renderingData.rendererSettings.rendererType == RendererType.Forward)
             {
                 cmd.ClearRenderTarget(
                     true,
@@ -82,8 +80,6 @@ namespace RoXamiRP
             FilteringSettings filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
             context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-            
-            context.Submit();
         }
     }
 }

@@ -24,8 +24,8 @@ namespace RoXamiRP
         public static bool GetRTHandleIfNeeded(
             ref RTHandle handle,
             in RenderTextureDescriptor descriptor,
-            string name = "",
             FilterMode filterMode = FilterMode.Point,
+            string name = "",
             TextureWrapMode wrapMode = TextureWrapMode.Repeat,
             bool isShadowMap = false,
             int anisoLevel = 1,
@@ -33,7 +33,9 @@ namespace RoXamiRP
         {
             if (RTHandleNeedsReAlloc(handle, descriptor))
             {
-                if (handle == null || handle.rt == null)
+                int key = GetRTHandleKey(handle, descriptor, name);
+                //Debug.Log("GetRTHandleIfNeeded");
+                if (handle == null || !handle.rt)
                 {
                     handle = RTHandles.Alloc(descriptor, filterMode, wrapMode, isShadowMap, anisoLevel, mipMapBias, name);
                 }
@@ -44,12 +46,12 @@ namespace RoXamiRP
                     handle = RTHandles.Alloc(descriptor, filterMode, wrapMode, isShadowMap, anisoLevel, mipMapBias, name);
                 }
 
-                if (m_RTHandles.TryGetValue(handle.GetInstanceID(), out var rtHandle))
+                if (m_RTHandles.TryGetValue(key, out var rtHandle))
                 {
                     rtHandle?.Release();
                 }
                 
-                m_RTHandles[handle.GetInstanceID()] = handle;
+                m_RTHandles[key] = handle;
                 
                 return true;
             }
@@ -63,7 +65,7 @@ namespace RoXamiRP
         /// <param name="handle"></param>
         /// <param name="descriptor"></param>
         /// <returns></returns>
-        internal static bool RTHandleNeedsReAlloc(
+        private static bool RTHandleNeedsReAlloc(
             RTHandle handle,
             in RenderTextureDescriptor descriptor)
         {
@@ -76,13 +78,32 @@ namespace RoXamiRP
             return false;
         }
 
-        internal static void ReleasePool()
+        private static int GetRTHandleKey(RTHandle handle, RenderTextureDescriptor descriptor, string name)
+        {
+            return HashCode.Combine(descriptor.width, descriptor.height, descriptor.colorFormat, name.GetHashCode());
+        }
+
+        public static void ReleasePool()
         {
             foreach (var handle in m_RTHandles)
             {
                 handle.Value?.Release();
             }
             m_RTHandles.Clear();
+        }
+
+        public static int GetRTHandlesCount()
+        {
+            return m_RTHandles.Count;
+        }
+
+        public static void DebugRTHandles()
+        {
+            Debug.Log("RTHandle Count: " + GetRTHandlesCount());
+            foreach (var rtHandle in m_RTHandles)
+            {
+                Debug.Log(rtHandle.Value.name);
+            }
         }
     }
 }

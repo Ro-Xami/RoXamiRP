@@ -4,78 +4,111 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRP
 {
-    public class Shadows
+    public class ShadowsCasterPass : RoXamiRenderPass
     {
-        const string bufferName = "RoXami Shadows";
-
-        CullingResults cullingResults;
-        ScriptableRenderContext context;
-        ShadowSettings settings;
-
-        private static readonly CommandBuffer cmd = new CommandBuffer
+        const string bufferName = "RoXami ShadowsCaster";
+        public ShadowsCasterPass(RenderPassEvent evt)
         {
-            name = bufferName
-        };
+            renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
+        }
 
         private const int maxCascades = 4;
         private const int split = 2;
 
-        private static readonly int
-            directionalLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData"),
-            directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices"),
-            cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres"),
-            shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
+        private RTHandle directionalLightShadowAtlas;
+        RenderTextureDescriptor descriptor = new RenderTextureDescriptor(1, 1)
+        {
+            depthBufferBits = 32,
+            colorFormat = RenderTextureFormat.Shadowmap
+        };
+        
+        private static readonly int directionalLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
+        private static readonly int directionalShadowMatricesID = Shader.PropertyToID("_DirectionalShadowMatrices");
+        private static readonly int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres");
+        private static readonly int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
         
         Vector4 directionalLightShadowData;
         private readonly Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
         private readonly Matrix4x4[] directionalShadowMatrices = new Matrix4x4[maxCascades];
         Vector4 shadowDistanceFade;
 
-        bool isCastShadows = false;
+        private CommandBuffer cmd;
+        ShadowSettings settings;
+        CullingResults cullingResults;
+        ScriptableRenderContext context;
 
-        public void Setup(ScriptableRenderContext scriptableRenderContext, RenderingData renderingData)
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            this.cullingResults = renderingData.cullingResults;
-            this.context = scriptableRenderContext;
-            this.settings = renderingData.shadowSettings;
-        }
-
-        public void Render(Light light, int lightIndex, ref RenderingData renderingData)
-        {
-            isCastShadows =
-                light && light.shadows != LightShadows.None && light.shadowStrength > 0f &&
-                cullingResults.GetShadowCasterBounds(0, out Bounds b) &&
-                renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows &&
-                renderingData.shadowSettings.enableDirectionalShadows;
-
-            renderingData.runtimeData.isCastShadows = isCastShadows;
-            
-            if (isCastShadows)
+            //only directionalLight
+            bool isDirectionalLight = false;
+            foreach (var lightType in renderingData.lightData.shadowCasterLights)
             {
-                RenderDirectionalShadows(light, lightIndex);
+                if (lightType.light.type == LightType.Directional)
+                {
+                    isDirectionalLight = true;
+                }
             }
+            if (!isDirectionalLight)
+            {
+                return;
+            }
+            
+            if (!renderingData.cameraData.additionalCameraData.enableScreenSpaceShadows ||
+                !renderingData.shadowSettings.enableDirectionalShadows)
+            {
+                return;
+            }
+            
+            settings = renderingData.shadowSettings;
+            cullingResults = renderingData.cullingResults;
+            this.context = context;
+            
+            cmd = renderingData.commandBuffer;
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                ExecuteCommandBuffer(context, cmd);
+                
+                foreach (var shadowCasterLight in renderingData.lightData.shadowCasterLights)
+                {
+                    if (!renderingData.cullingResults.GetShadowCasterBounds(0, out Bounds b))
+                    {
+                        continue;
+                    }
+                    renderingData.runtimeData.isCastShadows = true;
+                    
+                    RenderDirectionalShadows(ref renderingData, shadowCasterLight.light, shadowCasterLight.lightIndex);
+                }
+            }
+            
+            ExecuteCommandBuffer(context, cmd);
         }
 
-        void RenderDirectionalShadows(Light light, int lightIndex)
+        public override void Dispose()
+        {
+            directionalLightShadowAtlas?.Release();
+        }
+
+        void RenderDirectionalShadows(ref RenderingData renderingData, Light light, int lightIndex)
         {
 
             int atlasSize = (int)settings.directional.atlasSize;
+            descriptor.width = atlasSize;
+            descriptor.height = atlasSize;
+            
+            RoXamiRTHandlePool.GetRTHandleIfNeeded(ref directionalLightShadowAtlas,
+                descriptor, FilterMode.Point, ShaderDataID.directionalShadowAtlasName, TextureWrapMode.Clamp, true);
 
-            cmd.GetTemporaryRT(ShaderDataID.directionalShadowAtlasID, atlasSize, atlasSize,
-                32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap); //use unity's textureFormat for different API
-
-            cmd.SetRenderTarget(ShaderDataID.directionalShadowAtlasID,
+            cmd.SetRenderTarget(directionalLightShadowAtlas,
                 RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
             cmd.ClearRenderTarget(true, false, Color.clear);
 
-            cmd.BeginSample(bufferName);
-            ExecuteBuffer();
+            ExecuteCommandBuffer(context, cmd);
 
             RenderDirectionalShadowsCascade(light, lightIndex);
-
-            cmd.EndSample(bufferName);
-            ExecuteBuffer();
+            
+            renderingData.cameraData.directionalLightShadowAtlas = directionalLightShadowAtlas;
         }
 
         void RenderDirectionalShadowsCascade(Light light, int lightIndex)
@@ -113,7 +146,7 @@ namespace RoXamiRP
                 directionalShadowMatrices[i] = matrix;
 
                 cmd.SetGlobalDepthBias(0f, light.shadowBias);
-                ExecuteBuffer();
+                ExecuteCommandBuffer(context, cmd);
                 context.DrawShadows(ref shadowSettings);
             }
 
@@ -154,20 +187,6 @@ namespace RoXamiRP
             m.m22 = 0.5f * (m.m22);
             m.m23 = 0.5f * (m.m23 + 1);
             return m;
-        }
-
-        public void CleanUp()
-        {
-            if (isCastShadows)
-            {
-                cmd.ReleaseTemporaryRT(ShaderDataID.directionalShadowAtlasID);
-            }
-        }
-
-        void ExecuteBuffer()
-        {
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
         }
     }
 }

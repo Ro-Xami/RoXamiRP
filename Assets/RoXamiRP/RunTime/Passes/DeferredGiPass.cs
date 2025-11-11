@@ -10,31 +10,26 @@ namespace RoXamiRP
         public DeferredGiPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
         const string bufferName = "RoXami Deferred GI";
 
-        private readonly CommandBuffer cmd = new CommandBuffer()
+        private CommandBuffer cmd;
+
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            name = bufferName
-        };
+            cmd = renderingData.commandBuffer;
 
-        private ScriptableRenderContext context;
-
-        public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderingData)
-        {
-            context = scriptableRenderContext;
-
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-
-            Draw(renderingData);
-
-            cmd.EndSample(bufferName);
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                Draw(renderingData);
+            }
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void CleanUp(CommandBuffer commandBuffer)
         {
 
         }

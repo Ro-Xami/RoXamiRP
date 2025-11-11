@@ -37,12 +37,12 @@ namespace RoXamiRP
                 return;
             }
             
-            RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.ScreenShotBlurUI, true);
+            RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, true);
         }
 
         public static void EndBlur()
         {
-            pass?.ReleaseScreenShotBlurRT();
+            pass?.Dispose();
         }
         
         public override void Create()
@@ -53,16 +53,21 @@ namespace RoXamiRP
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (RoXamiFeatureManager.Instance.IsFeatureActive(RoXamiFeatureStack.ScreenShotBlurUI))
+#if UNITY_EDITOR
+            if (!IsGameOrSceneCamera(renderingData.cameraData.camera)) return;
+#endif
+            
+            if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenShotBlurUI))
             {
                 renderer.EnqueuePass(pass);
-                RoXamiFeatureManager.Instance.SetFeatureActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
+                RoXamiFeatureManager.Instance.SetActive(RoXamiFeatureStack.ScreenShotBlurUI, false);
             }
         }
 
         protected override void Dispose(bool disposing)
         {
             CoreUtils.Destroy(blurMaterial);
+            pass?.Dispose();
         }
 
         private class BlurPass : RoXamiRenderPass
@@ -76,21 +81,22 @@ namespace RoXamiRP
                 this.mode = mode;
                 this.settings = settings;
                 this.blurMaterial = blurMaterial;
+                
+                m_ProfilingSampler = new ProfilingSampler(nameof(BlurPass));
             }
 
             private const string bufferName = "RoXamiRP ScreenShot Blur";
-            private CommandBuffer cmd = new CommandBuffer()
-            {
-                name = bufferName
-            };
+            private CommandBuffer cmd;
 
             private RenderTexture screenShotBlurRT;
 
-            private readonly int gaussianUpSample = Shader.PropertyToID("_GaussianUpSample");
-            private readonly int gaussianDownSample = Shader.PropertyToID("_GaussianDownSample");
-            private readonly int offsetID = Shader.PropertyToID("_Post_GaussianBlurOffset");
+            const string gaussianUpSampleName = "_GaussianUpSample";
+            const string gaussianDownSampleName = "_GaussianDownSample";
+            private RTHandle gaussianUpSampleRT;
+            private RTHandle gaussianDownSampleRT;
             
-            private readonly int screenShotBlurTextureID = Shader.PropertyToID("_ScreenShotBlurTexture");
+            private static readonly int offsetID = Shader.PropertyToID("_Post_GaussianBlurOffset");
+            private static readonly int screenShotBlurTextureID = Shader.PropertyToID("_ScreenShotBlurTexture");
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
             {
@@ -99,27 +105,28 @@ namespace RoXamiRP
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                Blur(context, renderingData);
-            }
-
-            public override void CleanUp()
-            {
-                cmd.ReleaseTemporaryRT(gaussianUpSample);
-                cmd.ReleaseTemporaryRT(gaussianDownSample);
-            }
-
-            public void ReleaseScreenShotBlurRT()
-            {
-                screenShotBlurRT?.Release();
-            }
-            
-            private void Blur(ScriptableRenderContext context, RenderingData renderingData)
-            {
                 if (settings == null)
                 {
                     return;
                 }
                 
+                cmd = renderingData.commandBuffer;
+                using (new ProfilingScope(cmd, m_ProfilingSampler))
+                {
+                    Blur(context, renderingData);
+                }
+                ExecuteCommandBuffer(context, cmd);
+            }
+
+            public override void Dispose()
+            {
+                gaussianUpSampleRT?.Release();
+                gaussianDownSampleRT?.Release();
+                screenShotBlurRT?.Release();
+            }
+            
+            private void Blur(ScriptableRenderContext context, RenderingData renderingData)
+            {
                 var cameraData = renderingData.cameraData;
                 int width = Mathf.Max(2, cameraData.cameraColorDescriptor.width / settings.rtDownScale);
                 int height = Mathf.Max(2, cameraData.cameraColorDescriptor.height / settings.rtDownScale);
@@ -127,16 +134,16 @@ namespace RoXamiRP
                 var descriptor = cameraData.cameraColorDescriptor;
                 descriptor.width = width;
                 descriptor.height = height;
-                
-                cmd.GetTemporaryRT(gaussianUpSample, descriptor, FilterMode.Bilinear);
-                cmd.GetTemporaryRT(gaussianDownSample, descriptor, FilterMode.Bilinear);
+
+                RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                    ref gaussianUpSampleRT, descriptor, FilterMode.Bilinear, gaussianUpSampleName);
+                RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                    ref gaussianDownSampleRT, descriptor, FilterMode.Bilinear, gaussianDownSampleName);
+
                 screenShotBlurRT = RenderTexture.GetTemporary(descriptor);
 
                 float offsetX = 1f / width * settings.blurSize;
                 float offsetY = 1f / height * settings.blurSize;
-
-                cmd.BeginSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
                 
                 for (var i = 0; i < settings.blurIterations; i++)
                 {
@@ -144,8 +151,8 @@ namespace RoXamiRP
                     DrawDontCareDontCare
                     (
                         cmd, 
-                        i == 0 ? renderingData.renderer.GetCameraColorBufferRT(): gaussianDownSample, 
-                        gaussianUpSample, 
+                        i == 0 ? renderingData.renderer.GetCameraColorBufferRT(): gaussianDownSampleRT, 
+                        gaussianUpSampleRT, 
                         blurMaterial, 0
                     );
                     
@@ -153,17 +160,14 @@ namespace RoXamiRP
                     DrawDontCareDontCare
                     (
                         cmd, 
-                        gaussianUpSample, 
-                        i == settings.blurIterations - 1? screenShotBlurRT: gaussianDownSample,
+                        gaussianUpSampleRT, 
+                        i == settings.blurIterations - 1? screenShotBlurRT: gaussianDownSampleRT,
                         blurMaterial, 0
                     );
                 }
-                
                 Shader.SetGlobalTexture(screenShotBlurTextureID, screenShotBlurRT);
-                
-                cmd.EndSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
             }
+            
         }
     }
 }

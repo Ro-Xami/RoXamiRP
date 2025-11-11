@@ -21,7 +21,8 @@
 			#pragma multi_compile _ SCREENSPACE_SHADOWS
 			#pragma multi_compile _ SCREENSPACE_REFLECTION
 			#pragma multi_compile _ _Debug_Albedo _Debug_Normal _Debug_Metallic _Debug_Roughness _Debug_Ao _Debug_Emission _Debug_GiDiffuse _Debug_GiSpecular _Debug_Shadow
-
+			#pragma multi_compile _ _Debug_ScreenSpaceShadows
+			
 			#include "Assets/RoXamiRP/Shaders/DeferredLit/DeferredInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Common/ToonLighting.hlsl"
 
@@ -86,6 +87,10 @@
 				surface.roughness = 0;
 			    finalColor = gi.specular;
 			    #endif
+				
+				#ifdef _Debug_ScreenSpaceShadows
+				finalColor = light.shadowAttenuation.xxx;
+				#endif
 
 				return float4(finalColor, 1);
 			}

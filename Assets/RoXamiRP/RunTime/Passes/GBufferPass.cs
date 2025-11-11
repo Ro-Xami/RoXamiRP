@@ -9,75 +9,98 @@ namespace RoXamiRP
         public GBufferPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
         const string bufferName = "RoXami GBuffer";
+        private CommandBuffer cmd;
+        
+        const int albedoIndex = (int)GBufferTye.Albedo;
+        const int normalIndex = (int)GBufferTye.Normal;
+        const int mraIndex = (int)GBufferTye.MRA;
+        const int emissionIndex = (int)GBufferTye.Emission;
 
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
-
-        private static readonly RenderTargetIdentifier[] gBufferTargets = new RenderTargetIdentifier[]
-        {
-            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Albedo]),
-            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal]),
-            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.MRA]),
-            new RenderTargetIdentifier(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Emission]),
-        };
+        private readonly RTHandle[] GBufferRTs = new RTHandle[ShaderDataID.gBufferNameIDs.Length];
+        private readonly RenderTargetIdentifier[] GBufferTargets = new RenderTargetIdentifier[ShaderDataID.gBufferNameIDs.Length];
 
         RenderingData renderingData;
 
-        public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingDataInOut)
         {
-            renderingData = renderData;
-            GetGBufferRT();
+            this.renderingData = renderingDataInOut;
+            cmd = renderingData.commandBuffer;
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                GetGBufferRT(ref renderingDataInOut);
+                ClearCmdRenderTarget();
+                
+                ExecuteCommandBuffer(context, cmd);
 
-            ClearCmdRenderTarget();
-            cmd.BeginSample(bufferName);
+                SetDrawingSettings(out var drawingSettings, out var filteringSettings);
+                context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+                
+                ExecuteCommandBuffer(context, cmd);
+                
+                SetGBufferRT();
+            }
             ExecuteCommandBuffer(context, cmd);
-
-            SetDrawingSettings(out var drawingSettings, out var filteringSettings);
-            context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-            context.Submit();
-
-            // RoXamiRPCopyTexture(cmd, 
-            //     ShaderDataID.cameraDepthAttachmentId, 
-            //     renderingData.renderer.GetCameraDepthCopyRT());
-
-            cmd.EndSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
+            
         }
 
-        public override void CleanUp()
+        public override void Dispose()
         {
-            foreach (var gBufferID in ShaderDataID.gBufferNameIDs)
+            foreach (var GBuffer in GBufferRTs)
             {
-                cmd.ReleaseTemporaryRT(gBufferID);
+                GBuffer?.Release();
             }
         }
 
-        private void GetGBufferRT()
+        private void GetGBufferRT(ref RenderingData renderingDataOutput)
         {
-            int width = renderingData.cameraData.width;
-            int height = renderingData.cameraData.height;
+            var baseDescriptor = renderingData.cameraData.cameraColorDescriptor;
+            var filterMode = renderingData.cameraData.cameraColorFilterMode;
 
-            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Albedo], 
-                renderingData.cameraData.cameraColorDescriptor, renderingData.cameraData.cameraColorFilterMode);
-            
-            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], 
-                width, height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGBFloat);
+            for (int GBufferIndex = 0; GBufferIndex < ShaderDataID.gBufferNameIDs.Length; GBufferIndex++)
+            {
+                var descriptor = baseDescriptor;
+                switch ((GBufferTye)GBufferIndex)
+                {
+                    case GBufferTye.Albedo:
+                        break;
+                    
+                    case GBufferTye.Normal:
+                        descriptor.colorFormat = RenderTextureFormat.ARGBFloat;
+                        break;
+                    
+                    case GBufferTye.MRA:
+                        descriptor.colorFormat = RenderTextureFormat.ARGB32;
+                        break;
+                    
+                    case GBufferTye.Emission:
+                        break;
+                }
 
-            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.MRA],
-                width, height, 0, FilterMode.Bilinear, RenderTextureFormat.ARGB32);
+                var need = RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                    ref GBufferRTs[GBufferIndex], descriptor, filterMode,
+                    ShaderDataID.gBufferNames[GBufferIndex]);
+                
+                GBufferTargets[GBufferIndex] = GBufferRTs[GBufferIndex];
+            }
 
-            cmd.GetTemporaryRT(ShaderDataID.gBufferNameIDs[(int)GBufferTye.Emission],
-                renderingData.cameraData.cameraColorDescriptor, FilterMode.Bilinear);
+            renderingDataOutput.cameraData.GBufferRTs = GBufferRTs;
+        }
+
+        void SetGBufferRT()
+        {
+            for (int GBufferIndex = 0; GBufferIndex < ShaderDataID.gBufferNameIDs.Length; GBufferIndex++)
+            {
+                cmd.SetGlobalTexture(ShaderDataID.gBufferNameIDs[GBufferIndex], GBufferRTs[GBufferIndex]);
+            }
         }
 
         void ClearCmdRenderTarget()
         {
-            cmd.SetRenderTarget(gBufferTargets, renderingData.renderer.GetCameraDepthBufferRT());
+            cmd.SetRenderTarget(GBufferTargets, renderingData.renderer.GetCameraDepthBufferRT());
 
             cmd.ClearRenderTarget(true, true, Color.clear);
         }

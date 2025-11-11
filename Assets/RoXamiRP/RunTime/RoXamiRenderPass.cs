@@ -111,6 +111,8 @@ namespace RoXamiRP
     public abstract class RoXamiRenderPass
     {
         public RenderPassEvent renderPassEvent { get; set; }
+        
+        protected ProfilingSampler m_ProfilingSampler {get; set;}
 
 
         public virtual void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
@@ -123,9 +125,14 @@ namespace RoXamiRP
 
         }
 
-        public virtual void CleanUp()
+        public virtual void CleanUp(CommandBuffer cmd)
         {
 
+        }
+        
+        public virtual void Dispose()
+        {
+            
         }
 
         protected void ExecuteCommandBuffer(ScriptableRenderContext context, CommandBuffer cmd)

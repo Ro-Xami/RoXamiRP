@@ -5,21 +5,21 @@ namespace RoXamiRP
 {
     public class AntialiasingPass : RoXamiRenderPass
     {
+        const string bufferName = "AntialiasingPass";
         public AntialiasingPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
-        
-        const string bufferName = "AntialiasingPass";
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
 
+        private CommandBuffer cmd;
         private RenderingData renderingData;
-        
-        private readonly int smaaEdgeRTID = Shader.PropertyToID("_SmaaEdgeRT");
-        private readonly int smaaFactorRTID = Shader.PropertyToID("_SmaaFactorRT");
+
+        private const string smaaEdgeRtName = "_SmaaEdgeRT";
+        private const string smaaFactorRtName = "_SmaaFactorRT";
+        static readonly int smaaFactorRtID = Shader.PropertyToID(smaaFactorRtName);
+        private RTHandle smaaEdgeRT;
+        private RTHandle smaaFactorRT;
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderData)
         {
@@ -28,71 +28,68 @@ namespace RoXamiRP
             var aaSettings = renderingData.antialiasingSettings;
             AntialiasingMode aaMode = aaSettings.antialiasingMode;
 
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-
-            var shaderAsset = renderingData.shaderAsset;
-            switch (aaMode)
+            cmd = renderingData.commandBuffer;
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                case AntialiasingMode.FXAA_Quality:
-                    DrawFXAAQuality(shaderAsset);
-                    break;
-                case AntialiasingMode.FXAA_Console:
-                    DrawFXAAConsole(shaderAsset);
-                    break;
-                case AntialiasingMode.SMAA:
-                    DrawSMAA(shaderAsset);
-                    break;
-                case AntialiasingMode.None:
-                    break;
-                default:
-                    break;
+                var shaderAsset = renderingData.shaderAsset;
+                switch (aaMode)
+                {
+                    case AntialiasingMode.FXAA_Quality:
+                        DrawFXAAQuality(shaderAsset);
+                        break;
+                    case AntialiasingMode.FXAA_Console:
+                        DrawFXAAConsole(shaderAsset);
+                        break;
+                    case AntialiasingMode.SMAA:
+                        DrawSMAA(shaderAsset);
+                        break;
+                    case AntialiasingMode.None:
+                        break;
+                    default:
+                        break;
+                }
             }
-            
-            cmd.EndSample(bufferName);
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void Dispose()
         {
-            if (renderingData.antialiasingSettings.antialiasingMode == AntialiasingMode.SMAA)
-            {
-                cmd.ReleaseTemporaryRT(smaaEdgeRTID);
-                cmd.ReleaseTemporaryRT(smaaFactorRTID);
-            }
+            smaaEdgeRT?.Release();
+            smaaFactorRT?.Release();
         }
 
         void DrawFXAAQuality(ShaderAsset shaderAsset)
         {
-            FinalDraw(renderingData.renderer.GetCameraColorBufferRT(), shaderAsset.fxaaMaterial, 0);
+            FinalDraw(shaderAsset.fxaaMaterial, 0);
         }
         
         void DrawFXAAConsole(ShaderAsset shaderAsset)
         {
-            FinalDraw(renderingData.renderer.GetCameraColorBufferRT(), shaderAsset.fxaaMaterial, 1);
+            FinalDraw(shaderAsset.fxaaMaterial, 1);
         }
         
         void DrawSMAA(ShaderAsset shaderAsset)
         {
             var cameraData = renderingData.cameraData;
-            cmd.GetTemporaryRT(smaaEdgeRTID, 
-                cameraData.cameraColorDescriptor, FilterMode.Bilinear);
-            cmd.GetTemporaryRT(smaaFactorRTID, 
-                cameraData.cameraColorDescriptor, FilterMode.Bilinear);
+            RoXamiRTHandlePool.GetRTHandleIfNeeded(ref smaaEdgeRT, 
+                cameraData.cameraColorDescriptor, FilterMode.Bilinear, smaaEdgeRtName);
+            RoXamiRTHandlePool.GetRTHandleIfNeeded(ref smaaFactorRT, 
+                cameraData.cameraColorDescriptor, FilterMode.Bilinear, smaaFactorRtName);
             
-            Draw(renderingData.renderer.GetCameraColorBufferRT(), smaaEdgeRTID,
+            Draw(renderingData.renderer.GetCameraColorBufferRT(), smaaEdgeRT,
                 shaderAsset.smaaMaterial, 0);
             
-            Draw(smaaEdgeRTID, smaaFactorRTID,
+            cmd.SetGlobalTexture(smaaFactorRtID, smaaFactorRT);
+            Draw(smaaEdgeRT, smaaFactorRT,
                 shaderAsset.smaaMaterial, 1);
             
-            FinalDraw(renderingData.renderer.GetCameraColorBufferRT(), shaderAsset.smaaMaterial, 2);
+            FinalDraw(shaderAsset.smaaMaterial, 2);
         }
 
-        void FinalDraw(RenderTargetIdentifier from, Material mat, int passIndex)
+        void FinalDraw(Material mat, int passIndex)
         {
             Draw(
-                from,
+                renderingData.renderer.GetCameraColorBufferRT(),
                 renderingData.runtimeData.isCameraStackFinally?
                     BuiltinRenderTextureType.CameraTarget:
                     renderingData.renderer.GetSwitchCameraColorBufferRT(),

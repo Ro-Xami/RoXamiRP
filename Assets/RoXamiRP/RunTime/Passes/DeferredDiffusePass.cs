@@ -12,31 +12,28 @@ namespace RoXamiRP
         {
             renderPassEvent = evt;
             this.material = material;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
-        const string bufferName = "RoXami Deferred";
-
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        private const string bufferName = "RoXami Deferred";
+        private CommandBuffer cmd;
 
         private ScriptableRenderContext context;
 
         public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderingData)
         {
             context = scriptableRenderContext;
+            cmd = renderingData.commandBuffer;
 
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-
-            Draw(renderingData);
-
-            cmd.EndSample(bufferName);
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                Draw(renderingData);
+            }
+            
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void CleanUp(CommandBuffer commandBuffer)
         {
 
         }

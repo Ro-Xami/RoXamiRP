@@ -112,11 +112,14 @@ namespace RoXamiRP
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
+#if UNITY_EDITOR
+            if (!IsGameOrSceneCamera(renderingData.cameraData.camera)) return;
+#endif
+            
             if (pass != null)
             {
                 renderer.EnqueuePass(pass);
             }
-            
         }
 
         private class RenderObjectsPass : RoXamiRenderPass
@@ -155,22 +158,22 @@ namespace RoXamiRP
                 }
                 filteringSettings = new FilteringSettings(RenderQueueRange.all);
                 filteringSettings.layerMask = settings.layerMask;
+
+                m_ProfilingSampler = new ProfilingSampler(bufferName);
             }
             
             const string bufferName = "RoXamiRP RenderObjects";
-            CommandBuffer cmd = new CommandBuffer()
-            {
-                name = bufferName,
-            };
+            private CommandBuffer cmd;
             
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                cmd.BeginSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
+                cmd = renderingData.commandBuffer;
+                using (new ProfilingScope(cmd, m_ProfilingSampler))
+                {
+                    ExecuteCommandBuffer(context, cmd);
                 
-                context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
-                
-                cmd.EndSample(bufferName);
+                    context.DrawRenderers(renderingData.cullingResults, ref drawingSettings, ref filteringSettings);
+                }
                 ExecuteCommandBuffer(context, cmd);
             }
         }

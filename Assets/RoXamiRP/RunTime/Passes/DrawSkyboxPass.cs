@@ -7,17 +7,14 @@ namespace RoXamiRP
 {
     public class DrawSkyboxPass : RoXamiRenderPass
     {
+        const string bufferName = "Draw Skybox";
         public DrawSkyboxPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
-        static readonly string bufferName = "Draw Skybox";
-
-        static readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        private CommandBuffer cmd;
 
         private RenderingData renderingData;
         private ScriptableRenderContext context;
@@ -28,17 +25,18 @@ namespace RoXamiRP
             context = scriptableRenderContext;
 
             //Opaque==========================================================================
-            SetRenderTarget(cmd);
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-
-            DrawSkybox();
-
-            cmd.EndSample(bufferName);
+            cmd = renderData.commandBuffer;
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                SetRenderTarget(cmd);
+                ExecuteCommandBuffer(context, cmd);
+                
+                DrawSkybox();
+            }
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void CleanUp(CommandBuffer commandBuffer)
         {
         }
 
@@ -54,7 +52,6 @@ namespace RoXamiRP
         void DrawSkybox()
         {
             context.DrawSkybox(renderingData.cameraData.camera);
-            context.Submit();
         }
     }
 }

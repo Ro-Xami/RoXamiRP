@@ -10,7 +10,7 @@ namespace RoXamiRP
         [Min(0f)] public float clampMax = 5f;
         [Min(0f)] public float threshold = 0.9f;
         [Range(0f, 1f)] public float scatter = 0.7f;
-        [Range(0, 10)] public int maxSampleCount = 5;
+        [Range(0, 8)] public int maxSampleCount = 5;
 
         private const string bloomKeyword = "_Post_Bloom_ON";
         private static readonly int bloomParam = Shader.PropertyToID("_PostBloomParams");

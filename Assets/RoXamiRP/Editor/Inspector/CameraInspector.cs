@@ -51,7 +51,7 @@ public class CameraDataInspector : Editor
         if (roXamiAdditionalCameraData.additionalCameraData == null)
         {
             roXamiAdditionalCameraData.additionalCameraData =
-                new AdditionalCameraData(0, CameraRenderType.Base, null);
+                new AdditionalCameraData(RoXamiRendererAsset.defaultAsset, CameraRenderType.Base, null);
         }
     }
     
@@ -261,9 +261,8 @@ public class CameraDataInspector : Editor
         var rendererAssets = rpAsset.rendererAssets;
 
         string assetName =
-            roXamiAdditionalCameraData.additionalCameraData.roXamiRendererAssetID + 1 > rendererAssets.Length
-                ? "Null Renderer"
-                : rendererAssets[roXamiAdditionalCameraData.additionalCameraData.roXamiRendererAssetID].name;
+            !roXamiAdditionalCameraData.additionalCameraData.roXamiRendererAsset ? 
+                "Null Renderer" : roXamiAdditionalCameraData.additionalCameraData.roXamiRendererAsset.name;
 
         if (GUILayout.Button(assetName))
         {
@@ -274,15 +273,17 @@ public class CameraDataInspector : Editor
     
     private void RoXamiRenderAssetMenu(RoXamiRendererAsset[] rendererAssets)
     {
-         GenericMenu menu = new GenericMenu();
-         for (int i = 0; i < rendererAssets.Length; i++)
-         {
-             var rendererAsset = rendererAssets[i];
-             int assetIndex = i;
-             menu.AddItem(new GUIContent(rendererAsset.name), false,
-                 () => { roXamiAdditionalCameraData.additionalCameraData.roXamiRendererAssetID = assetIndex; });
-             menu.ShowAsContext();
-         }
+        GenericMenu menu = new GenericMenu();
+        foreach (var rendererAsset in rendererAssets)
+        {
+            var asset = rendererAsset;
+            menu.AddItem(new GUIContent(rendererAsset.name), false,
+                () =>
+                {
+                    roXamiAdditionalCameraData.additionalCameraData.roXamiRendererAsset = asset;
+                });
+            menu.ShowAsContext();
+        }
     }
 
     private void DrawSensorType()
@@ -307,6 +308,6 @@ public class CameraDataInspector : Editor
 [CustomEditor(typeof(RoXamiAdditionalCameraData))]
 public class RoXamiAdditionalCameraDataInspector : Editor
 {
-    public override void OnInspectorGUI()
-    { }
+    // public override void OnInspectorGUI()
+    // { }
 }

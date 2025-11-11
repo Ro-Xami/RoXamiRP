@@ -35,13 +35,12 @@ namespace RoXamiRP
                     // stencil = deferredLitSettings[i].stencil,
                 };
             }
+
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
         const string bufferName = "RoXami Custom Toon Deferred";
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        private CommandBuffer cmd;
 
         private ScriptableRenderContext context;
 
@@ -53,20 +52,13 @@ namespace RoXamiRP
         public override void Execute(ScriptableRenderContext scriptableRenderContext, ref RenderingData renderingData)
         {
             context = scriptableRenderContext;
+            cmd = renderingData.commandBuffer;
 
-            cmd.BeginSample(bufferName);
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                Draw();
+            }
             ExecuteCommandBuffer(context, cmd);
-
-            //SetClearRenderTarget();
-            Draw();
-
-            cmd.EndSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-        }
-
-        public override void CleanUp()
-        {
-
         }
 
         void Draw()

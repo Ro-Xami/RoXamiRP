@@ -31,12 +31,12 @@ namespace RoXamiRP
 
         private readonly Dictionary<int, bool> m_Features = new Dictionary<int, bool>();
 
-        public void SetFeatureActive(RoXamiFeatureStack stack, bool active)
+        public void SetActive(RoXamiFeatureStack stack, bool active)
         {
             m_Features[(int)stack] = active;
         }
 
-        public bool IsFeatureActive(RoXamiFeatureStack stack)
+        public bool IsActive(RoXamiFeatureStack stack)
         {
             if (!m_Features.TryGetValue((int)stack, out var active))
             {

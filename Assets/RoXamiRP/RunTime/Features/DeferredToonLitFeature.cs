@@ -20,7 +20,6 @@ namespace RoXamiRP
         DeferredLitSettings[] deferredCustomLitSettings;
 
         GBufferPass gBufferPass;
-        CopyCameraDepthPass copyDepthPass;
         ScreenSpaceShadowsPass ssShadowsPass;
         DeferredDiffusePass deferredDiffusePass;
         DeferredCustomPass deferredCustomPass;
@@ -28,13 +27,11 @@ namespace RoXamiRP
         
         public override void Create()
         {
-            gBufferPass = new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer + 10);
-
-            copyDepthPass = new CopyCameraDepthPass(RenderPassEvent.BeforeRenderingGbuffer + 11);
+            gBufferPass = new GBufferPass(RenderPassEvent.BeforeRenderingGbuffer + 5);
             
-            ssShadowsPass = new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 9);
+            ssShadowsPass = new ScreenSpaceShadowsPass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 4);
             
-            deferredDiffusePass = new DeferredDiffusePass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 10, deferredToonLitMaterial);
+            deferredDiffusePass = new DeferredDiffusePass(RenderPassEvent.BeforeRenderingDeferredDiffuse + 5, deferredToonLitMaterial);
             
             if (deferredCustomLitSettings != null && deferredCustomLitSettings.Length != 0)
             {
@@ -43,16 +40,17 @@ namespace RoXamiRP
                     deferredCustomLitSettings);
             }
 
-            deferredGiPass = new DeferredGiPass(RenderPassEvent.BeforeRenderingDeferredGI + 10);
+            deferredGiPass = new DeferredGiPass(RenderPassEvent.BeforeRenderingDeferredGI + 5);
         }
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            renderingData.runtimeData.isDeferred = true;
-            
+#if UNITY_EDITOR
+            if (!IsGameOrSceneCamera(renderingData.cameraData.camera) &&
+                renderingData.cameraData.camera.cameraType != CameraType.Preview) return;
+#endif
+
             renderer.EnqueuePass(gBufferPass);
-            
-            renderer.EnqueuePass(copyDepthPass);
             
             renderer.EnqueuePass(ssShadowsPass);
             

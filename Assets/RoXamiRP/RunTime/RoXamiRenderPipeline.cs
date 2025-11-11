@@ -10,7 +10,9 @@ namespace RoXamiRP
     {
         private const bool enableSrpBatcher = true;
         private const bool lightsUseLinearIntensity = true;
-        private RoXamiRPAsset rpAsset;
+        private readonly RoXamiRPAsset rpAsset;
+        
+        HashSet<RoXamiRenderer> m_Renderers = new HashSet<RoXamiRenderer>();
 
         public RoXamiRenderPipline(RoXamiRPAsset rpAsset)
         {
@@ -20,10 +22,9 @@ namespace RoXamiRP
             
             RTHandles.Initialize(Screen.width, Screen.height);
             RoXamiRTHandlePool.ReleasePool();
-            renderers.Clear();
+            
+            m_Renderers.Clear();
         }
-
-        readonly Dictionary<int,RoXamiRenderer> renderers = new Dictionary<int, RoXamiRenderer>();
 
         protected override void Render(
             ScriptableRenderContext context, Camera[] cameras
@@ -42,56 +43,91 @@ namespace RoXamiRP
             RoXamiVolume.Instance.Update();
 #endif
             
+            if (RoXamiRTHandlePool.GetRTHandlesCount() > 32)
+            {
+                RoXamiRTHandlePool.DebugRTHandles();
+                RoXamiRTHandlePool.ReleasePool();
+            }
+            
             foreach (var baseCamera in cameras)
             {
                 //Base Camera
-                var additionalCameraData = baseCamera.GetRoXamiAdditionalCameraData();
-                if (additionalCameraData.cameraRenderType == CameraRenderType.Overlay)
-                {
+                var baseAdditionalCameraData = baseCamera.GetRoXamiAdditionalCameraData();
+                if (baseAdditionalCameraData.cameraRenderType != CameraRenderType.Base) 
                     continue;
-                }
+
+                RoXamiRenderer baseRenderer = baseAdditionalCameraData.renderer;
+                m_Renderers.Add(baseRenderer);
                 
-                if (!baseCamera.TryGetCullingParameters(out ScriptableCullingParameters p))
+                bool isBaseFinally =
+                    baseAdditionalCameraData.cameraStack != null && baseAdditionalCameraData.cameraStack.Count > 0;
+
+                if (TryGetCull(baseCamera))
                 {
-                    continue;
+                    RenderSingleCamera(context, baseAdditionalCameraData, baseRenderer, baseCamera, isBaseFinally);
                 }
 
-                RoXamiRenderer cameraStackRenderer;
-                if (renderers.TryGetValue(baseCamera.GetInstanceID(), out var renderer))
+                if (!isBaseFinally) continue;
+                
+                for (int i = 0; i < baseAdditionalCameraData.cameraStack.Count; i++)
                 {
-                    if (renderer == null)
+                    var cameraStack = baseAdditionalCameraData.cameraStack[i];
+                    bool isOverlayFinally = i == baseAdditionalCameraData.cameraStack.Count - 1;
+                    
+                    if (!cameraStack) continue;
+                    var overlayAdditionalCameraData = cameraStack.GetRoXamiAdditionalCameraData();
+                    
+                    if (overlayAdditionalCameraData.cameraRenderType != CameraRenderType.Overlay)
+                        continue;
+
+                    var overlayRenderer = overlayAdditionalCameraData.renderer;
+                    m_Renderers.Add(overlayRenderer);
+                    
+                    if (TryGetCull(cameraStack))
                     {
-                        renderer = new RoXamiRenderer();
+                        RenderSingleCamera(context, overlayAdditionalCameraData, overlayRenderer, cameraStack, isOverlayFinally);
                     }
-                    cameraStackRenderer = renderer;
                 }
-                else
-                {
-                    renderers[baseCamera.GetInstanceID()] = new RoXamiRenderer();
-                    cameraStackRenderer = renderers[baseCamera.GetInstanceID()];
-                }
-                
-                var rendererAsset = 
-                    additionalCameraData.roXamiRendererAssetID < rpAsset.rendererAssets.Length && additionalCameraData.roXamiRendererAssetID > 0?
-                        rpAsset.rendererAssets[additionalCameraData.roXamiRendererAssetID]: RoXamiRendererAsset.defaultAsset;
-
-                cameraStackRenderer.InitializedRenderingData(
-                    context, baseCamera, additionalCameraData, 
-                    rpAsset, p, true);
-
-                cameraStackRenderer.InitializedActiveRenderPass(rendererAsset.roXamiRenderFeatures);
-                cameraStackRenderer.Render(context);
             }
             
         }
 
+        private bool TryGetCull(Camera baseCamera)
+        {
+            if (baseCamera.TryGetCullingParameters(out ScriptableCullingParameters p))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void RenderSingleCamera(ScriptableRenderContext context, AdditionalCameraData additionalCameraData,
+            RoXamiRenderer cameraStackRenderer, Camera baseCamera, bool isFinaleCamera)
+        {
+            var rendererAsset = additionalCameraData.roXamiRendererAsset ?
+                additionalCameraData.roXamiRendererAsset: RoXamiRendererAsset.defaultAsset;
+
+            cameraStackRenderer.InitializedRenderingData(
+                context, baseCamera, additionalCameraData, 
+                rpAsset, rendererAsset, true, out bool cull);
+
+            if (!cull) return;
+
+            cameraStackRenderer.InitializedActiveRenderPass(rendererAsset.roXamiRenderFeatures);
+            cameraStackRenderer.Render(context);
+        }
+
+
         protected override void Dispose(bool disposing)
         {
-            foreach (var renderer in renderers)
+            RoXamiRTHandlePool.ReleasePool();
+            
+            foreach (var renderer in m_Renderers)
             {
-                if (renderer.Value != null)
+                if (renderer != null)
                 {
-                    renderer.Value.Dispose();
+                    renderer.Dispose();
                 }
             }
         }

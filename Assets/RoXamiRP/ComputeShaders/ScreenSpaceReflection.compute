@@ -63,12 +63,14 @@ void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
     #if defined(UNITY_REVERSED_Z)
         if (depth <= FLT_MIN)
         {
+            _ScreenSpaceReflectionTexture[ssrUV] = 0;
             return;
         }
     #else
         depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
         if (depth >= 1)
         {
+            _ScreenSpaceReflectionTexture[ssrUV] = 0;
             return;
         }
     #endif
@@ -105,7 +107,10 @@ void ScreenSpaceReflection(uint3 id : SV_DispatchThreadID)
             }
 
             _ScreenSpaceReflectionTexture[ssrUV] = float4(SampleColor(rayScreenSpaceUV), 1);
-            break;
+            return;
         }
     }
+
+    _ScreenSpaceReflectionTexture[ssrUV] = 0;
+    
 }

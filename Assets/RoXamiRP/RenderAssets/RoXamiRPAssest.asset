@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c63cc618ef867a4e87c41a176293b97, type: 3}
-  m_Name: RoXamiRP Assest
+  m_Name: RoXamiRPAssest
   m_EditorClassIdentifier: 
   rendererAssets:
   - {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920, type: 2}
@@ -25,13 +25,13 @@ MonoBehaviour:
   shadowSettings:
     enableDirectionalShadows: 1
     maxDistance: 60
-    distanceFade: 0.278
+    distanceFade: 0.001
     directional:
       atlasSize: 2048
       filter: 1
-      cascadeRatio1: 0.166
-      cascadeRatio2: 0.503
-      cascadeRatio3: 0.773
+      cascadeRatio1: 0.129
+      cascadeRatio2: 0.387
+      cascadeRatio3: 0.697
       cascadeFade: 0.001
   shaderAsset:
     screenSpaceShadowComputeShader: {fileID: 7200000, guid: a8c4476fc8586e3479414139329386ec,

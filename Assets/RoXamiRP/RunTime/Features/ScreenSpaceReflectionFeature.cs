@@ -11,7 +11,7 @@ namespace RoXamiRP
         [Serializable]
         public class SsrSettings
         {
-            public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingDeferredDiffuse;
+            public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingDeferredDiffuse;
             public ComputeShader computeShader;
             public int maxStep = 20;
             public float stepSize = 1f;
@@ -35,6 +35,10 @@ namespace RoXamiRP
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
+#if UNITY_EDITOR
+            if (!IsGameOrSceneCamera(renderingData.cameraData.camera)) return;
+#endif
+
             //&& RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.ScreenSpaceReflectionFeature)
             if (ssr != null)
             {
@@ -62,53 +66,47 @@ namespace RoXamiRP
                 this.renderPassEvent = settings.renderPassEvent;
                 this.settings = settings;
                 kernel = settings.computeShader.FindKernel(bufferName);
+                
+                m_ProfilingSampler = new ProfilingSampler(bufferName);
             }
 
-            private readonly CommandBuffer cmd = new CommandBuffer()
-            {
-                name = bufferName,
-            };
+            private CommandBuffer cmd;
 
+            const string ssrRtName = "_ScreenSpaceReflectionTexture";
+            private readonly int ssrTextureID = Shader.PropertyToID(ssrRtName);
             private RTHandle ssrRT;
             
-            private readonly int 
-                ssrTextureID = Shader.PropertyToID("_ScreenSpaceReflectionTexture"),
-                ssrParamsID = Shader.PropertyToID("_ssrParams"),
-                texelSizeID = Shader.PropertyToID("_texelSize");
+            private readonly int ssrParamsID = Shader.PropertyToID("_ssrParams");
+            private readonly int texelSizeID = Shader.PropertyToID("_texelSize");
+
+            private RenderingData renderingData;
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
             {
-                var cameraData = renderingData.cameraData;
-                var descriptor = renderingData.cameraData.cameraColorDescriptor;
-                descriptor.enableRandomWrite = true;
-                descriptor.useMipMap = true;
-                descriptor.autoGenerateMips = true;
-                descriptor.mipCount = 7;
 
-                RoXamiRTHandlePool.GetRTHandleIfNeeded(ref ssrRT, descriptor, name:"ScreenSpaceReflectionTexture", FilterMode.Bilinear);
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
+                this.renderingData = renderingData;
+                cmd = renderingData.commandBuffer;
+                
                 if (settings == null || !settings.computeShader || kernel < 0)
                 {
                     cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
                     return;
                 }
+
+                using (new ProfilingScope(cmd, m_ProfilingSampler))
+                {
+                    cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
                 
-                cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
-                
-                cmd.BeginSample(bufferName);
+                    GetSetClearRtTarget(out int width, out int height);
+                    Draw(width, height);
+                    cmd.SetGlobalTexture(ssrTextureID, ssrRT);
+                }
                 ExecuteCommandBuffer(context, cmd);
                 
-                GetSetClearRtTarget(renderingData, out int width, out int height);
-
-                Draw(width, height);
-                
-                cmd.SetGlobalTexture(ssrTextureID, ssrRT);
-
-                cmd.EndSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
             }
 
             private void Draw(int width, int height)
@@ -120,8 +118,8 @@ namespace RoXamiRP
                     new Vector4(width, height, 1 / (float)width, 1 / (float)height));
                 
                 cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraColorCopyTextureID, renderingData.renderer.GetCameraColorBufferRT());
-                cmd.SetComputeTextureParam(cs, kernel, renderingData.renderer.GetCameraDepthCopyRT(), renderingData.renderer.GetCameraDepthBufferRT());
-                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal]);
+                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthBufferRT());
+                cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.gBufferNameIDs[(int)GBufferTye.Normal], renderingData.cameraData.GBufferRTs[(int)GBufferTye.Normal]);
                 cmd.SetComputeTextureParam(cs, kernel, ssrTextureID, ssrRT);
                 
                 int threadGroupX = Mathf.CeilToInt(width / 8.0f);
@@ -129,7 +127,7 @@ namespace RoXamiRP
                 cmd.DispatchCompute(cs, kernel, threadGroupX, threadGroupY, 1);
             }
 
-            private void GetSetClearRtTarget(RenderingData renderingData,  out int width, out int height)
+            private void GetSetClearRtTarget(out int width, out int height)
             {
                 var descriptor = renderingData.cameraData.cameraColorDescriptor;
                 descriptor.enableRandomWrite = true;
@@ -138,16 +136,13 @@ namespace RoXamiRP
                 descriptor.mipCount = 7;
                 width = descriptor.width;
                 height =descriptor.height;
+
+                RoXamiRTHandlePool.GetRTHandleIfNeeded(ref ssrRT, descriptor, FilterMode.Bilinear, ssrRtName);
                 
                 cmd.SetRenderTarget(ssrRT, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
             }
 
-            public override void CleanUp()
-            {
-                
-            }
-
-            public void Dispose()
+            public override void Dispose()
             {
                 ssrRT?.Release();
             }

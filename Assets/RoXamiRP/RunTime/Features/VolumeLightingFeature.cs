@@ -63,12 +63,18 @@ public class VolumeLightingFeature : RoXamiRenderFeature
 
     public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
     {
+#if UNITY_EDITOR
+        if (!IsGameOrSceneCamera(renderingData.cameraData.camera)) return;
+#endif
+
         AddTypePass(renderer, renderingData);
     }
 
     protected override void Dispose(bool disposing)
     {
         CoreUtils.Destroy(rayMarchMaterial);
+        radioBlurPass?.Dispose();
+        radioBlurPass?.Dispose();
     }
     
     private void AddTypePass(RoXamiRenderer renderer, RenderingData renderingData)
@@ -102,10 +108,8 @@ public class VolumeLightingFeature : RoXamiRenderFeature
     private void CreateRayMarchTypePass()
     {
         var shader = Shader.Find("RoXamiRP/Hide/RayMarchVolumeLighting");
-        if (!shader)
-        {
-            return;
-        }
+        if (!shader) return;
+        
         rayMarchMaterial = CoreUtils.CreateEngineMaterial(shader);
         
         if (rayMarchSettings == null || !rayMarchSettings.computeShader || rayMarchSettings.computeShader.FindKernel(kernelName) < 0)
@@ -121,16 +125,11 @@ public class VolumeLightingFeature : RoXamiRenderFeature
     private void CreateRadioBlurTypePass()
     {
         var shader = Shader.Find("RoXamiRP/Hide/RadioBlurVolumeLighting");
-        if (!shader)
-        {
-            return;
-        }
+        if (!shader) return;
+        
         radioBlurMaterial = CoreUtils.CreateEngineMaterial(shader);
         
-        if (radioBlurSettings == null)
-        {
-            return;
-        }
+        if (radioBlurSettings == null) return;
 
         radioBlurPass = new RadioBlurPass(radioBlurSettings, radioBlurMaterial);
     }
@@ -149,23 +148,27 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         public VolumeLighting volumeSettings;
 
         private const string bufferName = "VolumeLighting";
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        private CommandBuffer cmd;
+        RenderingData renderingData;
 
         private readonly int volumeLightIntensityID = Shader.PropertyToID("_VolumeLighting_RadioBlur_Intensity");
         private readonly int volumeLightingRadioBlurBlurParamsID = Shader.PropertyToID("_VolumeLighting_RadioBlur_BlurParams");
         private readonly int volumeLightBlurTexelSizeID = Shader.PropertyToID("_VolumeLighting_TexelSize");
-        
-        private readonly int radioBlurVolumeLightingTextureAID = Shader.PropertyToID("_VolumeLightingRadioBlurTextureA");
-        private readonly int radioBlurVolumeLightingTextureBID = Shader.PropertyToID("_VolumeLightingRadioBlurTextureB");
+
+        private const string radioBlurVolumeLightingRtAName = "_VolumeLightingRadioBlurTextureA";
+        private const string radioBlurVolumeLightingRtBName = "_VolumeLightingRadioBlurTextureB";
+        // static readonly int radioBlurVolumeLightingRtAID = Shader.PropertyToID(radioBlurVolumeLightingRtAName);
+        // static readonly int radioBlurVolumeLightingRtBID = Shader.PropertyToID(radioBlurVolumeLightingRtBName);
+        private RTHandle radioBlurVolumeLightingRtA;
+        private RTHandle radioBlurVolumeLightingRtB;
         
         public RadioBlurPass(RadioBlurSettings settings, Material material)
         {
             renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
             this.settings = settings;
             m_Material = material;
+            
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
 
         public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
@@ -178,32 +181,31 @@ public class VolumeLightingFeature : RoXamiRenderFeature
             
             if (!EnableVoL(VoL)) return;
             
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-
-            GetRadioBlurTexture(renderingData);
-
-            DrawFilter();
-
-            DrawRadioBlurAndCombine(renderingData, mainLightDir, VoL);
+            this.renderingData = renderingData;
+            cmd = renderingData.commandBuffer;
             
-            cmd.EndSample(bufferName);
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                GetRadioBlurTexture(renderingData);
+
+                DrawFilter();
+
+                DrawRadioBlurAndCombine(renderingData, mainLightDir, VoL);
+            }
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void Dispose()
         {
-            if (!EnableVoL(VoL)) return;
-            
-            cmd.ReleaseTemporaryRT(radioBlurVolumeLightingTextureAID);
-            cmd.ReleaseTemporaryRT(radioBlurVolumeLightingTextureBID);
+            radioBlurVolumeLightingRtA?.Release();
+            radioBlurVolumeLightingRtB?.Release();
         }
 
         void DrawFilter()
         {
-            cmd.SetGlobalTexture(renderingData.renderer.GetCameraDepthBufferRT(), renderingData.renderer.GetCameraDepthCopyRT());
+            cmd.SetGlobalTexture(ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthBufferRT());
             DrawDontCareStore(cmd, 
-                renderingData.renderer.GetCameraColorBufferRT(), radioBlurVolumeLightingTextureAID,
+                renderingData.renderer.GetCameraColorBufferRT(), radioBlurVolumeLightingRtA,
                 m_Material, 0);
         }
 
@@ -229,10 +231,10 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                 
                 DrawDontCareStore(cmd, 
                     //from
-                    isAB? radioBlurVolumeLightingTextureAID : radioBlurVolumeLightingTextureBID, 
+                    isAB? radioBlurVolumeLightingRtA : radioBlurVolumeLightingRtB, 
                     //to
                     isFinalDraw? renderingData.renderer.GetCameraColorBufferRT(): 
-                    isAB? radioBlurVolumeLightingTextureBID : radioBlurVolumeLightingTextureAID, 
+                    isAB? radioBlurVolumeLightingRtB : radioBlurVolumeLightingRtA, 
                     //mat
                     m_Material, isFinalDraw ? 2: 1);
             }
@@ -252,10 +254,13 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         {
             var cameraData = renderingData.cameraData;
 
-            cmd.GetTemporaryRT(radioBlurVolumeLightingTextureAID, 
-                cameraData.cameraColorDescriptor, cameraData.cameraColorFilterMode);
-            cmd.GetTemporaryRT(radioBlurVolumeLightingTextureBID, 
-                cameraData.cameraColorDescriptor, cameraData.cameraColorFilterMode);
+            RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                ref radioBlurVolumeLightingRtA, 
+                cameraData.cameraColorDescriptor, cameraData.cameraColorFilterMode, radioBlurVolumeLightingRtAName);
+            
+            RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                ref radioBlurVolumeLightingRtB, 
+                cameraData.cameraColorDescriptor, cameraData.cameraColorFilterMode, radioBlurVolumeLightingRtBName);
         }
         
         void CalculateVoL(RenderingData renderingData, out Vector3 mainLightDir, out float VoL)
@@ -302,15 +307,17 @@ public class VolumeLightingFeature : RoXamiRenderFeature
             m_Material = material;
             this.passIndex = passIndex;
             this.kernel = kernel;
+
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
         
         const string bufferName = "VolumeLighting";
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        private CommandBuffer cmd;
+        RenderingData renderingData;
 
-        private readonly int volumeLightingTextureID = Shader.PropertyToID("_VolumeLightingTexture");
+        const string volumeLightingRtName = "_VolumeLightingTexture";
+        static readonly int volumeLightingRtID = Shader.PropertyToID(volumeLightingRtName);
+        private RTHandle volumeLightingRT;
         private readonly int texelSizeID = Shader.PropertyToID("_texelSize");
         private readonly int volumeLightingParamsID = Shader.PropertyToID("_volumeLightingParams");
         private readonly int volumeLightDownSampleID = Shader.PropertyToID("_volumeLightDownSample");
@@ -325,21 +332,25 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
+            this.renderingData = renderingData;
+            cmd = renderingData.commandBuffer;
             
-            GetSetRayMarchRtTarget(renderingData, out int width, out int height);
-            DrawRayMarch(width, height);
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                GetSetRayMarchRtTarget(renderingData, out int width, out int height);
+                DrawRayMarch(width, height);
 
-            DrawBlur();
-            
-            cmd.EndSample(bufferName);
+                cmd.SetGlobalTexture(volumeLightingRtID, volumeLightingRT);
+                
+                DrawBlur();
+            }
+
             ExecuteCommandBuffer(context, cmd);
         }
 
-        public override void CleanUp()
+        public override void Dispose()
         {
-            cmd.ReleaseTemporaryRT(volumeLightingTextureID);
+            volumeLightingRT?.Release();
         }
 
         private void GetSetRayMarchRtTarget(RenderingData renderingData,  out int width, out int height)
@@ -355,9 +366,10 @@ public class VolumeLightingFeature : RoXamiRenderFeature
             descriptor.colorFormat = RenderTextureFormat.RFloat;
             width = descriptor.width = Mathf.Max(2, descriptor.width / settings.downSample);
             height = descriptor.height = Mathf.Max(2, descriptor.height / settings.downSample);
-                
-            cmd.GetTemporaryRT(volumeLightingTextureID,descriptor, FilterMode.Bilinear);
-            cmd.SetRenderTarget(volumeLightingTextureID, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+
+            RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                ref volumeLightingRT, descriptor, FilterMode.Bilinear, volumeLightingRtName);
+            cmd.SetRenderTarget(volumeLightingRT, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
         }
 
         void DrawRayMarch(int width, int height)
@@ -369,9 +381,9 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                 new Vector4(width, height, 1 / (float)width, 1 / (float)height));
             cmd.SetComputeFloatParam(cs, volumeLightDownSampleID, settings.downSample);
             
-            cmd.SetComputeTextureParam(cs, kernel, renderingData.renderer.GetCameraDepthCopyRT(), renderingData.renderer.GetCameraDepthBufferRT());
-            cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.directionalShadowAtlasID, ShaderDataID.directionalShadowAtlasID);
-            cmd.SetComputeTextureParam(cs, kernel, volumeLightingTextureID, volumeLightingTextureID);
+            cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthBufferRT());
+            cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.directionalShadowAtlasID, renderingData.cameraData.directionalLightShadowAtlas);
+            cmd.SetComputeTextureParam(cs, kernel, volumeLightingRtID, volumeLightingRT);
                 
             int threadGroupX = Mathf.CeilToInt(width / 8.0f);
             int threadGroupY = Mathf.CeilToInt(height / 8.0f);

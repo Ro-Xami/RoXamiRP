@@ -4,29 +4,25 @@ namespace RoXamiRP
 {
     public class CopyCameraDepthPass : RoXamiRenderPass
     {
+        const string bufferName = "RoXami Copy Depth";
         public CopyCameraDepthPass(RenderPassEvent evt)
         {
             renderPassEvent = evt;
+            m_ProfilingSampler = new ProfilingSampler(bufferName);
         }
         
-        const string bufferName = "RoXami Copy Depth";
-
-        private readonly CommandBuffer cmd = new CommandBuffer()
-        {
-            name = bufferName
-        };
+        private CommandBuffer cmd;
         
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            cmd.BeginSample(bufferName);
-            ExecuteCommandBuffer(context, cmd);
-          
-            RoXamiRPCopyTexture(cmd, 
-                renderingData.renderer.GetCameraDepthBufferRT(),
-                renderingData.renderer.GetCameraDepthCopyRT(), 
-                ShaderDataID.cameraDepthCopyTextureID);
-          
-            cmd.EndSample(bufferName);
+            cmd = renderingData.commandBuffer;
+            using (new ProfilingScope(cmd, m_ProfilingSampler))
+            {
+                RoXamiRPCopyTexture(cmd, 
+                    renderingData.renderer.GetCameraDepthBufferRT(),
+                    renderingData.renderer.GetCameraDepthCopyRT(),
+                    ShaderDataID.cameraDepthCopyTextureID);
+            }
             ExecuteCommandBuffer(context, cmd);
         }
     }

@@ -31,7 +31,11 @@ namespace RoXamiRP
 
         public override void AddRenderPasses(RoXamiRenderer renderer, ref RenderingData renderingData)
         {
-            if (RoXamiFeatureManager.Instance.IsFeatureActive(RoXamiFeatureStack.GlobalFog))
+#if UNITY_EDITOR
+            if (!IsGameOrSceneCamera(renderingData.cameraData.camera)) return;
+#endif
+            
+            if (RoXamiFeatureManager.Instance.IsActive(RoXamiFeatureStack.GlobalFog))
             {
                 renderer.EnqueuePass(pass);
             }
@@ -46,18 +50,17 @@ namespace RoXamiRP
         {
             private readonly Material m_Mat;
             private readonly int m_PassIndex;
+            const string bufferName = "RoXami GlobalFog";
+            
             public GlobalFogPass(RenderPassEvent evt, Material mMat, int mPassIndex)
             {
                 renderPassEvent = evt;
                 this.m_Mat = mMat;
                 this.m_PassIndex = mPassIndex;
+                m_ProfilingSampler = new ProfilingSampler(bufferName);
             }
-            
-            const string bufferName = "RoXami GlobalFog";
-            private readonly CommandBuffer cmd = new CommandBuffer()
-            {
-                name = bufferName,
-            };
+
+            private CommandBuffer cmd;
 
             public override void SetUp(CommandBuffer cmd, ref RenderingData renderingData)
             {
@@ -70,28 +73,25 @@ namespace RoXamiRP
                 {
                     return;
                 }
-                
-                cmd.SetGlobalTexture(
-                    renderingData.renderer.GetCameraDepthCopyRT(), 
-                    renderingData.renderer.GetCameraDepthBufferRT());
-                
-                cmd.SetRenderTarget(
-                    renderingData.renderer.GetCameraColorBufferRT(), 
-                    RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
-                
-                cmd.BeginSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
-                
-                DrawFullScreenTriangles(cmd, m_Mat, m_PassIndex);
-                
-                cmd.EndSample(bufferName);
-                ExecuteCommandBuffer(context, cmd);
-            }
 
-            public override void CleanUp()
-            {
+                cmd = renderingData.commandBuffer;
+                using (new ProfilingScope(cmd, m_ProfilingSampler))
+                {
+                    cmd.SetGlobalTexture(
+                        ShaderDataID.cameraDepthCopyTextureID, 
+                        renderingData.renderer.GetCameraDepthBufferRT());
+                
+                    cmd.SetRenderTarget(
+                        renderingData.renderer.GetCameraColorBufferRT(), 
+                        RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                
+                    DrawFullScreenTriangles(cmd, m_Mat, m_PassIndex);
+                    
+                }
+                ExecuteCommandBuffer(context, cmd);
                 
             }
+            
         }
     }
 }

@@ -88,7 +88,7 @@ Shader "RoXamiRP/Hide/RadioBlurVolumeLighting"
 
 			float4 RadioBlurTypeFilterFragment (Varyings IN) : SV_TARGET
 			{
-			    float3 color = SampleCameraColor(IN.uv).rgb;
+			    float3 color = GetSource0(IN.uv).rgb;
 				float3 filter = ApplyThreshold(color);
 
 				float depth = SampleCameraDepth(IN.uv);
