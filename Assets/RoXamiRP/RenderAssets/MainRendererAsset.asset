@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4ee944710e34fdfa3cb67018649624d, type: 3}
   m_Name: ScreenSpaceReflectionFeature
   m_EditorClassIdentifier: 
-  isActive: 1
+  isActive: 0
   settings:
-    renderPassEvent: 140
+    renderPassEvent: 160
     computeShader: {fileID: 7200000, guid: 32288154ef5b470da4229e8b0280f503, type: 3}
     maxStep: 100
     stepSize: 0.1
-    thickness: 0.001
+    thickness: 0.01
 --- !u!114 &-2352079972310408686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52,6 +52,7 @@ MonoBehaviour:
   m_Name: MainRendererAsset
   m_EditorClassIdentifier: 
   rendererSettings:
+    rendererType: 1
     enableLighting: 1
     copyColorAfterSkybox: 0
     copyDepthAfterOpaque: 0

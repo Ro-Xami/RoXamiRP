@@ -43,9 +43,9 @@ namespace RoXamiRP
             RoXamiVolume.Instance.Update();
 #endif
             
-            if (RoXamiRTHandlePool.GetRTHandlesCount() > 32)
+            if (RoXamiRTHandlePool.GetRTHandlesCount() > 64)
             {
-                RoXamiRTHandlePool.DebugRTHandles();
+                //RoXamiRTHandlePool.DebugRTHandles();
                 RoXamiRTHandlePool.ReleasePool();
             }
             
@@ -60,14 +60,14 @@ namespace RoXamiRP
                 m_Renderers.Add(baseRenderer);
                 
                 bool isBaseFinally =
-                    baseAdditionalCameraData.cameraStack != null && baseAdditionalCameraData.cameraStack.Count > 0;
+                    baseAdditionalCameraData.cameraStack == null || baseAdditionalCameraData.cameraStack.Count <= 0;
 
                 if (TryGetCull(baseCamera))
                 {
                     RenderSingleCamera(context, baseAdditionalCameraData, baseRenderer, baseCamera, isBaseFinally);
                 }
 
-                if (!isBaseFinally) continue;
+                if (isBaseFinally) continue;
                 
                 for (int i = 0; i < baseAdditionalCameraData.cameraStack.Count; i++)
                 {
@@ -103,14 +103,14 @@ namespace RoXamiRP
         }
 
         private void RenderSingleCamera(ScriptableRenderContext context, AdditionalCameraData additionalCameraData,
-            RoXamiRenderer cameraStackRenderer, Camera baseCamera, bool isFinaleCamera)
+            RoXamiRenderer cameraStackRenderer, Camera camera, bool isFinaleCamera)
         {
             var rendererAsset = additionalCameraData.roXamiRendererAsset ?
                 additionalCameraData.roXamiRendererAsset: RoXamiRendererAsset.defaultAsset;
 
             cameraStackRenderer.InitializedRenderingData(
-                context, baseCamera, additionalCameraData, 
-                rpAsset, rendererAsset, true, out bool cull);
+                context, camera, additionalCameraData, 
+                rpAsset, rendererAsset, isFinaleCamera, out bool cull);
 
             if (!cull) return;
 

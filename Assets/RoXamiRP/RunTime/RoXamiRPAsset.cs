@@ -55,6 +55,16 @@ namespace RoXamiRP
             SetAAKeyWords();
             SetPcfSettings();
             SetDirectionalShadowsKeyword();
+            SetDefaultRendererAsset();
+        }
+
+        void SetDefaultRendererAsset()
+        {
+            if (rendererAssets != null && rendererAssets.Length > 0 && rendererAssets[0])
+            {
+                RoXamiRendererAsset.m_DefaultAsset = rendererAssets[0];
+                RoXamiRendererAsset.defaultAsset = rendererAssets[0];
+            }
         }
 
         void SetDirectionalShadowsKeyword()

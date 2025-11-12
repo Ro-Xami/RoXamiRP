@@ -25,18 +25,29 @@ namespace RoXamiRP
 
     public class RoXamiRendererAsset : ScriptableObject
     {
-        public RendererSettings rendererSettings;
+        public RendererSettings rendererSettings = new RendererSettings();
 
         public List<RoXamiRenderFeature> roXamiRenderFeatures = new List<RoXamiRenderFeature>(10);
 
-        public static RoXamiRendererAsset defaultAsset;
+        internal static RoXamiRendererAsset m_DefaultAsset;
+        public static RoXamiRendererAsset defaultAsset
+        {
+            set{}
+            get
+            {
+                if (!m_DefaultAsset)
+                {
+                    m_DefaultAsset = CreateInstance<RoXamiRendererAsset>();
+                    m_DefaultAsset.hideFlags = HideFlags.HideAndDontSave;
+                }
+                
+                return m_DefaultAsset;
+            }
+        }
 
         private void OnEnable()
         {
-            if (!defaultAsset)
-            {
-                defaultAsset = this;
-            }
+
         }
     }
 }

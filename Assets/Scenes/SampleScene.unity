@@ -141,7 +141,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &250221184
 RectTransform:
   m_ObjectHideFlags: 0
@@ -158,7 +158,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 19.640015, y: 0}
+  m_AnchoredPosition: {x: 17.300049, y: -21.099976}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &250221185
@@ -429,7 +429,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   additionalCameraData:
-    roXamiRendererAssetID: 0
+    roXamiRendererAsset: {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920,
+      type: 2}
     cameraRenderType: 0
     backgroundType: 0
     cameraStack:
@@ -1000,7 +1001,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!20 &1344129324
 Camera:
   m_ObjectHideFlags: 0
@@ -1065,7 +1066,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   additionalCameraData:
-    roXamiRendererAssetID: 1
+    roXamiRendererAsset: {fileID: 11400000, guid: 600ce9f3d115edd4b804cfe6e0f1f8e5,
+      type: 2}
     cameraRenderType: 1
     backgroundType: 1
     cameraStack: []
@@ -1175,6 +1177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a872277fcb94b068b35c2cf12043d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  imageComponent: {fileID: 1415557031}
 --- !u!1 &1443412637
 GameObject:
   m_ObjectHideFlags: 0

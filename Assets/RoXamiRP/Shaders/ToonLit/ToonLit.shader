@@ -26,7 +26,7 @@ Shader "RoXamiRP/Scene/ToonLit"
 		[Toggle(_ALPHACLIP_ON)] _alphaClip ("Alpha Clip" , float) = 0
 		_cutout ("Cut Out" , Range(0 , 1)) = 0.5
 		
-		[Enum(Off, 0, Fronr, 1, Back, 2)] _cullMode ("Cull Mode", Int) = 0
+		[Enum(Off, 0, Front, 1, Back, 2)] _cullMode ("Cull Mode", Int) = 2
 	}
 	
 	SubShader

@@ -102,7 +102,7 @@ namespace RoXamiRP
                 }
 
                 RoXamiRTHandlePool.GetRTHandleIfNeeded(ref bloomDownSampleIDs[i], descriptor, filter, "_BloomDownSample" + i);
-                RoXamiRTHandlePool.GetRTHandleIfNeeded(ref bloomUpSampleIDs[i], descriptor, filter, "_BloomDownSample" + i);
+                RoXamiRTHandlePool.GetRTHandleIfNeeded(ref bloomUpSampleIDs[i], descriptor, filter, "_BloomUpSample" + i);
 
                 Draw(cmd, fromID, bloomDownSampleIDs[i], PostShaderPass.blurH);
                 Draw(cmd, bloomDownSampleIDs[i], bloomUpSampleIDs[i], PostShaderPass.blurV);

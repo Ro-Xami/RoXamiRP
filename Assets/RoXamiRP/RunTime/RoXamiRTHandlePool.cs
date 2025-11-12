@@ -24,8 +24,8 @@ namespace RoXamiRP
         public static bool GetRTHandleIfNeeded(
             ref RTHandle handle,
             in RenderTextureDescriptor descriptor,
-            FilterMode filterMode = FilterMode.Point,
-            string name = "",
+            in FilterMode filterMode = FilterMode.Point,
+            in string name = "",
             TextureWrapMode wrapMode = TextureWrapMode.Repeat,
             bool isShadowMap = false,
             int anisoLevel = 1,
@@ -34,7 +34,20 @@ namespace RoXamiRP
             if (RTHandleNeedsReAlloc(handle, descriptor))
             {
                 int key = GetRTHandleKey(handle, descriptor, name);
-                //Debug.Log("GetRTHandleIfNeeded");
+
+                foreach (var m_Handle in m_RTHandles)
+                {
+                    if (m_Handle.Key == key)
+                    {
+                        handle = m_Handle.Value;
+                        
+                        if (handle != null && handle.rt)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
                 if (handle == null || !handle.rt)
                 {
                     handle = RTHandles.Alloc(descriptor, filterMode, wrapMode, isShadowMap, anisoLevel, mipMapBias, name);
