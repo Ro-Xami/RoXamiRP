@@ -107,6 +107,10 @@ namespace RoXamiRP
         {
             var rendererAsset = additionalCameraData.roXamiRendererAsset ?
                 additionalCameraData.roXamiRendererAsset: RoXamiRendererAsset.defaultAsset;
+   
+#if UNITY_EDITOR
+            cameraStackRenderer.PrepareForSceneWindow(camera);
+#endif
 
             cameraStackRenderer.InitializedRenderingData(
                 context, camera, additionalCameraData, 

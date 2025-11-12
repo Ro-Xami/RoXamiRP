@@ -308,6 +308,6 @@ public class CameraDataInspector : Editor
 [CustomEditor(typeof(RoXamiAdditionalCameraData))]
 public class RoXamiAdditionalCameraDataInspector : Editor
 {
-    // public override void OnInspectorGUI()
-    // { }
+    public override void OnInspectorGUI()
+    { }
 }

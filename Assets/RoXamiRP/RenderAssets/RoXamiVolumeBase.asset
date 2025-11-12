@@ -33,13 +33,13 @@ MonoBehaviour:
   isActive: 1
   type: 0
   rayMarchingSettings:
-    intensity: 0.23
-    power: 3.01
+    intensity: 0.28
+    power: 3.76
     volumeLightColor: {r: 1, g: 1, b: 1, a: 1}
   radioBlurSettings:
-    intensity: 0.53
-    clampMax: 10
-    threshold: 0.88
+    intensity: 1.08
+    clampMax: 1
+    threshold: 0.911
 --- !u!114 &-821924632171251179
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -50,9 +50,6 @@ namespace RoXamiRP
         {
             var cmd = CommandBufferPool.Get();
             renderingData.commandBuffer = cmd;
-            #region DrawEditor
-            PrepareForSceneWindow();
-            #endregion
 
             CameraSetup(cmd, ref renderingData);
             ExecuteRoXamiRenderPass(context, ref renderingData);

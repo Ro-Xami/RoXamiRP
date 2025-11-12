@@ -6,11 +6,20 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRP
 {
-    partial class RoXamiRenderer
+    public partial class RoXamiRenderer
     {
+        internal void PrepareForSceneWindow(Camera editorCamera)
+        {
+#if UNITY_EDITOR
+            if (editorCamera.cameraType == CameraType.SceneView)
+            {
+                ScriptableRenderContext.EmitWorldGeometryForSceneView(editorCamera);
+            }
+#endif
+        }
+        
         partial void DrawUnsupportedShaders();
         partial void DrawGizmos();
-        partial void PrepareForSceneWindow();
         partial void DrawWire();
 
 #if UNITY_EDITOR
@@ -54,14 +63,6 @@ namespace RoXamiRP
             {
                 context.DrawGizmos(camera, GizmoSubset.PreImageEffects);
                 context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
-            }
-        }
-
-        partial void PrepareForSceneWindow()
-        {
-            if (camera.cameraType == CameraType.SceneView)
-            {
-                ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
             }
         }
 
