@@ -57,10 +57,15 @@ namespace RoXamiRP
             RenderingData renderingData;
 
             const string ssprKernelName = "SSPRCompute";
+            
             const string ssprRtName = "_SSPRTexture";
             static readonly int ssprRtID = Shader.PropertyToID(ssprRtName);
             RTHandle ssprTextureRT;
-            //static readonly int heightBufferID = Shader.PropertyToID("_SSPRHeightBuffer");
+            
+            const string heightBufferName = "_SSPRHeightBuffer";
+            static readonly int heightBufferID = Shader.PropertyToID(heightBufferName);
+            RTHandle ssprHeightBufferRT;
+            
             static readonly int texelSizeID = Shader.PropertyToID("_texelSize");
             static readonly int heightID = Shader.PropertyToID("_height");
 
@@ -75,8 +80,8 @@ namespace RoXamiRP
                     ssprDescriptor.enableRandomWrite = true;
                     RoXamiRTHandlePool.GetRTHandleIfNeeded(
                         ref ssprTextureRT, ssprDescriptor, renderingData.cameraData.cameraColorFilterMode, ssprRtName);
-                    // cmd.GetTemporaryRT(heightBufferID,
-                    //     ssprDescriptor, renderingData.cameraData.cameraColorFilterMode);
+                    RoXamiRTHandlePool.GetRTHandleIfNeeded(
+                        ref ssprHeightBufferRT, ssprDescriptor, renderingData.cameraData.cameraColorFilterMode, heightBufferName);
 
                     cmd.SetRenderTarget(ssprTextureRT,
                         RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
@@ -104,11 +109,11 @@ namespace RoXamiRP
                 cmd.SetComputeVectorParam(compute, texelSizeID,
                     new Vector4(width, height, 1 / (float)width, 1 / (float)height));
                 cmd.SetComputeTextureParam(compute, ssprKernel,
-                    ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthCopyRT());
+                    ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthBufferRT());
                 cmd.SetComputeTextureParam(compute, ssprKernel,
-                    ShaderDataID.cameraColorCopyTextureID, ShaderDataID.cameraColorCopyTextureID);
-                // cmd.SetComputeTextureParam(compute, ssprKernel,
-                //     heightBufferID, heightBufferID);
+                    ShaderDataID.cameraColorCopyTextureID, renderingData.renderer.GetCameraColorBufferRT());
+                cmd.SetComputeTextureParam(compute, ssprKernel,
+                    heightBufferID, ssprHeightBufferRT);
                 cmd.SetComputeTextureParam(compute, ssprKernel,
                     ssprRtID, ssprTextureRT);
 

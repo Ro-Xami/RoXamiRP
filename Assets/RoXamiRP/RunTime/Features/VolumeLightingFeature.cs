@@ -29,10 +29,10 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         public float stepSize = 0.1f;
         [Min(0f)]
         public float maxRayLength = 100f;
-        [Range(0f, 5f)] 
-        public float rayStart = 2f;
         [Range(0, 10)] 
         public float blurSize = 1f;
+        [Range(0f, 100f)]
+        public float randomStrength = 0.1f;
     }
     
     //================================================================================//
@@ -376,7 +376,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         {
             var cs = settings.computeShader;
             cmd.SetComputeVectorParam(cs, volumeLightingParamsID, 
-                new Vector4(settings.stepSize, settings.maxStep, settings.maxRayLength, settings.rayStart));
+                new Vector4(settings.stepSize, settings.maxStep, settings.maxRayLength, settings.randomStrength));
             cmd.SetComputeVectorParam(cs, texelSizeID,
                 new Vector4(width, height, 1 / (float)width, 1 / (float)height));
             cmd.SetComputeFloatParam(cs, volumeLightDownSampleID, settings.downSample);

@@ -88,6 +88,7 @@ namespace RoXamiRP
             }
 
             renderingDataOutput.cameraData.GBufferRTs = GBufferRTs;
+            renderingDataOutput.cameraData.GBufferTargets = GBufferTargets;
         }
 
         void SetGBufferRT()

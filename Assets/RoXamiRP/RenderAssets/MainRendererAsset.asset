@@ -19,6 +19,19 @@ MonoBehaviour:
     maxStep: 100
     stepSize: 0.1
     thickness: 0.01
+--- !u!114 &-6633183838115919845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a9497e98830c2147a9bf7b8d1373884, type: 3}
+  m_Name: DecalFeature
+  m_EditorClassIdentifier: 
+  isActive: 0
 --- !u!114 &-2352079972310408686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,6 +77,7 @@ MonoBehaviour:
   - {fileID: 444915565210774432}
   - {fileID: 1326430091380443188}
   - {fileID: -8455256662183391370}
+  - {fileID: -6633183838115919845}
 --- !u!114 &444915565210774432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,7 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb5635005b56458db8531e8d00e3fdfa, type: 3}
   m_Name: ScreenSpacePlanarReflectionFeature
   m_EditorClassIdentifier: 
-  isActive: 0
+  isActive: 1
   ssprCompute: {fileID: 7200000, guid: fa87b42df27c87e449eecff4a8ed8fa0, type: 3}
   planeHeight: 0
 --- !u!114 &1326430091380443188
@@ -112,8 +126,8 @@ MonoBehaviour:
     maxStep: 100
     stepSize: 0.004
     maxRayLength: 60
-    rayStart: 0
-    blurSize: 2.75
+    blurSize: 1.74
+    randomStrength: 2.3
   radioBlurSettings:
     sampleCount: 8
     blurIterations: 4

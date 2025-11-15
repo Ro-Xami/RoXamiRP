@@ -42,6 +42,8 @@ Shader "RoXamiRP/Scene/ToonLit"
 				Pass Replace
 			}
 			
+			ColorMask RGB
+			
 			Cull [_cullMode]
 			HLSLPROGRAM
 			#pragma vertex ToonGBufferPassVertex

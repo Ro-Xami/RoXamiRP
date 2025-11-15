@@ -14,6 +14,7 @@ namespace RoXamiRP
         
         private GenericMenu volumeMenu;
         private GUIStyle volumeStyle = new GUIStyle();
+        private Dictionary<RoXamiVolumeBase, bool> volumeFoldoutStates = new Dictionary<RoXamiVolumeBase, bool>();
         
         void OnEnable()
         {
@@ -96,12 +97,28 @@ namespace RoXamiRP
 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-                Editor featureEditor = CreateEditor(v);
-
-                EditorGUILayout.LabelField(v.GetType().Name, EditorStyles.boldLabel);
-                EditorGUI.indentLevel++;
-                featureEditor.OnInspectorGUI();
-                EditorGUI.indentLevel--;
+                // Initialize foldout state if not exists
+                if (!volumeFoldoutStates.ContainsKey(v))
+                {
+                    volumeFoldoutStates[v] = true;
+                }
+                
+                // Volume foldout
+                volumeFoldoutStates[v] = EditorGUILayout.Foldout(
+                    volumeFoldoutStates[v], 
+                    v.GetType().Name, 
+                    true, 
+                    EditorStyles.foldoutHeader
+                );
+                
+                if (volumeFoldoutStates[v])
+                {
+                    Editor featureEditor = CreateEditor(v);
+                    
+                    EditorGUI.indentLevel++;
+                    featureEditor.OnInspectorGUI();
+                    EditorGUI.indentLevel--;
+                }
 
                 EditorGUILayout.Space();
                 EditorGUILayout.BeginHorizontal();
@@ -111,6 +128,7 @@ namespace RoXamiRP
                     v.isActive = false;
                     string path = AssetDatabase.GetAssetPath(volume.volumeAsset);
                     volume.volumeAsset.volumes.RemoveAt(i);
+                    volumeFoldoutStates.Remove(v);
                     AssetDatabase.RemoveObjectFromAsset(v);
                     DestroyImmediate(v, true);
 

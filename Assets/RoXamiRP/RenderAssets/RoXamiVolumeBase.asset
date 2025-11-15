@@ -33,7 +33,7 @@ MonoBehaviour:
   isActive: 1
   type: 0
   rayMarchingSettings:
-    intensity: 0.28
+    intensity: 0.2
     power: 3.76
     volumeLightColor: {r: 1, g: 1, b: 1, a: 1}
   radioBlurSettings:

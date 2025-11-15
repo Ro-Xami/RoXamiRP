@@ -10,6 +10,9 @@ SAMPLER(sampler_NormalMap);
 TEXTURE2D(_EmissionMap);
 SAMPLER(sampler_EmissionMap);
 
+TEXTURE2D(_DecalMaskMap);
+SAMPLER(sampler_DecalMaskMap);
+
 CBUFFER_START(UnityPerMaterial)
 float4 _BaseMap_ST;
 float4 _BaseColor;
@@ -19,5 +22,8 @@ float _metallic;
 float _ao;
 float _normalStrength;
 float3 _emissive;
+
+//Decal
+float _decalFade;
 CBUFFER_END
 #endif

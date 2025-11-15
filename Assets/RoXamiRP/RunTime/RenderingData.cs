@@ -48,6 +48,7 @@ namespace RoXamiRP
         public FilterMode cameraDepthFilterMode;
         public RTHandle directionalLightShadowAtlas;
         public RTHandle[] GBufferRTs;
+        public RenderTargetIdentifier[] GBufferTargets;
     }
 
     public struct RuntimeData

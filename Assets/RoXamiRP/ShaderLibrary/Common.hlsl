@@ -92,6 +92,27 @@ float3 TransformNormalMapToNormal(float4 normalMap, float normalStrength, float3
 	return TransformNormalTrsToNormal(TBN, normalTrs);
 }
 
+//==============================Random Functions===================================
+// Simple hash function
+float Hash(uint2 p)
+{
+    p = 1103515245U * ((p >> 1U) ^ (p.yx));
+    uint h32 = 1103515245U * ((p.x) ^ (p.y >> 3U));
+    return h32 * (1.0 / float(0xffffffffU));
+}
+
+// Generate random value between -1 and 1
+float Random(uint2 id)
+{
+    return Hash(id) * 2.0 - 1.0;
+}
+
+// Generate random value between 0 and 1
+float Random01(uint2 id)
+{
+    return Hash(id);
+}
+
 // Deprecated: A confusingly named and duplicate function that scales clip space to unity NDC range. (-w < x(-y) < w --> 0 < xy < w)
 // Use GetVertexPositionInputs().positionNDC instead for vertex shader
 // Or a similar function in Common.hlsl, ComputeNormalizedDeviceCoordinatesWithZ()

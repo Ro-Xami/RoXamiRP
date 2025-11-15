@@ -14,7 +14,7 @@ float4 _volumeLightingParams;
 #define _stepSize _volumeLightingParams.x
 #define _maxStep _volumeLightingParams.y
 #define _maxRayLength _volumeLightingParams.z
-#define _rayStartLength _volumeLightingParams.w
+#define _randomStrength _volumeLightingParams.w
 
 float SampleShadow(float3 positionWS)
 {
@@ -55,7 +55,7 @@ void RayMarchVolumeLighting (uint3 id : SV_DispatchThreadID)
     float3 rayStart = cameraWS;
     float rayMaxLength = min(length(positionWS - cameraWS), _maxRayLength);
     float volumeLighting = 0;
-    float rayLength = _rayStartLength;
+    float rayLength = 0;
     
     UNITY_LOOP
     for(int j = 0 ; j < _maxStep ; j++)
@@ -65,7 +65,21 @@ void RayMarchVolumeLighting (uint3 id : SV_DispatchThreadID)
         {
             break;
         }
+        
         float3 rayPositionWS = rayStart + rayDir * rayLength;
+        
+        // Add random jittering in three directions
+        if (_randomStrength > 0)
+        {
+            // Generate independent random offsets for X, Y, Z axes
+            float3 randomOffset = float3(
+                Random(id.xy + uint2(j, 0)),
+                Random(id.xy + uint2(0, j)),
+                Random(id.xy + uint2(j, j))
+            ) * _randomStrength * _stepSize;
+            
+            rayPositionWS += randomOffset;
+        }
 
         volumeLighting += SampleShadow(rayPositionWS);
     }

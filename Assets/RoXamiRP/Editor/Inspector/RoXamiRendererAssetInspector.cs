@@ -18,6 +18,7 @@ namespace RoXamiRP
         private GenericMenu featureMenu;
         
         private static readonly GUIStyle featureStyle = new GUIStyle();
+        private Dictionary<RoXamiRenderFeature, bool> featureFoldoutStates = new Dictionary<RoXamiRenderFeature, bool>();
 
         void OnEnable()
         {
@@ -56,12 +57,28 @@ namespace RoXamiRP
 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 
-                Editor featureEditor = CreateEditor(renderFeature);
+                // Initialize foldout state if not exists
+                if (!featureFoldoutStates.ContainsKey(renderFeature))
+                {
+                    featureFoldoutStates[renderFeature] = true;
+                }
                 
-                EditorGUILayout.LabelField(renderFeature.GetType().Name, EditorStyles.boldLabel);
-                EditorGUI.indentLevel++;
-                featureEditor.OnInspectorGUI();
-                EditorGUI.indentLevel--;
+                // Feature foldout
+                featureFoldoutStates[renderFeature] = EditorGUILayout.Foldout(
+                    featureFoldoutStates[renderFeature], 
+                    renderFeature.GetType().Name, 
+                    true, 
+                    EditorStyles.foldoutHeader
+                );
+                
+                if (featureFoldoutStates[renderFeature])
+                {
+                    Editor featureEditor = CreateEditor(renderFeature);
+                    
+                    EditorGUI.indentLevel++;
+                    featureEditor.OnInspectorGUI();
+                    EditorGUI.indentLevel--;
+                }
 
                 EditorGUILayout.Space();
                 EditorGUILayout.BeginHorizontal();
@@ -70,6 +87,7 @@ namespace RoXamiRP
                 {
                     string path = AssetDatabase.GetAssetPath(asset);
                     asset.roXamiRenderFeatures.RemoveAt(i);
+                    featureFoldoutStates.Remove(renderFeature);
                     AssetDatabase.RemoveObjectFromAsset(renderFeature);
                     DestroyImmediate(renderFeature, true);
 
