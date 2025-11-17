@@ -14,7 +14,7 @@ namespace RoXamiRP
         //===============================================================================//
         public RoXamiRendererAsset[] rendererAssets;
 
-        public CommonSettings commonSettings;
+        public CommonSettings commonSettings = new CommonSettings();
 
         public AntialiasingSettings antialiasingSettings;
 
@@ -249,6 +249,7 @@ namespace RoXamiRP
     [Serializable]
     public class CommonSettings
     {
+        [Range(1f, 1.5f)] public float renderScale = 1.0f;
         public bool enableGpuInstancing = false;
         public bool enableDynamicBatching = false;
         public bool isHDR;

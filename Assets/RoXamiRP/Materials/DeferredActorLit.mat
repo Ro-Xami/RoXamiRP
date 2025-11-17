@@ -74,7 +74,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _ActorRimOffest: 3
-    - _ActorRimThreshold: 0.592
+    - _ActorRimThreshold: 0.03
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DeferredActorLitStencil: 0

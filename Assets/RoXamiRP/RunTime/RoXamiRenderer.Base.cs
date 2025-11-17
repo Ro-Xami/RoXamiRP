@@ -122,9 +122,22 @@ namespace RoXamiRP
             renderingData.rendererSettings = rendererAsset.rendererSettings;
 
             renderingData.cameraData.camera = camera;
-            renderingData.cameraData.width = camera.pixelWidth;
-            renderingData.cameraData.height = camera.pixelHeight;
             renderingData.cameraData.additionalCameraData = additionalCameraData;
+#if UNITY_EDITOR
+            if (camera.cameraType != CameraType.Game)
+            {
+                renderingData.cameraData.width = camera.pixelWidth;
+                renderingData.cameraData.height = camera.pixelHeight;
+            }
+            else
+            {
+                renderingData.cameraData.width = (int)(camera.pixelWidth * renderingData.commonSettings.renderScale);
+                renderingData.cameraData.height = (int)(camera.pixelHeight * renderingData.commonSettings.renderScale);
+            }
+#else
+            renderingData.cameraData.width = (int)(camera.pixelWidth * renderingData.commonSettings.renderScale);
+            renderingData.cameraData.height = (int)(camera.pixelHeight * renderingData.commonSettings.renderScale);
+#endif
             
             renderingData.renderer = this;
             

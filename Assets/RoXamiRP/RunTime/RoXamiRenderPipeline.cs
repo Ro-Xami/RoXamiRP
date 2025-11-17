@@ -20,7 +20,12 @@ namespace RoXamiRP
             GraphicsSettings.useScriptableRenderPipelineBatching = enableSrpBatcher;
             GraphicsSettings.lightsUseLinearIntensity = lightsUseLinearIntensity;
             
-            RTHandles.Initialize(Screen.width, Screen.height);
+            RTHandles.Initialize
+            (
+                (int)(Screen.width * rpAsset.commonSettings.renderScale), 
+                (int)(Screen.height * rpAsset.commonSettings.renderScale)
+            );
+            
             RoXamiRTHandlePool.ReleasePool();
             
             m_Renderers.Clear();

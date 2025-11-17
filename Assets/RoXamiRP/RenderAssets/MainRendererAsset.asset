@@ -104,7 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb5635005b56458db8531e8d00e3fdfa, type: 3}
   m_Name: ScreenSpacePlanarReflectionFeature
   m_EditorClassIdentifier: 
-  isActive: 1
+  isActive: 0
   ssprCompute: {fileID: 7200000, guid: fa87b42df27c87e449eecff4a8ed8fa0, type: 3}
   planeHeight: 0
 --- !u!114 &1326430091380443188

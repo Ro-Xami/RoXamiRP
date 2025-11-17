@@ -56,6 +56,10 @@ namespace RoXamiRP
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
+                RoXamiRPCopyTexture(cmd, 
+                    renderingData.renderer.GetCameraDepthBufferRT(),
+                    renderingData.renderer.GetCameraDepthCopyRT(),
+                    ShaderDataID.cameraDepthCopyTextureID);
                 Draw();
             }
             ExecuteCommandBuffer(context, cmd);
