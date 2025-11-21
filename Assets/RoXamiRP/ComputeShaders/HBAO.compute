@@ -1,0 +1,128 @@
+#pragma kernel HBAO
+
+#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/CameraDepthAttachment.hlsl"
+
+RWTexture2D<float> _HBAoTexture;
+
+TEXTURE2D(_GBuffer1);
+SAMPLER(sampler_GBuffer1);
+
+float4 _texelSize;
+
+#define _PI 3.141592654
+#define _DirectionCount 4
+#define _RadianStep 2 * _PI / _DirectionCount
+#define _MaxStepCount 6
+
+float _stepSize;
+
+float4 _hbaoParams;
+#define _intensity _hbaoParams.x
+#define _radius _hbaoParams.y
+#define _maxStepSize _hbaoParams.z
+#define _angleBias _hbaoParams.w
+
+float SampleDepth(float2 uv)
+{
+    return _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, uv, 0).r;
+}
+
+float3 SampleNormal(float2 uv)
+{
+    return normalize(_GBuffer1.SampleLevel(sampler_GBuffer1, uv, 0).rgb);
+}
+
+float Random(float2 p) {
+    return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453123);
+}
+
+// 计算距离衰减W
+float FallOff(float dist) {
+    return 1 - dist * dist / (_radius * _radius);
+}
+
+// https://www.derschmale.com/2013/12/20/an-alternative-implementation-for-hbao-2/
+inline float ComputeAO(float3 vpos, float3 stepVpos, float3 normal, inout float topOcclusion) {
+    float3 h = stepVpos - vpos;
+    float dist = length(h);
+    float occlusion = dot(normal, h) / dist;
+    float diff = max(occlusion - topOcclusion, 0);
+    topOcclusion = max(occlusion, topOcclusion);
+    return diff * saturate(FallOff(dist));
+}
+
+[numthreads(8,8,1)]
+void HBAO (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x > (uint)_texelSize.x || id.y > (uint)_texelSize.y)
+    {
+        return;
+    }
+
+    _HBAoTexture[id.xy] = 0;
+    float2 screenSpaceUV = float2(id.xy) * _texelSize.zw;
+    float depth = SampleDepth(screenSpaceUV);
+    //withoutSkybox
+    #if defined(UNITY_REVERSED_Z)
+        if (depth <= FLT_MIN) return;
+    #else
+        depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
+        if (depth >= 1) return;
+    #endif
+    
+    float3 positionWS = CalculateDepthToPositionWS(depth, screenSpaceUV);
+    float3 normalWS = SampleNormal(screenSpaceUV);
+
+    float3 positionVS = TransformWorldToView(positionWS);
+    positionVS.yz = -positionVS.yz;
+    float3 normalVS = TransformWorldToViewNormal(normalWS, true);
+    normalVS.yz = -normalVS.yz;
+    
+    float stepSize = min(_stepSize / max(FLT_MIN, positionVS.z), _maxStepSize) / (_MaxStepCount + 1);
+    float2 random = float2(Random(id.xy), Random(id.yx));
+    
+    if (stepSize < 1) 
+    {
+        _HBAoTexture[id.xy] = 0;
+        return;
+    }
+
+    float ao = 0.0f;
+    UNITY_UNROLL
+    for (int i = 0; i < _DirectionCount; i++)
+    {
+        float radianStep = _RadianStep * (i + random.x);//noise
+        float sinRadian, cosRadian;
+        sincos(radianStep, sinRadian, cosRadian);
+        float2 direction = float2(cosRadian, sinRadian);
+
+        float randomStepSize = frac(random.y) * stepSize + 1;//noise
+        float topOcclusion = _angleBias;
+        
+        UNITY_UNROLL
+        for (int j = 0; j < _MaxStepCount; j++)
+        {
+            float2 sampleUV = screenSpaceUV + round(direction * randomStepSize) * _texelSize.zw;
+            randomStepSize += stepSize;
+
+            if (sampleUV.x < 0 || sampleUV.x > 1 || sampleUV.y < 0 || sampleUV.y > 1)
+                continue;
+            
+            float sampleDepth = SampleDepth(sampleUV);
+            #if defined(UNITY_REVERSED_Z)
+                if (sampleDepth <= FLT_MIN) continue;
+            #else
+                sampleDepth = lerp(UNITY_NEAR_CLIP_VALUE, 1, sampleDepth);
+                if (sampleDepth >= 1) continue;
+            #endif
+            
+            float3 samplePositionVS = TransformWorldToView(CalculateDepthToPositionWS(sampleDepth, sampleUV));
+            samplePositionVS.yz = -samplePositionVS.yz;
+
+            ao += ComputeAO(positionVS, samplePositionVS, normalVS, topOcclusion);
+        }
+    }
+
+    _HBAoTexture[id.xy] = ao * (1.0 / (_DirectionCount * _MaxStepCount)) * _intensity;
+}

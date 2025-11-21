@@ -9,7 +9,6 @@ RWTexture2D<float4> _VolumeLightingTexture;
 // TEXTURE2D(_GBuffer1);
 // SAMPLER(sampler_GBuffer1);
 float4 _texelSize;
-uint _volumeLightDownSample;
 float4 _volumeLightingParams;
 #define _stepSize _volumeLightingParams.x
 #define _maxStep _volumeLightingParams.y

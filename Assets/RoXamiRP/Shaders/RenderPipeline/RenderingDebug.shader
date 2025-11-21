@@ -21,10 +21,11 @@
 			#pragma multi_compile _ SCREENSPACE_SHADOWS
 			#pragma multi_compile _ SCREENSPACE_REFLECTION
 			#pragma multi_compile _ _Debug_Albedo _Debug_Normal _Debug_Metallic _Debug_Roughness _Debug_Ao _Debug_Emission _Debug_GiDiffuse _Debug_GiSpecular _Debug_Shadow
-			#pragma multi_compile _ _Debug_ScreenSpaceShadows
+			#pragma multi_compile _ _Debug_ScreenSpaceShadows _Debug_HBAO
 			
 			#include "Assets/RoXamiRP/Shaders/DeferredLit/DeferredInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Common/ToonLighting.hlsl"
+			#include "Assets/RoXamiRP/Shaders/Common/SampleHBAOTexture.hlsl"
 
 			Surface GetSurfaceData(Varyings IN)
 			{
@@ -90,6 +91,11 @@
 				
 				#ifdef _Debug_ScreenSpaceShadows
 				finalColor = light.shadowAttenuation.xxx;
+				#endif
+
+				#ifdef _Debug_HBAO
+				//finalColor = SampleHBAOTexture(IN.uv);
+				finalColor = SAMPLE_TEXTURE2D(_HBAoTexture, sampler_HBAoTexture, IN.uv).rgb;
 				#endif
 
 				return float4(finalColor, 1);

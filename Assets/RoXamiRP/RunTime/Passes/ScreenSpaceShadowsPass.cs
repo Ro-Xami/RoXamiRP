@@ -45,7 +45,7 @@ namespace RoXamiRP
 
             if (!cs) 
             {
-                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                cmd.DisableShaderKeyword(ShaderDataID.screenSpaceShadowsKeyword);
                 ExecuteCommandBuffer(context, cmd);
                 
                 return;
@@ -56,7 +56,7 @@ namespace RoXamiRP
             if (kernel < 0 || !renderingData.runtimeData.isCastShadows ||
                 directionalShadowAtlas == null || !directionalShadowAtlas.rt)
             {
-                cmd.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                cmd.DisableShaderKeyword(ShaderDataID.screenSpaceShadowsKeyword);
                 ExecuteCommandBuffer(context, cmd);
                 
                 return;
@@ -64,7 +64,7 @@ namespace RoXamiRP
 
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
-                cmd.EnableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                cmd.EnableShaderKeyword(ShaderDataID.screenSpaceShadowsKeyword);
                 
                 int width = screenSpaceShadowsRtDesc.width = renderingData.cameraData.width;
                 int height = screenSpaceShadowsRtDesc.height = renderingData.cameraData.height;

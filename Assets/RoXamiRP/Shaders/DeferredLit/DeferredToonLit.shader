@@ -76,12 +76,14 @@ Shader "RoXamiRP/Hide/DeferredToonLit"
 			ZWrite Off
 			ZTest Always
 			Blend One One
+			//Blend SrcAlpha OneMinusSrcAlpha
 			
 			HLSLPROGRAM
 			#pragma target 3.5
 			#pragma vertex FullScreenTriangle
 			#pragma fragment DeferredToonLitPassFragment
 			#pragma multi_compile _ SCREENSPACE_REFLECTION
+			#pragma multi_compile _ HORIZONBASED_AO
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/DeferredLit/DeferredInput.hlsl"
 			#include "Assets/RoXamiRP/Shaders/Common/ToonLighting.hlsl"

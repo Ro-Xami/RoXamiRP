@@ -19,6 +19,20 @@ MonoBehaviour:
     maxStep: 100
     stepSize: 0.1
     thickness: 0.01
+--- !u!114 &-6645982080433895592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe5941acc91730548b1e3d066e151f91, type: 3}
+  m_Name: GlobalFogFeature
+  m_EditorClassIdentifier: 
+  isActive: 1
+  renderPassEvent: 260
 --- !u!114 &-6633183838115919845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,10 +88,12 @@ MonoBehaviour:
   - {fileID: 1571461644891948011}
   - {fileID: 560601761701961137}
   - {fileID: 0}
-  - {fileID: 444915565210774432}
+  - {fileID: 0}
   - {fileID: 1326430091380443188}
   - {fileID: -8455256662183391370}
   - {fileID: -6633183838115919845}
+  - {fileID: 5810970241478615556}
+  - {fileID: -6645982080433895592}
 --- !u!114 &444915565210774432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -92,6 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isActive: 1
   renderPassEvent: 260
+  m_Mat: {fileID: 0}
 --- !u!114 &560601761701961137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,3 +178,27 @@ MonoBehaviour:
       colorParams:
       - colorParam: {r: 0.23584908, g: 0.11903704, b: 0.11903704, a: 0}
         colorParamID: _ActorOutlineColor
+--- !u!114 &5810970241478615556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 500d77d2dade4f8bad3dcda91b0eee50, type: 3}
+  m_Name: HBAO
+  m_EditorClassIdentifier: 
+  isActive: 1
+  settings:
+    renderPassEvent: 180
+    computeShader: {fileID: 7200000, guid: 17b5d522cfdf3e04fb4b454014d58dac, type: 3}
+    downsample: 2
+    intensity: 16.16
+    radius: 0.83
+    maxStepSize: 21.3
+    angleBias: 0.17
+    blurDownSample: 2
+    blurIterations: 2
+    blurSize: 2.83

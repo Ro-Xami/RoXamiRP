@@ -16,7 +16,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5462a2395f26d2f4abad94bda23f5920, type: 2}
   - {fileID: 11400000, guid: 600ce9f3d115edd4b804cfe6e0f1f8e5, type: 2}
   commonSettings:
-    renderScale: 1.1
+    renderScale: 1
     enableGpuInstancing: 1
     enableDynamicBatching: 0
     isHDR: 1

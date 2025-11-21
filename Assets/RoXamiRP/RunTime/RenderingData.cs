@@ -110,8 +110,9 @@ namespace RoXamiRP
         //Shadows
         public const string directionalShadowAtlasName = "_DirectionalShadowAtlas";
         public static readonly int directionalShadowAtlasID = Shader.PropertyToID(directionalShadowAtlasName);
-        public const string enableScreenSpaceShadowsID = "SCREENSPACE_SHADOWS";
-        public const string enableScreenSpaceReflectionID = "SCREENSPACE_REFLECTION";
+        public const string screenSpaceShadowsKeyword = "SCREENSPACE_SHADOWS";
+        public const string screenSpaceReflectionKeyword = "SCREENSPACE_REFLECTION";
+        public const string horizonBasedAoKeyword = "HORIZONBASED_AO";
         
         //===========================================================================
         //Common

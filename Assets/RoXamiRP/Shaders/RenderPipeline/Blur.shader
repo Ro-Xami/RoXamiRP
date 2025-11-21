@@ -20,6 +20,7 @@
 			#pragma vertex FullScreenTriangle
 			#pragma fragment GaussianBlurPass
 			#define _Post_BlurPass
+			#define _Post_Gaussian_BlurPass
 			#include "Assets/RoXamiRP/ShaderLibrary/Common.hlsl"
 			#include "Assets/RoXamiRP/Shaders/RenderPipeline/FullScreenTriangle.hlsl"
 			#include "Assets/RoXamiRP/Shaders/RenderPipeline/BlurFragmentPass.hlsl"

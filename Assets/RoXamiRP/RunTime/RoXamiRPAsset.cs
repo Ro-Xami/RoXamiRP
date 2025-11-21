@@ -71,11 +71,11 @@ namespace RoXamiRP
         {
             if (shadowSettings != null && shadowSettings.enableDirectionalShadows)
             {
-                Shader.EnableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                Shader.EnableKeyword(ShaderDataID.screenSpaceShadowsKeyword);
             }
             else
             {
-                Shader.DisableKeyword(ShaderDataID.enableScreenSpaceShadowsID);
+                Shader.DisableKeyword(ShaderDataID.screenSpaceShadowsKeyword);
             }
         }
 

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -78,8 +77,9 @@ namespace RoXamiRP
 
             rendererCommandBuffer.SetGlobalMatrix(ShaderDataID.matrixInvVP_ID, invVP);
             
-            rendererCommandBuffer.DisableShaderKeyword(ShaderDataID.enableScreenSpaceShadowsID);
-            rendererCommandBuffer.DisableShaderKeyword(ShaderDataID.enableScreenSpaceReflectionID);
+            rendererCommandBuffer.DisableShaderKeyword(ShaderDataID.screenSpaceShadowsKeyword);
+            rendererCommandBuffer.DisableShaderKeyword(ShaderDataID.screenSpaceReflectionKeyword);
+            rendererCommandBuffer.DisableShaderKeyword(ShaderDataID.horizonBasedAoKeyword);
         }
 
         internal void Dispose()

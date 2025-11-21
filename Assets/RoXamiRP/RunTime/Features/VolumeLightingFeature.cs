@@ -320,7 +320,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
         private RTHandle volumeLightingRT;
         private readonly int texelSizeID = Shader.PropertyToID("_texelSize");
         private readonly int volumeLightingParamsID = Shader.PropertyToID("_volumeLightingParams");
-        private readonly int volumeLightDownSampleID = Shader.PropertyToID("_volumeLightDownSample");
+        //private readonly int volumeLightDownSampleID = Shader.PropertyToID("_volumeLightDownSample");
         
         private readonly int volumeLightBlurTexelSizeID = Shader.PropertyToID("_VolumeLighting_TexelSize");
         
@@ -379,7 +379,7 @@ public class VolumeLightingFeature : RoXamiRenderFeature
                 new Vector4(settings.stepSize, settings.maxStep, settings.maxRayLength, settings.randomStrength));
             cmd.SetComputeVectorParam(cs, texelSizeID,
                 new Vector4(width, height, 1 / (float)width, 1 / (float)height));
-            cmd.SetComputeFloatParam(cs, volumeLightDownSampleID, settings.downSample);
+            //cmd.SetComputeFloatParam(cs, volumeLightDownSampleID, settings.downSample);
             
             cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.cameraDepthCopyTextureID, renderingData.renderer.GetCameraDepthBufferRT());
             cmd.SetComputeTextureParam(cs, kernel, ShaderDataID.directionalShadowAtlasID, renderingData.cameraData.directionalLightShadowAtlas);

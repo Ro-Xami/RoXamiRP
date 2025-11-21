@@ -5,6 +5,7 @@
 #include "Assets//RoXamiRP/ShaderLibrary/Light.hlsl"
 #include "Assets//RoXamiRP/ShaderLibrary/GI.hlsl"
 #include "Assets/RoXamiRP/Shaders/Common/ToonBRDF.hlsl"
+#include "Assets/RoXamiRP/Shaders/Common/SampleHBAOTexture.hlsl"
 
 TEXTURE2D(_ToonLitLut);
 SAMPLER(sampler_ToonLitLut);
@@ -109,6 +110,10 @@ float4 CalculateDeferredToonLitGI(Input inputData , Surface surfaceData)
     Light mainLight = GetMainLight(inputData);
     ToonBRDF brdfData = GetToonLitBRDFData(inputData, surfaceData, mainLight);
     GI gi = GetGI(inputData , surfaceData);
+
+#if defined(HORIZONBASED_AO)
+    surfaceData.ao *= saturate(1 - SampleHBAOTexture(inputData.screenSpaceUV));
+#endif
     
     float4 finalColor = float4(0, 0, 0, 0);
     finalColor.rgb = InDirectionalLight(inputData , surfaceData, brdfData, mainLight, gi);

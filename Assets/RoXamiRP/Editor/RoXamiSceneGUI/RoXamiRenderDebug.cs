@@ -14,7 +14,8 @@ namespace RoXamiRP
             "_Debug_Emission",
             "_Debug_GiDiffuse",
             "_Debug_GiSpecular",
-            "_Debug_ScreenSpaceShadows"
+            "_Debug_ScreenSpaceShadows",
+            "_Debug_HBAO"
         };
         
         public override void OnEnable()

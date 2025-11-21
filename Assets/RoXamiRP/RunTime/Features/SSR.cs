@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 namespace RoXamiRP
 {
-    public class ScreenSpaceReflectionFeature : RoXamiRenderFeature
+    public class SSR : RoXamiRenderFeature
     {
         [SerializeField] public SsrSettings settings;
 
