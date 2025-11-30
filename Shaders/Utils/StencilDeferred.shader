@@ -222,15 +222,15 @@ Shader "Hidden/Universal Render Pipeline/StencilDeferred"
 
             // -------------------------------------
             // Stencil Settings
-//            Stencil {
-//                Ref [_LitDirStencilRef]
-//                ReadMask [_LitDirStencilReadMask]
-//                WriteMask [_LitDirStencilWriteMask]
-//                Comp Equal
-//                Pass Keep
-//                Fail Keep
-//                ZFail Keep
-//            }
+            Stencil {
+                Ref [_LitDirStencilRef]
+                ReadMask [_LitDirStencilReadMask]
+                WriteMask [_LitDirStencilWriteMask]
+                Comp Equal
+                Pass Keep
+                Fail Keep
+                ZFail Keep
+            }
 
             HLSLPROGRAM
             #pragma target 4.5

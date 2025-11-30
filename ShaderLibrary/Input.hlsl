@@ -109,6 +109,9 @@ uint _MainLightLayerMask;
 // w: directLightStrength
 half4 _AmbientOcclusionParam;
 
+//用于向Toon Deferred传递全局的多光源数量
+int _RoxamiAdditionalLightsCount;
+
 half4 _AdditionalLightsCount;
 
 uint _RenderingLayerMaxInt;

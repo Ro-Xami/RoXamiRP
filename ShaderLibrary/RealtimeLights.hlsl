@@ -244,6 +244,11 @@ int GetPerObjectLightIndex(uint index)
 #endif
 }
 
+int GetRoxamiAdditionalLightsCount()
+{
+    return _RoxamiAdditionalLightsCount;
+}
+
 // Fills a light struct given a loop i index. This will convert the i
 // index to a perObjectLightIndex
 Light GetAdditionalLight(uint i, float3 positionWS)

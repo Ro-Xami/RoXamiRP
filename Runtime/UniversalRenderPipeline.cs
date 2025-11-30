@@ -1,6 +1,7 @@
 using System;
 using Unity.Collections;
 using System.Collections.Generic;
+using RoxamiUtils;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Rendering.Universal;
@@ -269,6 +270,8 @@ namespace UnityEngine.Rendering.Universal
             CameraCaptureBridge.enabled = false;
 
             DisposeAdditionalCameraData();
+            
+            RoxamiDisposeUtils.RoxamiDispose();
         }
 
         // If the URP gets destroyed, we must clean up all the added URP specific camera data and
