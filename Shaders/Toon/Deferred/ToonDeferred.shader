@@ -34,7 +34,7 @@ Shader "Hidden/RoxamiRP/ToonDeferred"
         // 0 - Lit
         Pass
         {
-            Name "Toon Stencil Deferred Lit)"
+            Name "Toon Stencil Deferred Lit"
 
             // -------------------------------------
             // Render State Commands
