@@ -23,12 +23,13 @@
 
 struct Attributes
 {
-    float4 positionOS   : POSITION;
-    float3 normalOS     : NORMAL;
-    float4 tangentOS    : TANGENT;
-    float2 texcoord     : TEXCOORD0;
-    float2 staticLightmapUV   : TEXCOORD1;
-    float2 dynamicLightmapUV  : TEXCOORD2;
+    float4 positionOS           : POSITION;
+    float3 normalOS             : NORMAL;
+    float4 tangentOS            : TANGENT;
+    float2 texcoord             : TEXCOORD0;
+    float2 staticLightmapUV     : TEXCOORD1;
+    float2 dynamicLightmapUV    : TEXCOORD2;
+    float4 color                : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -44,27 +45,36 @@ struct Varyings
 #if defined(REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR)
     half4 tangentWS                 : TEXCOORD3;    // xyz: tangent, w: sign
 #endif
-#ifdef _ADDITIONAL_LIGHTS_VERTEX
-    half3 vertexLighting            : TEXCOORD4;    // xyz: vertex lighting
-#endif
 
-#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-    float4 shadowCoord              : TEXCOORD5;
-#endif
+    DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 4);
 
-#if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
-    half3 viewDirTS                 : TEXCOORD6;
-#endif
+    float4 color                    : TEXCOORD5;
 
-    DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 7);
-#ifdef DYNAMICLIGHTMAP_ON
-    float2  dynamicLightmapUV       : TEXCOORD8; // Dynamic lightmap UVs
+#if defined(_APPLY_GLOBAL_WIND)
+    float windWeight                : TEXCOORD6;
 #endif
 
     float4 positionCS               : SV_POSITION;
+    
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
 };
+
+// #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
+//     half3 viewDirTS                 : TEXCOORD5;
+// #endif
+//     
+// #ifdef _ADDITIONAL_LIGHTS_VERTEX
+//     half3 vertexLighting            : TEXCOORD4;    // xyz: vertex lighting
+// #endif
+//
+// #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+//     float4 shadowCoord              : TEXCOORD5;
+// #endif
+//
+// #ifdef DYNAMICLIGHTMAP_ON
+//     float2  dynamicLightmapUV       : TEXCOORD8; // Dynamic lightmap UVs
+// #endif
 
 void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData)
 {
@@ -126,7 +136,30 @@ Varyings LitGBufferPassVertex(Attributes input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+    VertexPositionInputs vertexInput = (VertexPositionInputs) 0;
+    vertexInput.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+
+    #if defined(_APPLY_GLOBAL_WIND)
+
+        #if defined(_WINDWEIGHTINPUT_VCOLOR)
+            output.windWeight = input.color.r;
+        #elif defined(_WINDWEIGHTINPUT_MASK)
+            output.windWeight = SAMPLE_TEXTURE2D_LOD(_WindWeightMask, sampler_WindWeightMask, input.texcoord, 0).r;
+        #elif defined(_WINDWEIGHTINPUT_POSITIONOS)
+            output.windWeight = input.positionOS.y;
+        #elif defined(_WINDWEIGHTINPUT_UV)
+            output.windWeight = input.texcoord.y;
+        #endif
+        
+        ApplyGlobalWind(vertexInput.positionWS, output.windWeight * _WindWeightFactor);
+    #endif
+    
+    vertexInput.positionVS = TransformWorldToView(vertexInput.positionWS);
+    vertexInput.positionCS = TransformWorldToHClip(vertexInput.positionWS);
+
+    float4 ndc = vertexInput.positionCS * 0.5f;
+    vertexInput.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;
+    vertexInput.positionNDC.zw = vertexInput.positionCS.zw;
 
     // normalWS and tangentWS already normalize.
     // this is required to avoid skewing the direction during interpolation
@@ -195,6 +228,10 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
 
     SurfaceData surfaceData;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
+
+#if defined(_APPLY_GLOBAL_WIND)
+    surfaceData.albedo *= lerp(_GrassColor.rgb, half3(1, 1, 1), input.windWeight);
+#endif
 
 #ifdef LOD_FADE_CROSSFADE
     LODFadeCrossFade(input.positionCS);

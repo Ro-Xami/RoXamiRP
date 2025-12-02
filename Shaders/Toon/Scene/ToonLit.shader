@@ -312,7 +312,7 @@ Shader "RoxamiRP/Scene/ToonLit"
             // -------------------------------------
             // Includes
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Toon/RoxamiLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Toon/RoxamiShadowCasterPass.hlsl"
             ENDHLSL
         }
 
@@ -355,7 +355,7 @@ Shader "RoxamiRP/Scene/ToonLit"
             // -------------------------------------
             // Includes
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Toon/RoxamiLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Toon/RoxamiDepthOnlyPass.hlsl"
             ENDHLSL
         }
     }
